@@ -90,7 +90,29 @@
   </style>
 </head>
 <body>
-  <div class="card">
+  
+<style>
+.back-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+
+<div class="card">
+<button class="back-btn" onclick="history.back()">◀︎</button>
     <div class="title">👤 個人資料設定</div>
     <div class="slogan" id="slogan">健康從認識自己開始！</div>
     <div class="avatar-preview">
