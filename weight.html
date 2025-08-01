@@ -354,5 +354,65 @@ function renderChart() {
 function currentUserKey() {
   return "weightRecords_" + (localStorage.getItem("currentUser") || "default");
 }
+</script><script>
+function filterRecords() {
+  const startDateStr = document.getElementById("startDate").value;
+  const endDateStr = document.getElementById("endDate").value;
+  if (!startDateStr || !endDateStr) {
+    alert("請選擇完整的時間範圍！");
+    return;
+  }
+
+  const start = new Date(startDateStr);
+  const end = new Date(endDateStr);
+  const records = JSON.parse(localStorage.getItem(getCurrentUserKey()) || "[]");
+  const tbody = document.getElementById("recordsBody");
+  tbody.innerHTML = "";
+
+  records.forEach((r, i) => {
+    const recordDate = new Date(r.time);
+    if (recordDate >= start && recordDate <= end) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(r.time).toLocaleString("zh-TW")}</td>
+        <td>${r.weight}</td>
+        <td><button onclick="deleteRecord(${i})">刪除</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+  });
+
+  renderChart();
+}
+</script><script>
+function clearSelectedRecords() {
+  const startDateStr = document.getElementById("startDate").value;
+  const endDateStr = document.getElementById("endDate").value;
+  if (!startDateStr || !endDateStr) {
+    alert("請先選擇完整的時間範圍");
+    return;
+  }
+
+  const start = new Date(startDateStr);
+  const end = new Date(endDateStr);
+  let records = JSON.parse(localStorage.getItem(getCurrentUserKey()) || "[]");
+
+  records = records.filter(r => {
+    const recordDate = new Date(r.time);
+    return recordDate < start || recordDate > end;
+  });
+
+  localStorage.setItem(getCurrentUserKey(), JSON.stringify(records));
+  showRecords();
+  renderChart();
+}
+
+function clearAll() {
+  if (confirm("你確定要清除所有體重紀錄嗎？此動作無法復原。")) {
+    localStorage.removeItem(getCurrentUserKey());
+    showRecords();
+    renderChart();
+  }
+}
 </script></body>
 </html>
