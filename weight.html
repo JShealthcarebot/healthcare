@@ -157,9 +157,29 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
+.avatar-link {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  display: block;
+  overflow: hidden;
+  background-color: transparent;
+  z-index: 999;
+}
+.avatar-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 </style>
 </head>
-<body><button id="avatarBtn" onclick="location.href='profile.html'"><img id="avatarImage" src="avatar-neutral.png"/></button>
+<body><a class="avatar-link" href="profile.html" id="avatarBtn"><img id="avatarImage" src="avatar-neutral.png"/></a>
 <div class="card">
 <div class="top-buttons">
 <button class="menu-btn" onclick="location.href='main.html'">主選單</button>
