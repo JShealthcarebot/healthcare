@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>體重紀錄 v3.2.1 | Health Care</title>
@@ -227,7 +228,7 @@
             && (!isNaN(end) ? r.timestamp <= end + 86400000 : true);
       });
       renderTable();
-      renderChart();
+      setTimeout(() => { renderChart(); }, 100);
     }
 
     
@@ -348,8 +349,8 @@
       const chartSection = document.getElementById("chartSection");
       const btn = document.querySelector(".toggle-chart-btn");
       if (chartSection.style.display === "none") {
-        chartSection.style.display = "block"; renderChart();
-        btn.textContent = "📉 隱藏趨勢圖";
+        chartSection.style.display = "block"; setTimeout(() => { renderChart(); }, 100);
+        btn.textContent = "📉 隱藏趨勢圖"; setTimeout(() => { renderChart(); }, 100);
       } else {
         chartSection.style.display = "none";
         btn.textContent = "📉 顯示趨勢圖";
@@ -359,7 +360,7 @@
     function render() {
       filtered = [...records];
       renderTable();
-      renderChart();
+      setTimeout(() => { renderChart(); }, 100);
     }
 
     render();
