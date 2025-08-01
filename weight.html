@@ -296,5 +296,65 @@ function updateSlogan() {
 window.addEventListener("load", () => {
   updateSlogan();
 });
+</script><script>
+let weightChart;
+
+function toggleChart() {
+  const section = document.getElementById("chartSection");
+  const btn = document.querySelector(".toggle-chart-btn");
+  if (section.style.display === "none") {
+    section.style.display = "block";
+    btn.innerHTML = "📉 隱藏趨勢圖";
+    setTimeout(renderChart, 100);
+  } else {
+    section.style.display = "none";
+    btn.innerHTML = "📉 顯示趨勢圖";
+  }
+}
+
+function renderChart() {
+  const data = JSON.parse(localStorage.getItem(currentUserKey()) || "[]");
+  if (!data.length) return;
+
+  const labels = data.map(r => new Date(r.time).toLocaleString("sv-SE"));
+  const weights = data.map(r => r.weight);
+
+  const ctx = document.getElementById("weightChart").getContext("2d");
+  if (weightChart) weightChart.destroy();
+
+  weightChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "體重 (kg)",
+        data: weights,
+        borderColor: "blue",
+        backgroundColor: "rgba(75,192,192,0.1)",
+        pointBorderColor: "red",
+        pointRadius: 5,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        title: {
+          display: true,
+          text: "體重變化趨勢圖"
+        }
+      },
+      scales: {
+        x: { type: "category", title: { display: true, text: "時間" } },
+        y: { title: { display: true, text: "體重 (kg)" } }
+      }
+    }
+  });
+}
+
+function currentUserKey() {
+  return "weightRecords_" + (localStorage.getItem("currentUser") || "default");
+}
 </script></body>
 </html>
