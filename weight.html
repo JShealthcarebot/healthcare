@@ -354,5 +354,35 @@ function renderChart() {
 function currentUserKey() {
   return "weightRecords_" + (localStorage.getItem("currentUser") || "default");
 }
+</script><script>
+function filterRecords() {
+  const startDateStr = document.getElementById("startDate").value;
+  const endDateStr = document.getElementById("endDate").value;
+  if (!startDateStr || !endDateStr) {
+    alert("請選擇完整的時間範圍！");
+    return;
+  }
+
+  const start = new Date(startDateStr);
+  const end = new Date(endDateStr);
+  const records = JSON.parse(localStorage.getItem(getCurrentUserKey()) || "[]");
+  const tbody = document.getElementById("recordsBody");
+  tbody.innerHTML = "";
+
+  records.forEach((r, i) => {
+    const recordDate = new Date(r.time);
+    if (recordDate >= start && recordDate <= end) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(r.time).toLocaleString("zh-TW")}</td>
+        <td>${r.weight}</td>
+        <td><button onclick="deleteRecord(${i})">刪除</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+  });
+
+  renderChart();
+}
 </script></body>
 </html>
