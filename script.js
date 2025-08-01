@@ -1,8 +1,4 @@
-
 function logout() {
-  localStorage.removeItem('currentUser');
-  window.location.href = 'index.html';
-}
-function goMenu() {
-  window.location.href = 'main.html';
+  alert("登出成功");
+  window.location.href = "index.html";
 }
