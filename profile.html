@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>個人資料設定</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>個人資料設定</title>
+<style>
     body {
       font-family: "Helvetica Neue", sans-serif;
       margin: 0;
@@ -87,60 +88,50 @@
       color: green;
       display: none;
     }
-  </style>
-</head>
-<body>
   
-<style>
 .back-btn {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background-color: #ffffff;
-  border: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 42px;
+  height: 42px;
+  background: white;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
-  font-weight: bold;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+  border: none;
+  font-size: 20px;
+  line-height: 42px;
+  text-align: center;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 1000;
+  color: #333;
 }
 </style>
-
+</head>
+<body><button class="back-btn" onclick="history.back()">←</button>
 <div class="card">
-<button class="back-btn" onclick="history.back()">◀︎</button>
-    <div class="title">👤 個人資料設定</div>
-    <div class="slogan" id="slogan">健康從認識自己開始！</div>
-    <div class="avatar-preview">
-      <img id="avatarPreview" src="avatar-neutral.png" />
-    </div>
-    <label for="nickname">暱稱</label>
-    <input type="text" id="nickname" />
-
-    <label>性別</label>
-    <div class="gender-group">
-      <label><input type="radio" name="gender" value="male" /> 男</label>
-      <label><input type="radio" name="gender" value="female" /> 女</label>
-    </div>
-
-    <label for="height">身高 (cm)</label>
-    <input type="number" id="height" min="0" />
-
-    <label for="weight">體重 (kg)</label>
-    <input type="number" id="weight" min="0" />
-
-    <label for="birthday">生日</label>
-    <input type="date" id="birthday" />
-
-    <button class="save-btn" onclick="saveProfile()">儲存</button>
-    <div class="save-msg" id="saveMsg">✅ 已儲存！</div>
-  </div>
-
-  <script>
+<div class="title">👤 個人資料設定</div>
+<div class="slogan" id="slogan">健康從認識自己開始！</div>
+<div class="avatar-preview">
+<img id="avatarPreview" src="avatar-neutral.png"/>
+</div>
+<label for="nickname">暱稱</label>
+<input id="nickname" type="text"/>
+<label>性別</label>
+<div class="gender-group">
+<label><input name="gender" type="radio" value="male"/> 男</label>
+<label><input name="gender" type="radio" value="female"/> 女</label>
+</div>
+<label for="height">身高 (cm)</label>
+<input id="height" min="0" type="number"/>
+<label for="weight">體重 (kg)</label>
+<input id="weight" min="0" type="number"/>
+<label for="birthday">生日</label>
+<input id="birthday" type="date"/>
+<button class="save-btn" onclick="saveProfile()">儲存</button>
+<div class="save-msg" id="saveMsg">✅ 已儲存！</div>
+</div>
+<script>
     function loadProfile() {
       const data = JSON.parse(localStorage.getItem("profile") || "{}");
       document.getElementById("nickname").value = data.nickname || "";
