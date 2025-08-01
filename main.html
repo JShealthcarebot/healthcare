@@ -1,25 +1,90 @@
 
 <!DOCTYPE html>
-
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>主選單 | Health Care</title>
-
-<link href="style.css" rel="stylesheet"/></head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>主選單 | Health Care</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #f0f4f8, #ffffff);
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      margin-top: 40px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logout-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 26px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #2c3e50;
+    }
+    .slogan {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .menu-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      background-color: #3498db;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .menu-btn:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
 <body>
-<div class="card">
-<button class="menu-btn" onclick="goMenu()">主選單</button>
-<button class="logout-btn">登出</button>
-<h2>主選單</h2>
-<p class="slogan">選擇你今天要追蹤的健康項目吧 💪</p>
-<button class="menu-btn" onclick="location.href='weight.html'">體重紀錄</button>
-<button class="menu-btn" onclick="location.href='diet.html'">飲食紀錄</button>
-<button class="menu-btn" onclick="location.href='exercise.html'">運動紀錄</button>
-<button class="menu-btn" onclick="location.href='water.html'">飲水紀錄</button>
-<button class="menu-btn" onclick="location.href='overview.html'">健康總覽</button>
-</div>
+  <div class="card">
+    <button class="logout-btn">登出</button>
+    <h2>主選單</h2>
+    <p class="slogan">選擇你今天要追蹤的健康項目吧 💪</p>
 
-<script src="script.js"></script></body>
+    <button class="menu-btn" onclick="location.href='weight.html'">體重紀錄</button>
+    <button class="menu-btn" onclick="location.href='diet.html'">飲食紀錄</button>
+    <button class="menu-btn" onclick="location.href='exercise.html'">運動紀錄</button>
+    <button class="menu-btn" onclick="location.href='water.html'">飲水紀錄</button>
+    <button class="menu-btn" onclick="location.href='overview.html'">健康總覽</button>
+  </div>
+</body>
 </html>
