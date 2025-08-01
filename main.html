@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>主選單 | Health Care</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>主選單 | Health Care</title>
+<style>
     body {
       background: linear-gradient(to bottom, #f0f4f8, #ffffff);
       font-family: "Segoe UI", sans-serif;
@@ -74,20 +75,18 @@
     }
   </style>
 </head>
-<body>
-  <div class="card">
-    <button class="logout-btn">登出</button>
-    <h2>主選單</h2>
-    <p class="slogan">載入中...</p>
-
-    <button class="menu-btn" onclick="location.href='weight.html'">體重紀錄</button>
-    <button class="menu-btn" onclick="location.href='diet.html'">飲食紀錄</button>
-    <button class="menu-btn" onclick="location.href='exercise.html'">運動紀錄</button>
-    <button class="menu-btn" onclick="location.href='water.html'">飲水紀錄</button>
-    <button class="menu-btn" onclick="location.href='overview.html'">健康總覽</button>
-  </div>
-
-  <script>
+<body><img id="avatarImage" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 16px; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer;"/>
+<div class="card">
+<button class="logout-btn">登出</button>
+<h2>主選單</h2>
+<p class="slogan">載入中...</p>
+<button class="menu-btn" onclick="location.href='weight.html'">體重紀錄</button>
+<button class="menu-btn" onclick="location.href='diet.html'">飲食紀錄</button>
+<button class="menu-btn" onclick="location.href='exercise.html'">運動紀錄</button>
+<button class="menu-btn" onclick="location.href='water.html'">飲水紀錄</button>
+<button class="menu-btn" onclick="location.href='overview.html'">健康總覽</button>
+</div>
+<script>
     document.querySelector(".logout-btn").addEventListener("click", function () {
       localStorage.removeItem("currentUser");
       window.location.href = "index.html";
@@ -105,6 +104,16 @@
     ];
     document.querySelector(".slogan").textContent =
       slogans[Math.floor(Math.random() * slogans.length)];
-  </script>
+  
+window.addEventListener("load", () => {
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const avatarImage = document.getElementById("avatarImage");
+  if (avatarImage) {
+    if (profile.gender === "male") avatarImage.src = "avatar-male.png";
+    else if (profile.gender === "female") avatarImage.src = "avatar-female.png";
+    else avatarImage.src = "avatar-neutral.png";
+  }
+});
+</script>
 </body>
 </html>
