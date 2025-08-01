@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>體重紀錄 | Health Care</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #f0f4f8, #ffffff);
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      margin-top: 40px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+    .logout-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 26px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .menu-btn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 60px;
+      height: 26px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #2c3e50;
+    }
+    .slogan {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button.submit {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+    .encourage {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <button class="menu-btn" onclick="goMenu()">主選單</button>
+    <button class="logout-btn" onclick="logout()">登出</button>
+    <h2>體重紀錄 📉</h2>
+    <p class="slogan">別害怕體重，勇敢面對才是開始！</p>
+    <input type="number" id="weightInput" placeholder="請輸入今天的體重 (kg)">
+    <button class="submit" onclick="addWeight()">記錄體重</button>
+    <div class="encourage" id="encourageText"></div>
+    <table id="recordTable"><thead><tr><th>時間</th><th>體重 (kg)</th></tr></thead><tbody></tbody></table>
+    <canvas id="weightChart" height="200"></canvas>
+  </div>
+
+  <script>
+    const user = localStorage.getItem("currentUser") || "guest";
+    const storageKey = `weightRecords_${user}`;
+    const input = document.getElementById("weightInput");
+    const tbody = document.querySelector("#recordTable tbody");
+    const encourageText = document.getElementById("encourageText");
+    let records = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
+
+    function goMenu() {
+      window.location.href = "main.html";
+    }
+
+    function addWeight() {
+      const val = parseFloat(input.value);
+      if (!val) return alert("請輸入有效的體重！");
+      const now = new Date();
+      const time = now.toLocaleString();
+      const record = { time, weight: val };
+      records.push(record);
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      input.value = "";
+      renderTable();
+      renderChart();
+      showEncouragement(val);
+    }
+
+    function renderTable() {
+      tbody.innerHTML = "";
+      records.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.time}</td><td>${r.weight}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      if (window.weightChart) window.weightChart.destroy();
+      const labels = records.map(r => r.time);
+      const data = records.map(r => r.weight);
+      window.weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: "體重變化",
+            data,
+            fill: false,
+            borderColor: "#3498db",
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { display: false },
+            y: { beginAtZero: false }
+          }
+        }
+      });
+    }
+
+    function showEncouragement(current) {
+      if (records.length < 2) {
+        encourageText.textContent = "你已經開始記錄，很棒！👍";
+        return;
+      }
+      const prev = records[records.length - 2].weight;
+      if (current < prev) {
+        encourageText.textContent = "🎉 體重下降了，繼續保持！";
+      } else if (current > prev) {
+        encourageText.textContent = "😅 有點上升，別氣餒，明天繼續！";
+      } else {
+        encourageText.textContent = "😐 體重沒變，記得動一動哦～";
+      }
+    }
+
+    renderTable();
+    renderChart();
+  </script>
+</body>
+</html>
