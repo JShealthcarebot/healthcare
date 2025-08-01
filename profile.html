@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>個人資料設定</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #f0f4f8, #dfe9f3);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 20px;
+      max-width: 360px;
+      width: 90%;
+    }
+    .title {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .slogan {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+    }
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .gender-group {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .gender-group label {
+      font-weight: normal;
+    }
+    .save-btn {
+      background: #2b8bd6;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .save-msg {
+      text-align: center;
+      margin-top: 10px;
+      color: green;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">👤 個人資料設定</div>
+    <div class="slogan" id="slogan">健康從認識自己開始！</div>
+    <div class="avatar-preview">
+      <img id="avatarPreview" src="avatar-neutral.png" />
+    </div>
+    <label for="nickname">暱稱</label>
+    <input type="text" id="nickname" />
+
+    <label>性別</label>
+    <div class="gender-group">
+      <label><input type="radio" name="gender" value="male" /> 男</label>
+      <label><input type="radio" name="gender" value="female" /> 女</label>
+    </div>
+
+    <label for="height">身高 (cm)</label>
+    <input type="number" id="height" min="0" />
+
+    <label for="weight">體重 (kg)</label>
+    <input type="number" id="weight" min="0" />
+
+    <label for="birthday">生日</label>
+    <input type="date" id="birthday" />
+
+    <button class="save-btn" onclick="saveProfile()">儲存</button>
+    <div class="save-msg" id="saveMsg">✅ 已儲存！</div>
+  </div>
+
+  <script>
+    function loadProfile() {
+      const data = JSON.parse(localStorage.getItem("profile") || "{}");
+      document.getElementById("nickname").value = data.nickname || "";
+      document.getElementById("height").value = data.height || "";
+      document.getElementById("weight").value = data.weight || "";
+      document.getElementById("birthday").value = data.birthday || "";
+      if (data.gender === "male") {
+        document.querySelector('input[value="male"]').checked = true;
+        document.getElementById("avatarPreview").src = "avatar-male.png";
+      } else if (data.gender === "female") {
+        document.querySelector('input[value="female"]').checked = true;
+        document.getElementById("avatarPreview").src = "avatar-female.png";
+      } else {
+        document.getElementById("avatarPreview").src = "avatar-neutral.png";
+      }
+    }
+
+    function saveProfile() {
+      const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+      const data = {
+        nickname: document.getElementById("nickname").value,
+        gender,
+        height: document.getElementById("height").value,
+        weight: document.getElementById("weight").value,
+        birthday: document.getElementById("birthday").value
+      };
+      localStorage.setItem("profile", JSON.stringify(data));
+      document.getElementById("saveMsg").style.display = "block";
+      if (gender === "male") document.getElementById("avatarPreview").src = "avatar-male.png";
+      else if (gender === "female") document.getElementById("avatarPreview").src = "avatar-female.png";
+      else document.getElementById("avatarPreview").src = "avatar-neutral.png";
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
