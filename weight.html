@@ -628,3 +628,22 @@ function drawBMIChart() {
   });
 }
 </script>
+
+<script>
+window.addEventListener("load", () => {
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const avatarImage = document.getElementById("avatarImage");
+  if (avatarImage) {
+    if (profile.gender === "male") {
+      avatarImage.src = "avatar-male.png";
+    } else if (profile.gender === "female") {
+      avatarImage.src = "avatar-female.png";
+    } else {
+      avatarImage.src = "avatar-neutral.png";
+    }
+  }
+
+  if (typeof showRecords === "function") showRecords();
+  if (typeof updateSlogan === "function") updateSlogan();
+});
+</script>
