@@ -273,5 +273,28 @@ function deleteRecord(index) {
 window.onload = () => {
   showRecords();
 };
+</script><script>
+const slogans = [
+  "今天的你比昨天更棒 💪",
+  "記得多喝水、別熬夜 🌙",
+  "體重不是一切，但紀律是 💡",
+  "紀錄體重，就是邁出健康的第一步 🏃‍♀️",
+  "堅持一天，輕盈一生 ✨",
+  "別小看每次紀錄，你的體重正在感謝你 🫶",
+  "體重會變輕，意志會變強 🔥"
+];
+
+function updateSlogan() {
+  const target = document.getElementById("slogan");
+  if (target && slogans.length > 0) {
+    const index = Math.floor(Math.random() * slogans.length);
+    target.innerText = slogans[index];
+  }
+}
+
+// 如果已有 onload，附加它
+window.addEventListener("load", () => {
+  updateSlogan();
+});
 </script></body>
 </html>
