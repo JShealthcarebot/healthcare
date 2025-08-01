@@ -78,7 +78,7 @@
   <div class="card">
     <button class="logout-btn">登出</button>
     <h2>主選單</h2>
-    <p class="slogan">選擇你今天要追蹤的健康項目吧 💪</p>
+    <p class="slogan">載入中...</p>
 
     <button class="menu-btn" onclick="location.href='weight.html'">體重紀錄</button>
     <button class="menu-btn" onclick="location.href='diet.html'">飲食紀錄</button>
@@ -92,6 +92,19 @@
       localStorage.removeItem("currentUser");
       window.location.href = "index.html";
     });
+
+    const slogans = [
+      "今天吃的少一點，快樂多一點 😋",
+      "健康不是口號，是行動！🏃",
+      "紀錄一下，瘦得比較快 📉",
+      "體重不會說謊，紀錄不會背叛你 💪",
+      "追蹤健康，就從這裡開始！🩺",
+      "別讓體重偷偷上升，今天開始行動！⏱️",
+      "喝水、運動、記錄體重，三步驟搞定！💦",
+      "你打開這個 App 的樣子真帥 💼"
+    ];
+    document.querySelector(".slogan").textContent =
+      slogans[Math.floor(Math.random() * slogans.length)];
   </script>
 </body>
 </html>

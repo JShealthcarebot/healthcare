@@ -26,7 +26,7 @@
       margin-bottom: 10px;
       color: #2e2e2e;
     }
-    p {
+    p.slogan {
       margin-bottom: 20px;
       color: #555;
       font-size: 14px;
@@ -54,7 +54,7 @@
 <body>
   <div class="login-container">
     <h1>Health Care</h1>
-    <p>一身肥肉不是你的錯，不動才是！🏃</p>
+    <p class="slogan">載入中...</p>
     <input type="text" placeholder="帳號" id="account" />
     <input type="password" placeholder="密碼" id="password" />
     <button onclick="login()">登入</button>
@@ -70,11 +70,23 @@
         admin: "Admin"
       };
       if (users[acc] === pwd) {
+        localStorage.setItem("currentUser", acc);
         window.location.href = "main.html";
       } else {
         alert("帳號或密碼錯誤");
       }
     }
+
+    const loginSlogans = [
+      "減肥就是：每天多堅持一點點 💪",
+      "不要怕記錄，怕的是體重自己飆 📈",
+      "登入只是第一步，瘦才是終點！🚀",
+      "別只是想瘦，打開 App 開始做！🏃‍♀️",
+      "一身肥肉不是你的錯，不動才是！🔥",
+      "登入一下，健康一下 👨‍⚕️"
+    ];
+    document.querySelector(".slogan").textContent =
+      loginSlogans[Math.floor(Math.random() * loginSlogans.length)];
   </script>
 </body>
 </html>
