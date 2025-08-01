@@ -7,6 +7,10 @@
   <title>體重記錄</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
   <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+    }
     canvas#weightChart {
       height: 300px !important;
     }
@@ -29,21 +33,100 @@
   </style>
 </head>
 <body>
-  <h2>體重記錄頁面</h2>
-  <input type="date" id="startDate" placeholder="請選擇開始日期">
-  <input type="date" id="endDate" placeholder="請選擇結束日期">
+  <h2>體重記錄</h2>
+
+  <input type="number" id="weightInput" placeholder="請輸入體重 (kg)">
+  <button onclick="addRecord()">記錄體重</button>
+
+  <div style="margin-top: 1em;">
+    <input type="date" id="startDate" placeholder="請選擇開始日期">
+    <input type="date" id="endDate" placeholder="請選擇結束日期">
+    <button onclick="filterData()">篩選</button>
+    <button onclick="clearFilteredData()">清除所選時間紀錄</button>
+  </div>
+
+  <table id="recordTable" border="1" style="margin-top: 1em; width: 100%;">
+    <thead>
+      <tr>
+        <th>時間</th>
+        <th>體重 (kg)</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
   <button class="toggle-chart-btn" onclick="toggleChart()">📉 顯示趨勢圖</button>
   <div id="chartSection" style="display:none;">
     <canvas id="weightChart" height="300"></canvas>
   </div>
 
   <script>
-    const records = [
-      { weight: 60, timestamp: new Date("2025-08-01T08:00:00").getTime() },
-      { weight: 63, timestamp: new Date("2025-08-02T08:00:00").getTime() },
-    ];
-
     let weightChart;
+    const tableBody = document.querySelector("#recordTable tbody");
+
+    function getRecords() {
+      return JSON.parse(localStorage.getItem("weightRecords") || "[]");
+    }
+
+    function saveRecords(data) {
+      localStorage.setItem("weightRecords", JSON.stringify(data));
+    }
+
+    function addRecord() {
+      const input = document.getElementById("weightInput");
+      const weight = parseFloat(input.value);
+      if (isNaN(weight)) return alert("請輸入有效體重！");
+      const record = { weight, timestamp: Date.now() };
+      const data = getRecords();
+      data.push(record);
+      saveRecords(data);
+      input.value = "";
+      renderTable(data);
+    }
+
+    function deleteRecord(index) {
+      const data = getRecords();
+      data.splice(index, 1);
+      saveRecords(data);
+      renderTable(data);
+    }
+
+    function renderTable(data) {
+      tableBody.innerHTML = "";
+      data.forEach((r, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`
+          <td>\${new Date(r.timestamp).toLocaleString()}</td>
+          <td>\${r.weight}</td>
+          <td><button onclick="deleteRecord(\${i})">刪除</button></td>
+        \`;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function filterData() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      const all = getRecords();
+      const filtered = all.filter(r => {
+        const date = new Date(r.timestamp).toISOString().split("T")[0];
+        return (!start || date >= start) && (!end || date <= end);
+      });
+      renderTable(filtered);
+    }
+
+    function clearFilteredData() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      let data = getRecords();
+      data = data.filter(r => {
+        const date = new Date(r.timestamp).toISOString().split("T")[0];
+        return (start && date < start) || (end && date > end);
+      });
+      saveRecords(data);
+      renderTable(data);
+    }
 
     function toggleChart() {
       const chartSection = document.getElementById("chartSection");
@@ -59,22 +142,20 @@
     }
 
     function renderChart() {
-      const labels = records.map(r => new Date(r.timestamp).toLocaleString("sv-SE"));
-      const data = records.map(r => r.weight);
-
-      console.log("📊 資料筆數：", records.length);
-      console.log("📊 標籤資料：", labels);
-      console.log("📊 體重資料：", data);
+      const data = getRecords();
+      const labels = data.map(r => new Date(r.timestamp).toLocaleString("sv-SE"));
+      const weights = data.map(r => r.weight);
 
       const ctx = document.getElementById("weightChart").getContext("2d");
       if (weightChart) weightChart.destroy();
+
       weightChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
           datasets: [{
             label: "體重 (kg)",
-            data: data,
+            data: weights,
             borderColor: "rgba(54, 162, 235, 1)",
             pointBackgroundColor: "red",
             pointBorderWidth: 2,
@@ -110,6 +191,8 @@
         }
       });
     }
+
+    renderTable(getRecords());
   </script>
 </body>
 </html>
