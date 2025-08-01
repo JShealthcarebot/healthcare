@@ -553,3 +553,78 @@ function drawBMIChart() {
 window.addEventListener("load", calculateAndDisplayBMI);
 </script></body>
 </html>
+
+<script>
+let bmiChartInstance = null;
+
+function toggleBMIChart() {
+  const chartBox = document.getElementById("bmi-chart-container");
+  const btn = document.querySelector('button[onclick="toggleBMIChart()"]');
+  if (chartBox.style.display === "none") {
+    chartBox.style.display = "block";
+    btn.innerHTML = "📊 隱藏 BMI 趨勢圖";
+    drawBMIChart();
+  } else {
+    chartBox.style.display = "none";
+    btn.innerHTML = "📊 顯示 BMI 趨勢圖";
+  }
+}
+
+function drawBMIChart() {
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const heightCm = parseFloat(profile.height);
+  const weightRecords = JSON.parse(localStorage.getItem(getCurrentUserKey()) || "[]");
+
+  console.log("💡 BMI Debug Log:");
+  console.log("身高（cm）:", heightCm);
+  console.log("體重記錄數量:", weightRecords.length);
+
+  if (!heightCm || weightRecords.length === 0) {
+    console.warn("❗ 資料不足，無法繪製 BMI 圖表");
+    return;
+  }
+
+  const heightM = heightCm / 100;
+  const bmiData = weightRecords.map(r => {
+    const bmi = parseFloat((r.weight / (heightM * heightM)).toFixed(1));
+    const date = new Date(r.time).toLocaleDateString("zh-TW");
+    return { date, bmi };
+  });
+
+  const canvas = document.getElementById("bmiChart");
+  if (!canvas) {
+    console.error("❌ 找不到 bmiChart 畫布");
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (bmiChartInstance) {
+    bmiChartInstance.destroy();
+  }
+
+  bmiChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: bmiData.map(d => d.date),
+      datasets: [{
+        label: "BMI 趨勢",
+        data: bmiData.map(d => d.bmi),
+        borderColor: "orange",
+        backgroundColor: "rgba(255,165,0,0.2)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        title: { display: true, text: "BMI 變化趨勢圖" }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+}
+</script>
