@@ -2,124 +2,14 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>體重紀錄 v3.2.1 | Health Care</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>體重記錄</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
   <style>
-    body {
-      background: linear-gradient(to bottom, #f0f4f8, #ffffff);
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+    canvas#weightChart {
+      height: 300px !important;
     }
-    .card {
-      background: white;
-      margin-top: 40px;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .top-buttons {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    .logout-btn, .menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  width: auto;
-  padding: 0 14px;
-  height: 30px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      width: 60px;
-      height: 30px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  width: auto;
-  padding: 0 14px;
-  height: 30px;
-      background-color: #3498db;
-    }
-    h2 {
-      margin: 10px 0 5px 0;
-      font-size: 22px;
-      color: #2c3e50;
-    }
-    .slogan, .encourage {
-      font-size: 14px;
-      color: #555;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button.action {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .control-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      width: 100%;
-      justify-content: space-between;
-    }
-    .control-row > * {
-      flex: 1 1 45%;
-    }
-    table {
-      width: 100%;
-      margin-top: 10px;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
-    }
-    canvas {
-      margin-top: 20px;
-      max-width: 100%;
-    }
-  
     .toggle-chart-btn {
       margin-top: 10px;
       background: linear-gradient(to right, #6ec6ff, #2196f3);
@@ -136,261 +26,90 @@
       background: #1e88e5;
       transform: scale(1.03);
     }
-    </style>
+  </style>
 </head>
 <body>
-  <div class="card">
-    <div class="top-buttons">
-      <button class="menu-btn" onclick="goMenu()">主選單</button>
-      <button class="logout-btn" onclick="logout()">登出</button>
-    </div>
-    <h2>體重紀錄 📉</h2>
-    <p class="slogan">載入中...</p>
-
-    <input type="number" id="weightInput" placeholder="請輸入今天的體重 (kg)">
-    <button class="action" onclick="addWeight()">記錄體重</button>
-
-    <div class="control-row">
-      <input type="date" id="startDate">
-      <input type="date" id="endDate">
-      <button class="action" onclick="filterRecords()">篩選</button>
-      <button class="action" onclick="clearSelectedRecords()">清除所選時間紀錄</button>
-      <button class="action" onclick="clearAll()">清除所有紀錄</button>
-    </div>
-    <div class="control-row">
-      <button class="action" onclick="exportToExcel()">匯出 Excel</button>
-      <input type="file" accept=".xlsx" onchange="importExcel(this)">
-    </div>
-
-    <p class="encourage" id="encourageText"></p>
-
-    <table id="recordTable"><thead><tr><th>時間</th><th>體重 (kg)</th><th>操作</th></tr></thead><tbody></tbody></table>
-    
-    <button class="toggle-chart-btn" onclick="toggleChart()">📉 顯示趨勢圖</button>
-    <div id="chartSection" style="display: none;">
-      <canvas id="weightChart" height="300" height="200"></canvas></div>
+  <h2>體重記錄頁面</h2>
+  <input type="date" id="startDate" placeholder="請選擇開始日期">
+  <input type="date" id="endDate" placeholder="請選擇結束日期">
+  <button class="toggle-chart-btn" onclick="toggleChart()">📉 顯示趨勢圖</button>
+  <div id="chartSection" style="display:none;">
+    <canvas id="weightChart" height="300"></canvas>
   </div>
 
   <script>
-    const user = localStorage.getItem("currentUser") || "guest";
-    const storageKey = `weightRecords_${user}`;
-    let records = JSON.parse(localStorage.getItem(storageKey)) || [];
-    let filtered = [...records];
-
-    const slogans = [
-      "今天不記錄，明天會後悔！😅",
-      "體重下降 0.1kg 也值得紀念！🎉",
-      "記錄一下，脂肪會怕怕 🫣",
-      "不記錄的人，永遠不知道自己多厲害 💪",
-      "體重不是壞事，它只是提醒你該喝水了 💧",
-      "記錄體重，是邁向健康的一小步 🏃",
-      "今天的你比昨天更有紀律 👏"
+    const records = [
+      { weight: 60, timestamp: new Date("2025-08-01T08:00:00").getTime() },
+      { weight: 63, timestamp: new Date("2025-08-02T08:00:00").getTime() },
     ];
-    document.querySelector(".slogan").textContent =
-      slogans[Math.floor(Math.random() * slogans.length)];
 
-    function logout() {
-      localStorage.removeItem("currentUser");
-      window.location.href = "index.html";
-    }
+    let weightChart;
 
-    function goMenu() {
-      window.location.href = "main.html";
-    }
-
-    function addWeight() {
-      const val = parseFloat(document.getElementById("weightInput").value);
-      if (!val) return alert("請輸入有效的體重！");
-      const now = new Date();
-      const record = {
-        time: now.toLocaleString(),
-        timestamp: now.getTime(),
-        weight: val
-      };
-      records.push(record);
-      localStorage.setItem(storageKey, JSON.stringify(records));
-      document.getElementById("weightInput").value = "";
-      render();
-      showEncouragement(val);
-    }
-
-    function deleteRecord(index) {
-      records.splice(index, 1);
-      localStorage.setItem(storageKey, JSON.stringify(records));
-      render();
-    }
-
-    function filterRecords() {
-      const start = new Date(document.getElementById("startDate").value).getTime();
-      const end = new Date(document.getElementById("endDate").value).getTime();
-      filtered = records.filter(r => {
-        return (!isNaN(start) ? r.timestamp >= start : true)
-            && (!isNaN(end) ? r.timestamp <= end + 86400000 : true);
-      });
-      renderTable();
-      setTimeout(() => { renderChart(); }, 100);
-    }
-
-    
-    function clearSelectedRecords() {
-      const start = new Date(document.getElementById("startDate").value).getTime();
-      const end = new Date(document.getElementById("endDate").value).getTime();
-      if (isNaN(start) || isNaN(end)) {
-        alert("請選擇起始與結束日期再進行刪除");
-        return;
-      }
-      if (!confirm("確定要刪除這段期間內的紀錄嗎？此操作無法還原。")) return;
-      records = records.filter(r => r.timestamp < start || r.timestamp > end + 86400000);
-      localStorage.setItem(storageKey, JSON.stringify(records));
-      render();
-      alert("所選時間紀錄已清除！");
-    }
- {
-      document.getElementById("startDate").value = "";
-      document.getElementById("endDate").value = "";
-      filtered = [...records];
-      render();
-    }
-
-    function clearAll() {
-      if (confirm("你確定要刪除所有紀錄嗎？這個動作無法還原。")) {
-        records = [];
-        localStorage.setItem(storageKey, JSON.stringify(records));
-        render();
-      }
-    }
-
-    function exportToExcel() {
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(records.map(r => ({ 時間: r.time, 體重: r.weight })));
-      XLSX.utils.book_append_sheet(wb, ws, "體重紀錄");
-      XLSX.writeFile(wb, `weight-backup-${user}.xlsx`);
-    }
-
-    function importExcel(input) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
-        json.forEach(item => {
-          if (item.時間 && item.體重) {
-            records.push({
-              time: item.時間,
-              timestamp: new Date(item.時間).getTime(),
-              weight: parseFloat(item.體重)
-            });
-          }
-        });
-        localStorage.setItem(storageKey, JSON.stringify(records));
-        render();
-        alert("匯入成功！");
-      };
-      reader.readAsArrayBuffer(input.files[0]);
-    }
-
-    function showEncouragement(current) {
-      const t = document.getElementById("encourageText");
-      if (records.length < 2) {
-        t.textContent = "你已經開始記錄，很棒！👍";
-        return;
-      }
-      const prev = records[records.length - 2].weight;
-      if (current < prev) {
-        t.textContent = "🎉 體重下降了，繼續保持！";
-      } else if (current > prev) {
-        t.textContent = "😅 有點上升，別氣餒，明天繼續！";
-      } else {
-        t.textContent = "😐 體重沒變，記得動一動哦～";
-      }
-    }
-
-    function renderTable() {
-      const tbody = document.querySelector("#recordTable tbody");
-      tbody.innerHTML = "";
-      filtered.forEach((r, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.time}</td><td>${r.weight}</td>
-          <td><button onclick="deleteRecord(${records.indexOf(r)})">刪除</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderChart() {
-      const ctx = document.getElementById('weightChart').getContext('2d');
-      if (window.weightChart) window.weightChart.destroy();
-      const labels = filtered.map(r => r.time);
-      const data = filtered.map(r => r.weight);
-      window.weightChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: "體重變化",
-            data,
-            fill: false,
-            borderColor: "rgba(54, 162, 235, 1)", pointBackgroundColor: "red", pointBorderWidth: 2, pointRadius: 5,
-            tension: 0.1
-          }]
-        },
-        options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "體重變化趨勢圖",
-          font: {
-            size: 16
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: "日期時間"
-          }
-        },
-        y: {
-          title: {
-            display: true,
-            text: "體重 (kg)"
-          }
-        }
-      },
-          responsive: true,
-          scales: {
-            x: { display: false },
-            y: { beginAtZero: false }
-          }
-        }
-      });
-    }
-
-    
     function toggleChart() {
       const chartSection = document.getElementById("chartSection");
       const btn = document.querySelector(".toggle-chart-btn");
       if (chartSection.style.display === "none") {
-        chartSection.style.display = "block"; setTimeout(() => { renderChart(); }, 100);
-        btn.textContent = "📉 隱藏趨勢圖"; setTimeout(() => { renderChart(); }, 100);
+        chartSection.style.display = "block";
+        btn.textContent = "📉 隱藏趨勢圖";
+        setTimeout(() => { renderChart(); }, 100);
       } else {
         chartSection.style.display = "none";
         btn.textContent = "📉 顯示趨勢圖";
       }
     }
 
-    function render() {
-      filtered = [...records];
-      renderTable();
-      setTimeout(() => { renderChart(); }, 100);
-    }
+    function renderChart() {
+      const labels = records.map(r => new Date(r.timestamp).toLocaleString("sv-SE"));
+      const data = records.map(r => r.weight);
 
-    render();
+      console.log("📊 資料筆數：", records.length);
+      console.log("📊 標籤資料：", labels);
+      console.log("📊 體重資料：", data);
+
+      const ctx = document.getElementById("weightChart").getContext("2d");
+      if (weightChart) weightChart.destroy();
+      weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "體重 (kg)",
+            data: data,
+            borderColor: "rgba(54, 162, 235, 1)",
+            pointBackgroundColor: "red",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: "體重變化趨勢圖",
+              font: { size: 16 }
+            }
+          },
+          scales: {
+            x: {
+              type: "category",
+              title: {
+                display: true,
+                text: "日期時間"
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: "體重 (kg)"
+              }
+            }
+          }
+        }
+      });
+    }
   </script>
 </body>
 </html>
