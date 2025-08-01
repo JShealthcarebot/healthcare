@@ -142,8 +142,8 @@
 <body>
 <div class="card">
 <div class="top-buttons">
-<button class="menu-btn" onclick="goMenu()">主選單</button>
-<button class="logout-btn" onclick="logout()">登出</button>
+<button class="menu-btn" onclick="location.href='main.html'">主選單</button>
+<button class="logout-btn" onclick="localStorage.removeItem('currentUser'); location.href='index.html'">登出</button>
 </div>
 <h2>體重紀錄 📉</h2>
 <p class="slogan">載入中...</p>
