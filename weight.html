@@ -203,6 +203,10 @@
 <button class="toggle-chart-btn" onclick="toggleChart()">📉 顯示趨勢圖</button>
 <div id="chartSection" style="display: none;">
 <canvas height="200" id="weightChart"></canvas></div>
+<button class="toggle-chart-btn" onclick="toggleBMIChart()">📊 顯示 BMI 趨勢圖</button>
+<div id="bmi-chart-container" style="display:none; width:100%;">
+  <canvas id="bmiChart" height="200"></canvas>
+</div>
 </div>
 <script>
 let weightChart;
