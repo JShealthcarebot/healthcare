@@ -149,9 +149,7 @@
 <p class="slogan" id="slogan">載入中...</p>
 <input id="weightInput" placeholder="請輸入今天的體重 (kg)" type="number"/>
 <button class="action" onclick="saveWeightRecord()">記錄體重</button>
-<div class="control-row">
-<input id="startDate" type="date"/>
-<input id="endDate" type="date"/>
+<div class="control-row"><div style="display: flex; gap: 14px; margin-bottom: 4px; justify-content: flex-start;"><div style="width: 140px; text-align: left; font-weight: bold;">時間開始</div><div style="width: 140px; text-align: left; font-weight: bold;">時間結束</div></div><div style="display: flex; gap: 14px; margin-bottom: 12px; justify-content: flex-start;"><input id="startDate" style="width: 140px; padding: 6px; border-radius: 6px;" type="date"/><input id="endDate" style="width: 140px; padding: 6px; border-radius: 6px;" type="date"/></div>
 <button class="action" onclick="filterRecords()">篩選</button>
 <button class="action" onclick="clearSelectedRecords()">清除所選時間紀錄</button>
 <button class="action" onclick="clearAll()">清除所有紀錄</button>
