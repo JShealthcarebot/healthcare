@@ -168,7 +168,7 @@
     
     <button class="toggle-chart-btn" onclick="toggleChart()">📉 顯示趨勢圖</button>
     <div id="chartSection" style="display: none;">
-      <canvas id="weightChart" height="200"></canvas></div>
+      <canvas id="weightChart" height="300" height="200"></canvas></div>
   </div>
 
   <script>
@@ -330,11 +330,38 @@
             label: "體重變化",
             data,
             fill: false,
-            borderColor: "#3498db",
+            borderColor: "rgba(54, 162, 235, 1)", pointBackgroundColor: "red", pointBorderWidth: 2, pointRadius: 5,
             tension: 0.1
           }]
         },
         options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: "體重變化趨勢圖",
+          font: {
+            size: 16
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "日期時間"
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: "體重 (kg)"
+          }
+        }
+      },
           responsive: true,
           scales: {
             x: { display: false },
