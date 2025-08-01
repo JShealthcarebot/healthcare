@@ -466,5 +466,86 @@ window.addEventListener("load", () => {
     avatarImage.src = "avatar-neutral.png";
 }
 });
+
+function calculateAndDisplayBMI() {
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const heightCm = parseFloat(profile.height);
+  const weightRecords = JSON.parse(localStorage.getItem(currentUser + "_weightRecords") || "[]");
+  if (!heightCm || weightRecords.length === 0) {
+    document.getElementById("bmi-info").innerText = "尚無足夠資料計算 BMI。";
+    return;
+  }
+
+  const latest = weightRecords[weightRecords.length - 1];
+  const heightM = heightCm / 100;
+  const bmi = (latest.weight / (heightM * heightM)).toFixed(1);
+  let category = "", comment = "";
+
+  if (bmi < 18.5) {
+    category = "過輕";
+    comment = "吃飯別再挑食啦，體重快飛走了🕊️";
+  } else if (bmi < 25) {
+    category = "正常";
+    comment = "你的身材剛剛好，繼續保持，別讓泡麵拖你下水🍜";
+  } else if (bmi < 30) {
+    category = "過重";
+    comment = "該減少宵夜了！脂肪悄悄愛上你🍟";
+  } else {
+    category = "肥胖";
+    comment = "你不是胖，只是對美食太忠誠了🍰";
+  }
+
+  document.getElementById("bmi-info").innerHTML =
+    `<strong>BMI：${bmi}（${category}）</strong><br>${comment}`;
+}
+
+function toggleBMIChart() {
+  const chartBox = document.getElementById("bmi-chart-container");
+  if (chartBox.style.display === "none") {
+    chartBox.style.display = "block";
+    drawBMIChart();
+  } else {
+    chartBox.style.display = "none";
+  }
+}
+
+function drawBMIChart() {
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const heightCm = parseFloat(profile.height);
+  const weightRecords = JSON.parse(localStorage.getItem(currentUser + "_weightRecords") || "[]");
+  if (!heightCm || weightRecords.length === 0) return;
+
+  const heightM = heightCm / 100;
+  const bmiData = weightRecords.map(function(r) { return {
+    date: r.date,
+    bmi: parseFloat((r.weight / (heightM * heightM)).toFixed(1)) }; });
+  }));
+
+  const ctx = document.getElementById("bmiChart").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: bmiData.map(d => d.date),
+      datasets: [{
+        label: "BMI 趨勢",
+        data: bmiData.map(d => d.bmi),
+        borderColor: "orange",
+        backgroundColor: "rgba(255,165,0,0.2)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
+  });
+}
+
+window.addEventListener("load", calculateAndDisplayBMI);
 </script></body>
 </html>
