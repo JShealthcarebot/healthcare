@@ -37,6 +37,13 @@
       margin-bottom: 10px;
     }
     .logout-btn, .menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: auto;
+  padding: 0 14px;
+  height: 30px;
       background-color: #e74c3c;
       color: white;
       border: none;
@@ -51,6 +58,13 @@
       justify-content: center;
     }
     .menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: auto;
+  padding: 0 14px;
+  height: 30px;
       background-color: #3498db;
     }
     h2 {
@@ -122,7 +136,7 @@
       <input type="date" id="startDate">
       <input type="date" id="endDate">
       <button class="action" onclick="filterRecords()">篩選</button>
-      <button class="action" onclick="clearFilterFields()">清除篩選欄位</button>
+      <button class="action" onclick="clearSelectedRecords()">清除所選時間紀錄</button>
       <button class="action" onclick="clearAll()">清除所有紀錄</button>
     </div>
     <div class="control-row">
@@ -196,7 +210,21 @@
       renderChart();
     }
 
-    function clearFilterFields() {
+    
+    function clearSelectedRecords() {
+      const start = new Date(document.getElementById("startDate").value).getTime();
+      const end = new Date(document.getElementById("endDate").value).getTime();
+      if (isNaN(start) || isNaN(end)) {
+        alert("請選擇起始與結束日期再進行刪除");
+        return;
+      }
+      if (!confirm("確定要刪除這段期間內的紀錄嗎？此操作無法還原。")) return;
+      records = records.filter(r => r.timestamp < start || r.timestamp > end + 86400000);
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      render();
+      alert("所選時間紀錄已清除！");
+    }
+ {
       document.getElementById("startDate").value = "";
       document.getElementById("endDate").value = "";
       filtered = [...records];
