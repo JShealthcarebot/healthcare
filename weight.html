@@ -280,13 +280,21 @@ function saveWeightRecord() {
     alert("請輸入有效的體重數字");
     return;
   }
+
   const records = JSON.parse(localStorage.getItem(getCurrentUserKey()) || "[]");
   const now = new Date();
   records.push({ time: now.toISOString(), weight });
   localStorage.setItem(getCurrentUserKey(), JSON.stringify(records));
   input.value = "";
   showRecords();
-  renderChart(); // 更新圖表
+
+  // ✅ 自動更新圖表（若有展開）
+  if (document.getElementById("chartSection")?.style.display !== "none") {
+    renderChart?.();
+  }
+  if (document.getElementById("bmi-chart-container")?.style.display !== "none") {
+    drawBMIChart?.();
+  }
 }
 
 function showRecords() {
