@@ -664,15 +664,12 @@ function exportToCSV() {
     csv += `${d},${t},${r.weight}\n`;
   });
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "體重紀錄.csv";
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const newWindow = window.open();
+  if (newWindow) {
+    newWindow.document.write('<pre>' + csv + '</pre>');
+    newWindow.document.title = "體重紀錄.csv";
+  } else {
+    alert("無法開啟新視窗，請確認瀏覽器是否阻擋跳出視窗");
+  }
 }
 </script>
