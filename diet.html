@@ -115,11 +115,6 @@ input, button, select {
 .menu-btn {
   background-color: #3498db;
 }
-
-#startDate, #endDate {
-  width: 100% !important;
-  margin: 5px 0;
-}
 </style>
 </head>
 <body>
@@ -139,6 +134,7 @@ input, button, select {
 <button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
 <button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
 <input id="importFile" onchange="importDietFromExcel()" style="margin-top:10px;" type="file"/>
+
 <div id="chartSection" style="margin-top: 20px;">
 <canvas height="200" id="caloriesChart"></canvas>
 <canvas height="200" id="priceChart" style="margin-top:20px;"></canvas>
@@ -177,7 +173,7 @@ function addDietRecord() {
   document.getElementById("foodPrice").value = "";
   document.getElementById("foodCalories").value = "";
   showDietRecords();
-  renderCharts();
+  setTimeout(renderCharts, 200);
 }
 
 function showDietRecords() {
@@ -217,7 +213,7 @@ window.addEventListener("load", () => {
   }
 
   showDietRecords();
-  renderCharts();
+  setTimeout(renderCharts, 200);
 });
 </script>
 </body>
