@@ -1,13 +1,14 @@
 
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>飲食紀錄</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>飲食紀錄</title>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
@@ -88,37 +89,58 @@ input, button, select {
   width: 100%;
 }
 
+
+.top-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.logout-btn, .menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: auto;
+  padding: 0 14px;
+  height: 30px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.menu-btn {
+  background-color: #3498db;
+}
 </style>
 </head>
 <body>
-  <div class="card">
-    <img id="avatarImage" src="avatar-neutral.png" class="avatar" onclick="goToProfile()" />
-    <h2>飲食紀錄</h2>
-    <div class="slogan" id="sloganText">🍽️ 健康從記錄每一餐開始！</div>
-
-    <input type="text" id="foodName" placeholder="食物名稱">
-    <input type="number" id="foodPrice" placeholder="價格（元）">
-    <input type="number" id="foodCalories" placeholder="熱量（kcal）">
-    <button onclick="addDietRecord()">新增紀錄</button>
-
-    
-    <input type="date" id="startDate" placeholder="開始日期" />
-    <input type="date" id="endDate" placeholder="結束日期" />
-    <button onclick="filterDietRecords()">查詢時間範圍</button>
-    <button onclick="clearFilteredDiet()">清除所選時間紀錄</button>
-    <button onclick="clearAllDiet()">清除全部紀錄</button>
-    <button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
-    <button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
-    <input type="file" id="importFile" style="margin-top:10px;" onchange="importDietFromExcel()" />
-    <button onclick="toggleChart()">📊 展開/折疊圖表</button>
-    <div id="chartSection" style="display:none; margin-top: 20px;">
-      <canvas id="caloriesChart" height="200"></canvas>
-      <canvas id="priceChart" height="200" style="margin-top:20px;"></canvas>
-    </div>
-
-    <div class="record-list" id="recordList"></div>
-  </div>
-
+<div class="card">
+<img class="avatar" id="avatarImage" onclick="goToProfile()" src="avatar-neutral.png"/>
+<div class="top-buttons"><button class="menu-btn" onclick="location.href='main.html'">主選單</button><button class="logout-btn" onclick="localStorage.removeItem('currentUser'); location.href='index.html'">登出</button></div><h2>飲食紀錄</h2>
+<div class="slogan" id="sloganText">🍽️ 健康從記錄每一餐開始！</div>
+<input id="foodName" placeholder="食物名稱" type="text"/>
+<input id="foodPrice" placeholder="價格（元）" type="number"/>
+<input id="foodCalories" placeholder="熱量（kcal）" type="number"/>
+<button onclick="addDietRecord()">新增紀錄</button>
+<input id="startDate" placeholder="開始日期" type="date">
+<input id="endDate" placeholder="結束日期" type="date">
+<button onclick="filterDietRecords()">查詢時間範圍</button>
+<button onclick="clearFilteredDiet()">清除所選時間紀錄</button>
+<button onclick="clearAllDiet()">清除全部紀錄</button>
+<button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
+<button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
+<input id="importFile" onchange="importDietFromExcel()" style="margin-top:10px;" type="file">
+<button onclick="toggleChart()">📊 展開/折疊圖表</button>
+<div id="chartSection" style="display:none; margin-top: 20px;">
+<canvas height="200" id="caloriesChart"></canvas>
+<canvas height="200" id="priceChart" style="margin-top:20px;"></canvas>
+</div>
+<div class="record-list" id="recordList"></div>
+</input></input></input></div>
 <script>
 function getCurrentUserKey() {
   const user = localStorage.getItem("currentUser");
@@ -194,7 +216,6 @@ window.addEventListener("load", () => {
 </script>
 </body>
 </html>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 function filterDietRecords() {
