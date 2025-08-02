@@ -669,7 +669,10 @@ function exportToCSV() {
   const a = document.createElement("a");
   a.href = url;
   a.download = "體重紀錄.csv";
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 </script>
