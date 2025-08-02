@@ -116,7 +116,7 @@ input, button, select {
   background-color: #3498db;
 }
 </style>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
 <body>
 <div class="card">
 <img class="avatar" id="avatarImage" onclick="goToProfile()" src="avatar-neutral.png"/>
@@ -134,8 +134,8 @@ input, button, select {
 <button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
 <button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
 <input id="importFile" onchange="importDietFromExcel()" style="margin-top:10px;" type="file"/>
-
-<div id="chartSection" style="margin-top: 20px;">
+<button onclick="toggleChart()">📊 展開/折疊圖表</button>
+<div id="chartSection" style="margin-top:20px;">
 <canvas height="200" id="caloriesChart"></canvas>
 <canvas height="200" id="priceChart" style="margin-top:20px;"></canvas>
 </div>
