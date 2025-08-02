@@ -115,6 +115,11 @@ input, button, select {
 .menu-btn {
   background-color: #3498db;
 }
+
+#startDate, #endDate {
+  width: 100% !important;
+  margin: 5px 0;
+}
 </style>
 </head>
 <body>
@@ -126,21 +131,20 @@ input, button, select {
 <input id="foodPrice" placeholder="價格（元）" type="number"/>
 <input id="foodCalories" placeholder="熱量（kcal）" type="number"/>
 <button onclick="addDietRecord()">新增紀錄</button>
-<input id="startDate" placeholder="開始日期" type="date">
-<input id="endDate" placeholder="結束日期" type="date">
+<input id="startDate" placeholder="開始日期" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 16px;" type="date"/>
+<input id="endDate" placeholder="結束日期" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 16px;" type="date"/>
 <button onclick="filterDietRecords()">查詢時間範圍</button>
 <button onclick="clearFilteredDiet()">清除所選時間紀錄</button>
 <button onclick="clearAllDiet()">清除全部紀錄</button>
 <button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
 <button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
-<input id="importFile" onchange="importDietFromExcel()" style="margin-top:10px;" type="file">
-<button onclick="toggleChart()">📊 展開/折疊圖表</button>
-<div id="chartSection" style="display:none; margin-top: 20px;">
+<input id="importFile" onchange="importDietFromExcel()" style="margin-top:10px;" type="file"/>
+<div id="chartSection" style="margin-top: 20px;">
 <canvas height="200" id="caloriesChart"></canvas>
 <canvas height="200" id="priceChart" style="margin-top:20px;"></canvas>
 </div>
 <div class="record-list" id="recordList"></div>
-</input></input></input></div>
+</div>
 <script>
 function getCurrentUserKey() {
   const user = localStorage.getItem("currentUser");
@@ -173,6 +177,7 @@ function addDietRecord() {
   document.getElementById("foodPrice").value = "";
   document.getElementById("foodCalories").value = "";
   showDietRecords();
+  renderCharts();
 }
 
 function showDietRecords() {
@@ -212,6 +217,7 @@ window.addEventListener("load", () => {
   }
 
   showDietRecords();
+  renderCharts();
 });
 </script>
 </body>
