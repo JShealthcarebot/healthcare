@@ -5,96 +5,349 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>飲食紀錄</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    .top-right-buttons {
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to bottom right, #f2f9f4, #d9eaf7);
+      min-height: 100vh;
+    }
+    .card {
+      background: #fff;
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .avatar {
       position: absolute;
-      top: 10px;
-      right: 60px;
-      display: flex;
-      gap: 10px;
+      top: -40px;
+      right: -40px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      border: 2px solid white;
     }
-    .chart-container {
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    input, button {
+      display: block;
       width: 100%;
-      max-width: 500px;
-      margin: auto;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
     }
-  </style>
+    button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .slogan {
+      text-align: center;
+      font-style: italic;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .record-list {
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    .record-list div {
+      margin-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+  
+input, button, select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#startDate, #endDate {
+  width: 100%;
+  margin: 5px 0;
+}
+#chartSection {
+  width: 100%;
+  max-width: 100%;
+}
+#importFile {
+  width: 100%;
+}
+
+</style>
 </head>
 <body>
-  <div class="top-right-buttons">
-    <button onclick="goToMainMenu()">主選單</button>
-    <button onclick="logout()">登出</button>
-  </div>
   <div class="card">
+    <img id="avatarImage" src="avatar-neutral.png" class="avatar" onclick="goToProfile()" />
     <h2>飲食紀錄</h2>
-    <button onclick="toggleChart()">展開/折疊圖表</button>
-    <div id="chartSection" style="display: none;">
-      <div class="chart-container">
-        <canvas id="dietChart"></canvas>
-      </div>
-      <div class="chart-container">
-        <canvas id="priceChart"></canvas>
-      </div>
+    <div class="slogan" id="sloganText">🍽️ 健康從記錄每一餐開始！</div>
+
+    <input type="text" id="foodName" placeholder="食物名稱">
+    <input type="number" id="foodPrice" placeholder="價格（元）">
+    <input type="number" id="foodCalories" placeholder="熱量（kcal）">
+    <button onclick="addDietRecord()">新增紀錄</button>
+
+    
+    <input type="date" id="startDate" placeholder="開始日期" />
+    <input type="date" id="endDate" placeholder="結束日期" />
+    <button onclick="filterDietRecords()">查詢時間範圍</button>
+    <button onclick="clearFilteredDiet()">清除所選時間紀錄</button>
+    <button onclick="clearAllDiet()">清除全部紀錄</button>
+    <button onclick="exportDietToExcel()">匯出 Excel（桌機）</button>
+    <button onclick="exportDietToCSV()">匯出 CSV（手機）</button>
+    <input type="file" id="importFile" style="margin-top:10px;" onchange="importDietFromExcel()" />
+    <button onclick="toggleChart()">📊 展開/折疊圖表</button>
+    <div id="chartSection" style="display:none; margin-top: 20px;">
+      <canvas id="caloriesChart" height="200"></canvas>
+      <canvas id="priceChart" height="200" style="margin-top:20px;"></canvas>
     </div>
+
+    <div class="record-list" id="recordList"></div>
   </div>
 
-  <script>
-    function goToMainMenu() {
-      window.location.href = "main.html";
-    }
-    function logout() {
-      localStorage.removeItem("currentUser");
-      window.location.href = "index.html";
-    }
+<script>
+function getCurrentUserKey() {
+  const user = localStorage.getItem("currentUser");
+  return user ? "diet_" + user : "diet_guest";
+}
 
-    function toggleChart() {
-      const section = document.getElementById("chartSection");
-      section.style.display = section.style.display === "none" ? "block" : "none";
-      if (section.style.display === "block") {
-        renderCharts();
-      }
-    }
+function goToProfile() {
+  window.location.href = "profile.html";
+}
 
-    function renderCharts() {
-      const account = localStorage.getItem("currentUser") || "guest";
-      const records = JSON.parse(localStorage.getItem("diet_" + account) || "[]");
+function addDietRecord() {
+  const name = document.getElementById("foodName").value.trim();
+  const price = parseFloat(document.getElementById("foodPrice").value);
+  const calories = parseFloat(document.getElementById("foodCalories").value);
+  if (!name || isNaN(price) || isNaN(calories)) {
+    alert("請正確填寫所有欄位！");
+    return;
+  }
+  const record = {
+    name,
+    price,
+    calories,
+    time: new Date().toISOString()
+  };
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  records.push(record);
+  localStorage.setItem(key, JSON.stringify(records));
+  document.getElementById("foodName").value = "";
+  document.getElementById("foodPrice").value = "";
+  document.getElementById("foodCalories").value = "";
+  showDietRecords();
+}
 
-      const labels = records.map(r => r.food);
-      const calories = records.map(r => parseFloat(r.calories));
-      const prices = records.map(r => parseFloat(r.price));
+function showDietRecords() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  const list = document.getElementById("recordList");
+  list.innerHTML = "";
+  let totalCals = 0;
+  let totalPrice = 0;
+  records.forEach(r => {
+    const time = new Date(r.time);
+    const line = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}｜${r.name}｜${r.price}元｜${r.calories} kcal`;
+    const div = document.createElement("div");
+    div.textContent = line;
+    list.appendChild(div);
+    totalCals += r.calories;
+    totalPrice += r.price;
+  });
+  if (records.length > 0) {
+    const summary = document.createElement("div");
+    summary.style.fontWeight = "bold";
+    summary.textContent = `本日總計：${totalCals.toFixed(1)} kcal，${totalPrice.toFixed(0)} 元`;
+    list.appendChild(summary);
+  }
+}
 
-      // 清空已有圖表
-      if (window.calorieChartObj) window.calorieChartObj.destroy();
-      if (window.priceChartObj) window.priceChartObj.destroy();
+window.addEventListener("load", () => {
+  // 頭像切換
+  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+  const avatarImage = document.getElementById("avatarImage");
+  if (profile.gender === "male") {
+    avatarImage.src = "avatar-male.png";
+  } else if (profile.gender === "female") {
+    avatarImage.src = "avatar-female.png";
+  } else {
+    avatarImage.src = "avatar-neutral.png";
+  }
 
-      const ctx1 = document.getElementById('dietChart').getContext('2d');
-      window.calorieChartObj = new Chart(ctx1, {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '熱量 (kcal)',
-            data: calories,
-            backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff']
-          }]
-        }
-      });
-
-      const ctx2 = document.getElementById('priceChart').getContext('2d');
-      window.priceChartObj = new Chart(ctx2, {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '價格 (元)',
-            data: prices,
-            backgroundColor: ['#8e5ea2', '#3cba9f', '#e8c3b9', '#c45850', '#a2d2ff']
-          }]
-        }
-      });
-    }
-  </script>
+  showDietRecords();
+});
+</script>
 </body>
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function filterDietRecords() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  const start = new Date(document.getElementById("startDate").value);
+  const end = new Date(document.getElementById("endDate").value);
+  const filtered = records.filter(r => {
+    const t = new Date(r.time);
+    return (!isNaN(start) ? t >= start : true) && (!isNaN(end) ? t <= end : true);
+  });
+  displayFilteredRecords(filtered);
+}
+
+function displayFilteredRecords(records) {
+  const list = document.getElementById("recordList");
+  list.innerHTML = "";
+  let totalCals = 0;
+  let totalPrice = 0;
+  records.forEach(r => {
+    const time = new Date(r.time);
+    const line = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}｜${r.name}｜${r.price}元｜${r.calories} kcal`;
+    const div = document.createElement("div");
+    div.textContent = line;
+    list.appendChild(div);
+    totalCals += r.calories;
+    totalPrice += r.price;
+  });
+  if (records.length > 0) {
+    const summary = document.createElement("div");
+    summary.style.fontWeight = "bold";
+    summary.textContent = `範圍總計：${totalCals.toFixed(1)} kcal，${totalPrice.toFixed(0)} 元`;
+    list.appendChild(summary);
+  }
+}
+
+function clearFilteredDiet() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  const start = new Date(document.getElementById("startDate").value);
+  const end = new Date(document.getElementById("endDate").value);
+  const remaining = records.filter(r => {
+    const t = new Date(r.time);
+    return (isNaN(start) || t < start) || (isNaN(end) || t > end);
+  });
+  localStorage.setItem(key, JSON.stringify(remaining));
+  showDietRecords();
+  if (document.getElementById("chartSection").style.display !== "none") renderCharts();
+}
+
+function clearAllDiet() {
+  const key = getCurrentUserKey();
+  localStorage.removeItem(key);
+  showDietRecords();
+  if (document.getElementById("chartSection").style.display !== "none") renderCharts();
+}
+
+function toggleChart() {
+  const section = document.getElementById("chartSection");
+  section.style.display = section.style.display === "none" ? "block" : "none";
+  if (section.style.display === "block") renderCharts();
+}
+
+function renderCharts() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  const dates = {};
+  records.forEach(r => {
+    const d = new Date(r.time).toLocaleDateString();
+    if (!dates[d]) dates[d] = { cal: 0, price: 0 };
+    dates[d].cal += r.calories;
+    dates[d].price += r.price;
+  });
+
+  const labels = Object.keys(dates);
+  const calData = labels.map(l => dates[l].cal);
+  const priceData = labels.map(l => dates[l].price);
+
+  const ctx1 = document.getElementById("caloriesChart").getContext("2d");
+  const ctx2 = document.getElementById("priceChart").getContext("2d");
+
+  if (window.calChart) window.calChart.destroy();
+  if (window.priceChart) window.priceChart.destroy();
+
+  window.calChart = new Chart(ctx1, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{ label: "每日熱量 (kcal)", data: calData, borderWidth: 2 }]
+    }
+  });
+
+  window.priceChart = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{ label: "每日花費 (元)", data: priceData, borderWidth: 2 }]
+    }
+  });
+}
+
+function exportDietToExcel() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  const ws = XLSX.utils.json_to_sheet(records.map(r => ({
+    日期: new Date(r.time).toLocaleDateString(),
+    時間: new Date(r.time).toLocaleTimeString(),
+    食物: r.name,
+    價格: r.price,
+    熱量: r.calories
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "飲食紀錄");
+  XLSX.writeFile(wb, "飲食紀錄.xlsx");
+}
+
+function exportDietToCSV() {
+  const key = getCurrentUserKey();
+  const records = JSON.parse(localStorage.getItem(key) || "[]");
+  let csv = "日期,時間,食物,價格,熱量\n";
+  records.forEach(r => {
+    const d = new Date(r.time).toLocaleDateString();
+    const t = new Date(r.time).toLocaleTimeString();
+    csv += `${d},${t},${r.name},${r.price},${r.calories}\n`;
+  });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "diet.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function importDietFromExcel() {
+  const file = document.getElementById("importFile").files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+    const key = getCurrentUserKey();
+    const records = json.map(r => ({
+      name: r.食物 || r.name,
+      price: Number(r.價格 || r.price),
+      calories: Number(r.熱量 || r.calories),
+      time: new Date().toISOString()
+    }));
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    localStorage.setItem(key, JSON.stringify(existing.concat(records)));
+    showDietRecords();
+  };
+  reader.readAsArrayBuffer(file);
+}
+</script>
