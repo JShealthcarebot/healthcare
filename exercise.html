@@ -1268,5 +1268,125 @@ function toggleRecords() {
     recordSection.classList.toggle("hidden");
   }
 }
-</script></body>
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const recordTypeSelect = document.getElementById("recordType");
+    const weightFields = document.getElementById("weightFields");
+    const timeFields = document.getElementById("timeFields");
+    const recordsContainer = document.getElementById("recordsContainer");
+    const chartCalories = document.getElementById("chartCalories");
+    const chartWeights = document.getElementById("chartWeights");
+
+    function toggleInputFields() {
+        const type = recordTypeSelect.value;
+        if (type === "時間型") {
+            timeFields.style.display = "block";
+            weightFields.style.display = "none";
+        } else {
+            timeFields.style.display = "none";
+            weightFields.style.display = "block";
+        }
+    }
+    recordTypeSelect.addEventListener("change", toggleInputFields);
+    toggleInputFields();
+
+    function getNowString() {
+        const now = new Date();
+        return now.toLocaleString("zh-TW");
+    }
+
+    function getUser() {
+        return localStorage.getItem("currentUser") || "demoUser";
+    }
+
+    function loadRecords() {
+        const all = JSON.parse(localStorage.getItem("exerciseRecords") || "{}");
+        return all[getUser()] || [];
+    }
+
+    function saveRecords(records) {
+        const all = JSON.parse(localStorage.getItem("exerciseRecords") || "{}");
+        all[getUser()] = records;
+        localStorage.setItem("exerciseRecords", JSON.stringify(all));
+    }
+
+    function addRecord() {
+        const type = recordTypeSelect.value;
+        const name = document.getElementById("exerciseName").value.trim();
+        const r1 = document.getElementById("weightInput").value.trim();
+        const r2 = document.getElementById("setsInput").value.trim();
+        const r3 = document.getElementById("repsInput").value.trim();
+        const duration = document.getElementById("durationInput").value.trim();
+        const kcal = document.getElementById("caloriesInput").value.trim();
+
+        if (!name) return alert("請輸入運動名稱");
+        let newRec = { type, name, time: getNowString() };
+        if (type === "時間型") {
+            newRec.duration = parseInt(duration) || 0;
+            newRec.kcal = parseInt(kcal) || 0;
+        } else {
+            newRec.weight = parseFloat(r1) || 0;
+            newRec.sets = parseInt(r2) || 0;
+            newRec.reps = parseInt(r3) || 0;
+        }
+        const recs = loadRecords();
+        recs.push(newRec);
+        saveRecords(recs);
+        alert("✅ 新增成功！");
+        updateDisplay();
+        updateCharts();
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addRecord);
+
+    function updateDisplay() {
+        const recs = loadRecords();
+        recordsContainer.innerHTML = recs.map(rec => {
+            if (rec.type === "時間型") {
+                return `<div class='record'>🕒 ${rec.time}｜🔥 ${rec.name}：${rec.duration} 分，${rec.kcal} kcal</div>`;
+            } else {
+                const total = rec.weight * rec.reps;
+                return `<div class='record'>🏋️ ${rec.time}｜${rec.name}：${rec.weight}kg × ${rec.sets}組 × ${rec.reps}次，共 ${total}kg</div>`;
+            }
+        }).join("");
+    }
+
+    function updateCharts() {
+        const recs = loadRecords();
+        const kcalMap = {}, weightMap = {};
+        recs.forEach(rec => {
+            const d = rec.time.split(" ")[0];
+            if (rec.type === "時間型") {
+                kcalMap[d] = (kcalMap[d] || 0) + (rec.kcal || 0);
+            } else {
+                weightMap[rec.name] = (weightMap[rec.name] || 0) + (rec.weight || 0) * (rec.reps || 0);
+            }
+        });
+
+        const ctx1 = document.getElementById("chartCalories").getContext("2d");
+        new Chart(ctx1, {
+            type: "bar",
+            data: {
+                labels: Object.keys(kcalMap),
+                datasets: [{ label: "每日消耗熱量", data: Object.values(kcalMap), backgroundColor: "salmon" }]
+            }
+        });
+
+        const ctx2 = document.getElementById("chartWeights").getContext("2d");
+        new Chart(ctx2, {
+            type: "bar",
+            data: {
+                labels: Object.keys(weightMap),
+                datasets: [{ label: "訓練總重量", data: Object.values(weightMap), backgroundColor: "skyblue" }]
+            }
+        });
+    }
+
+    updateDisplay();
+    updateCharts();
+});
+</script>
+
+</body>
 </html>
