@@ -667,7 +667,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 };</script>
 </div><div id="chartContainer" style="display:none; margin-top: 20px;">
-
 </div>
 </div>
 <script>window.onload = function() {
@@ -1224,5 +1223,50 @@ function toggleCharts() {
 
 // Chart 美化效果附加至原始繪圖程式裡，略過此段
 </script>
-</div></body>
+</div><script>
+function goMenu() {
+  window.location.href = 'main.html';
+}
+
+function logout() {
+  window.location.href = 'index.html';
+}
+
+function 新增紀錄() {
+  alert("✅ 模擬新增一筆運動紀錄（實作略）");
+  location.reload();
+}
+
+function 記錄一組() {
+  alert("✅ 模擬記錄一組運動（實作略）");
+  location.reload();
+}
+
+function filterExerciseRecords() {
+  alert("📆 模擬篩選紀錄功能（尚未實作）");
+}
+
+function clearFilteredExerciseData() {
+  alert("🧹 模擬清除所選時間紀錄（尚未實作）");
+}
+
+function clearAllExerciseData() {
+  if (confirm("確定要清除全部紀錄嗎？")) {
+    localStorage.removeItem("exerciseRecords");
+    alert("✅ 已清除全部紀錄");
+    location.reload();
+  }
+}
+
+function exportExerciseToExcel() {
+  alert("📤 匯出功能尚未整合");
+}
+
+function toggleRecords() {
+  const recordSection = document.getElementById("recordSection");
+  if (recordSection) {
+    recordSection.classList.toggle("hidden");
+  }
+}
+</script></body>
 </html>
