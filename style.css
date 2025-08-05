@@ -1,0 +1,23 @@
+
+body {
+  background: linear-gradient(to bottom right, #f2f9f4, #d9eaf7);
+  font-family: Arial, sans-serif;
+}
+.card {
+  background: white;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 20px;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.avatar {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}

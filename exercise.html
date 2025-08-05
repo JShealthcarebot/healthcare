@@ -1,0 +1,837 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>運動紀錄 🏃‍♀️ | Health Care</title>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    body {
+      background-color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card {
+      background: #e0f7ff;
+      margin: 80px auto;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 400px;
+      position: relative;
+    }
+    .top-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .logout-btn, .menu-btn {
+      padding: 5px 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+    }
+    .logout-btn { background-color: #e74c3c; }
+    .menu-btn { background-color: #3498db; }
+
+    .input-section input, .input-section select, .input-section button,
+    .filter-section input, .filter-section button {
+      display: block;
+      width: 100%;
+      max-width: 240px;
+      margin: 6px auto;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .slogan {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+<style>
+#summaryContent, #suggestionContent {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+</style>
+</head>
+<body>
+<img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
+         box-shadow: 0 0 5px rgba(0,0,0,0.2); cursor: pointer; z-index: 999;"/>
+<div class="card">
+<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+</div>
+<div class="top-buttons">
+<button class="menu-btn" onclick="goMenu()">主選單</button>
+<button class="logout-btn" onclick="logout()">登出</button>
+</div>
+<h2>運動紀錄 🏃‍♀️</h2> <p :="" class="slogan" left;="">這裡是 運動紀錄 🏃‍♀️，讓我們一起變健康！😄</p>
+<div class="summary-card" id="summaryCard" style="background:#fff8e1; border:2px solid #ffd54f; padding:15px; border-radius:10px; margin-bottom:20px;">
+<h3 style="margin-top:0;color:#3e2723;font-weight:bold;">📘 今日運動總結</h3>
+<p id="summaryDate">📅 日期：</p>
+<p id="summaryTime">🏃‍♂️ 運動時間：</p>
+<p id="summaryLoad">🏋️‍♀️ 負荷總量：</p>
+<p id="summaryCalories">🔥 消耗卡路里：</p>
+</div>
+<div class="input-section">
+<select id="exerciseMode" onchange="toggleInputFields()">
+<option value="重量型">重量型</option>
+<option value="時間型">時間型</option>
+</select>
+<div id="weightFields">
+<input id="exerciseType" placeholder="運動類型（如：深蹲）" type="text"/>
+<input id="weight" placeholder="重量（kg，可選）" type="number"/>
+<input id="sets" placeholder="組數" type="number"/>
+<input id="reps" placeholder="每組次數" type="number"/>
+</div>
+<div id="timeFields" style="display: none;">
+<input id="exerciseTypeTime" placeholder="運動類型（如：跑步）" type="text"/>
+<input id="duration" placeholder="運動時數（分鐘）" type="number"/>
+<input id="calories" placeholder="消耗卡路里（kcal）" type="number"/>
+<input id="slope" placeholder="坡度（如跑步機）" type="number"/>
+<input id="speed" placeholder="速度（km/h）" type="number"/>
+</div>
+<button id="addRecordBtn" onclick="新增紀錄()">➕ 新增紀錄</button>
+<button onclick="記錄一組()">💥 紀錄一組</button>
+</div>
+<hr/>
+<div class="filter-section">
+<input id="startDate" placeholder="開始日期" type="date"/>
+<input id="endDate" placeholder="結束日期" type="date"/>
+<button onclick="filterExerciseRecords()">📆 篩選</button>
+<button onclick="clearFilteredExerciseData()">🧹 清除所選時間紀錄</button>
+<button onclick="clearAllExerciseData()">❌ 清除全部</button>
+</div>
+<hr/>
+<div>
+<button onclick="exportExerciseToExcel()">📤 匯出 Excel</button>
+<input accept=".xlsx" id="excelFile" onchange="importExerciseFromExcel(event)" type="file"/>
+</div>
+<hr/>
+<div id="exerciseChartSection" style="margin-top: 20px;">
+<canvas id="exerciseChart"></canvas>
+<canvas id="loadChart" style="margin-top: 30px;"></canvas>
+</div>
+<div id="exerciseRecords"></div><div id="chartSection" style="margin-top:20px;">
+<button onclick="toggleCharts()">展開圖表</button>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function toggleCharts() {
+    const container = document.getElementById('chartContainer');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+     // Always render on toggle
+  }
+
+  
+
+function renderCharts() {
+  const records = getRecords();
+  const dateDurationMap = {};
+  const weightLoadMap = {};
+
+  records.forEach(r => {
+    const date = r.time.slice(0, 10);
+    if (r.type === "時間型" && r.val1) {
+      const duration = parseInt(r.val1);
+      if (!isNaN(duration)) {
+        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
+        dateDurationMap[date] += duration;
+      }
+    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
+      const name = r.name || "未命名";
+      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
+      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
+        const load = w * sets * reps;
+        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
+        weightLoadMap[name] += load;
+      }
+    }
+  });
+
+  const lineLabels = Object.keys(dateDurationMap).sort();
+  const lineData = lineLabels.map(d => dateDurationMap[d]);
+  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
+  new Chart(ctxLine, {
+    type: "line",
+    data: {
+      labels: lineLabels,
+      datasets: [{
+        label: "運動時間（分鐘）",
+        data: lineData,
+        borderColor: "blue",
+        fill: false
+      }]
+    }
+  });
+
+  const barLabels = Object.keys(weightLoadMap);
+  const barData = barLabels.map(k => weightLoadMap[k]);
+  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
+  new Chart(ctxBar, {
+    type: "bar",
+    data: {
+      labels: barLabels,
+      datasets: [{
+        label: "總運動負荷",
+        data: barData,
+        backgroundColor: ["skyblue", "orange", "green", "purple"]
+      }]
+    }
+  });
+}
+;
+  const weightLoadMap = {};
+
+  records.forEach(r => {
+    const date = r.time.slice(0, 10);
+    if (r.type === "時間型" && r.val1) {
+      const duration = parseInt(r.val1);
+      if (!isNaN(duration)) {
+        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
+        dateDurationMap[date] += duration;
+      }
+    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
+      const name = r.name || "未命名";
+      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
+      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
+        const load = w * sets * reps;
+        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
+        weightLoadMap[name] += load;
+      }
+    }
+  });
+
+  const lineLabels = Object.keys(dateDurationMap).sort();
+  const lineData = lineLabels.map(d => dateDurationMap[d]);
+  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
+  new Chart(ctxLine, {
+    type: "line",
+    data: {
+      labels: lineLabels,
+      datasets: [{
+        label: "運動時間（分鐘）",
+        data: lineData,
+        borderColor: "blue",
+        fill: false
+      }]
+    }
+  });
+
+  const barLabels = Object.keys(weightLoadMap);
+  const barData = barLabels.map(k => weightLoadMap[k]);
+  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
+  new Chart(ctxBar, {
+    type: "bar",
+    data: {
+      labels: barLabels,
+      datasets: [{
+        label: "總運動負荷",
+        data: barData,
+        backgroundColor: ["skyblue", "orange", "green", "purple"]
+      }]
+    }
+  });
+}
+]
+      }
+    });
+  }
+</script>
+<script>
+  const user = localStorage.getItem("currentUser") || "default";
+  const storageKey = `exerciseRecords_${user}`;
+
+  function getRecords() {
+    return JSON.parse(localStorage.getItem(storageKey) || "[]");
+  }
+
+  function saveRecords(records) {
+    localStorage.setItem(storageKey, JSON.stringify(records));
+  }
+
+  
+
+function 新增紀錄() {
+  const type = document.getElementById("exerciseMode").value;
+  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
+
+  if (type === "重量型") {
+    name = document.getElementById("exerciseType").value;
+    val1 = document.getElementById("weight").value;
+    val2 = document.getElementById("sets").value;
+    val3 = document.getElementById("reps").value;
+    if (!val1 || !val2 || !val3) {
+      alert("請填入完整的重量型紀錄欄位！");
+      return;
+    }
+  } else {
+    name = document.getElementById("exerciseTypeTime").value;
+    val1 = document.getElementById("duration").value;
+    val2 = document.getElementById("calories").value;
+    val3 = document.getElementById("slope").value;
+    val4 = document.getElementById("speed").value;
+    if (!val1) {
+      alert("請填入運動時間（分鐘）！");
+      return;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const record = { type, name, val1, val2, val3, val4, time: now };
+  const all = getRecords();
+  all.push(record);
+  saveRecords(all);
+  alert("✅ 已新增紀錄！");
+  renderRecords();
+  renderCharts();
+}
+} else {
+    name = document.getElementById("exerciseTypeTime").value;
+    val1 = document.getElementById("duration").value;
+    val2 = document.getElementById("calories").value;
+    val3 = document.getElementById("slope").value;
+    val4 = document.getElementById("speed").value;
+    if (!val1) {
+      alert("請填入運動時間（分鐘）！");
+      return;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const record = { type, name, val1, val2, val3, val4, time: now };
+  const all = getRecords();
+  all.push(record);
+  saveRecords(all);
+  alert("✅ 已新增紀錄！");
+  renderRecords();
+  renderCharts();
+
+  }
+
+  function 記錄一組() {
+    const all = getRecords();
+    if (all.length === 0) return alert("❗請先新增一筆紀錄");
+    const last = { ...all[all.length - 1], time: new Date().toISOString() };
+    all.push(last);
+    saveRecords(all);
+    alert("⭐ 已記錄一組！");
+  renderRecords();
+  renderCharts();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("addRecordBtn")?.addEventListener("click", 新增紀錄);
+    document.getElementById("repeatRecordBtn")?.addEventListener("click", 記錄一組);
+  });
+</script>
+<script>
+function renderSummaryAndSuggestion() {
+  const records = getRecords();
+  const today = new Date().toISOString().slice(0, 10);
+  let timeSum = 0, loadSum = 0, calSum = 0;
+  let countTime = 0, countWeight = 0;
+  const recentRecords = [];
+
+  records.forEach(r => {
+    const date = r.time.slice(0, 10);
+    if (date === today) {
+      if (r.type === "時間型" && r.val1) {
+        const t = parseInt(r.val1);
+        if (!isNaN(t)) {
+          timeSum += t;
+          countTime++;
+        }
+        const cal = parseInt(r.val2);
+        if (!isNaN(cal)) calSum += cal;
+      }
+      if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
+        const w = parseInt(r.val1), s = parseInt(r.val2), rps = parseInt(r.val3);
+        if (!isNaN(w) && !isNaN(s) && !isNaN(rps)) {
+          loadSum += w * s * rps;
+          countWeight++;
+        }
+      }
+    }
+
+    // 建議用：抓最近 7 天內紀錄
+    const recordDate = new Date(date);
+    const daysAgo = (new Date() - recordDate) / (1000 * 60 * 60 * 24);
+    if (daysAgo <= 7) {
+      recentRecords.push(r);
+    }
+  });
+
+  document.getElementById("summaryDate").innerText = "🗓️ 日期：" + today;
+  document.getElementById("summaryTime").innerText = "🏃‍♀️ 運動時間：" + timeSum + " 分鐘";
+  document.getElementById("summaryLoad").innerText = "🏋️‍♂️ 負荷總量：" + loadSum;
+  document.getElementById("summaryCalories").innerText = "🔥 消耗卡路里：約 " + (calSum || 0) + " kcal";
+
+  // 智慧建議
+  let tCount = 0, wCount = 0;
+  recentRecords.forEach(r => {
+    if (r.type === "時間型") tCount++;
+    if (r.type === "重量型") wCount++;
+  });
+
+  let suggestion = "";
+  if (tCount === 0 && wCount === 0) {
+    suggestion = "近期沒有任何紀錄，加油開始動起來！💪";
+  } else if (tCount > wCount * 1.5) {
+    suggestion = "你最近偏向有氧運動，建議搭配一些重量訓練更均衡喔～🧘‍♂️";
+  } else if (wCount > tCount * 1.5) {
+    suggestion = "你最近重量訓練很積極，別忘了安排休息與伸展～🧘‍♀️";
+  } else {
+    suggestion = "你維持了很好的有氧與重量訓練平衡，繼續保持！🔥";
+  }
+
+  document.getElementById("suggestionText").innerText = suggestion;
+  document.getElementById("suggestionCard").style.display = "block";
+}
+
+// 呼叫初始化一次
+
+</script>
+<script>
+function toggleSection(id) {
+  const el = document.getElementById(id);
+  if (el.style.display === "none") {
+    el.style.display = "block";
+  } else {
+    el.style.display = "none";
+  }
+}
+</script>
+<script>
+function handleAddRecord() {
+  const username = localStorage.getItem("currentUser") || "未命名";
+  const type = document.getElementById("exerciseType").value;
+  const name = document.getElementById("exerciseName").value.trim();
+  const val1 = document.getElementById("val1").value.trim();
+  const val2 = document.getElementById("val2").value.trim();
+  const val3 = document.getElementById("val3").value.trim();
+
+  if (!name || !val1) {
+    alert("請填寫完整資訊！");
+    return;
+  }
+
+  const record = {
+    time: new Date().toISOString(),
+    username, type, name, val1, val2, val3
+  };
+  const records = getRecords();
+  records.push(record);
+  localStorage.setItem("exerciseRecords", JSON.stringify(records));
+  
+  
+  
+}
+
+function filterRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return  // reset
+  const records = getRecords();
+  const filtered = records.filter(r => {
+    const d = r.time.slice(0, 10);
+    return d >= start && d <= end;
+  });
+  
+  
+}
+
+function clearFilteredRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) {
+    alert("請選擇日期範圍");
+    return;
+  }
+  let records = getRecords();
+  records = records.filter(r => {
+    const d = r.time.slice(0, 10);
+    return d < start || d > end;
+  });
+  localStorage.setItem("exerciseRecords", JSON.stringify(records));
+  
+  
+  
+}
+
+function clearAllRecords() {
+  if (!confirm("確定要清除所有運動紀錄？")) return;
+  localStorage.removeItem("exerciseRecords");
+  
+  
+  
+}
+
+function getRecords() {
+  return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
+}
+</script>
+</div><div id="chartContainer" style="display:none; margin-top: 20px;">
+<canvas height="200" id="exerciseChartLine" width="400"></canvas>
+</div><canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400"></canvas>
+</div>
+<script>
+function toggleInputFields() {
+  const mode = document.getElementById('exerciseMode').value;
+  document.getElementById('weightFields').style.display = mode === '重量型' ? 'block' : 'none';
+  document.getElementById('timeFields').style.display = mode === '時間型' ? 'block' : 'none';
+}
+function goMenu() {
+  window.location.href = "main.html";
+}
+function logout() {
+  window.location.href = "index.html";
+}
+</script>
+
+
+<script>
+function getCurrentUser() {
+  return localStorage.getItem("currentUser") || "guest";
+}
+
+function getRecordKey() {
+  return "exerciseRecords_" + getCurrentUser();
+}
+
+function loadRecords() {
+  return JSON.parse(localStorage.getItem(getRecordKey()) || "[]");
+}
+
+function saveRecords(records) {
+  localStorage.setItem(getRecordKey(), JSON.stringify(records));
+}
+
+function addRecord() {
+  const type = document.getElementById("exerciseType").value;
+  const subtype = document.getElementById("exerciseSubtype").value;
+  const val1 = document.getElementById("exerciseVal1").value;
+  const val2 = document.getElementById("exerciseVal2").value;
+  const val3 = document.getElementById("exerciseVal3").value;
+  const val4 = document.getElementById("exerciseVal4").value;
+
+  const record = {
+    id: Date.now(),
+    type,
+    subtype,
+    timestamp: new Date().toISOString()
+  };
+
+  if (type === "時間型") {
+    record.duration = parseFloat(val1) || 0;
+    record.calories = parseFloat(val2) || 0;
+    record.slope = parseFloat(val3) || 0;
+    record.speed = parseFloat(val4) || 0;
+  } else {
+    record.weight = parseFloat(val1) || 0;
+    record.sets = parseFloat(val2) || 0;
+    record.reps = parseFloat(val3) || 0;
+  }
+
+  const records = loadRecords();
+  records.push(record);
+  saveRecords(records);
+  alert("✅ 紀錄新增成功！");
+  location.reload();
+}
+
+function addGroupRecord() {
+  alert("🧪 群組紀錄功能尚未實作，預留未來版本");
+}
+
+function filterRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  const records = loadRecords();
+  const filtered = records.filter(r => {
+    const date = r.timestamp.split("T")[0];
+    return date >= start && date <= end;
+  });
+  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
+}
+
+function clearFilteredRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  let records = loadRecords();
+  records = records.filter(r => {
+    const date = r.timestamp.split("T")[0];
+    return !(date >= start && date <= end);
+  });
+  saveRecords(records);
+  alert("🧹 已刪除所選時間範圍的紀錄！");
+  location.reload();
+}
+
+function clearAllRecords() {
+  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
+  saveRecords([]);
+  alert("❌ 所有紀錄已清除！");
+  location.reload();
+}
+</script>
+<script>
+function logSet() { 記錄一組(); }
+
+function getCurrentUser() {
+  return localStorage.getItem("currentUser") || "guest";
+}
+function getExerciseKey() {
+  return "exerciseRecords_" + getCurrentUser();
+}
+function getRecords() {
+  return JSON.parse(localStorage.getItem(getExerciseKey()) || "[]");
+}
+function saveRecords(records) {
+  localStorage.setItem(getExerciseKey(), JSON.stringify(records));
+}
+
+// 篩選
+function filterExerciseRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  const records = getRecords();
+  const filtered = records.filter(r => {
+    const date = r.time.slice(0, 10);
+    return date >= start && date <= end;
+  });
+  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
+}
+
+// 清除所選時間
+function clearFilteredExerciseData() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  let records = getRecords();
+  records = records.filter(r => {
+    const date = r.time.slice(0, 10);
+    return !(date >= start && date <= end);
+  });
+  saveRecords(records);
+  alert("🧹 已刪除所選時間範圍紀錄！");
+  location.reload();
+}
+
+// 清除全部
+function clearAllExerciseData() {
+  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
+  saveRecords([]);
+  alert("❌ 所有紀錄已清除！");
+  location.reload();
+}
+</script>
+
+
+<script>
+function getCurrentUser() {
+  return localStorage.getItem("currentUser") || "guest";
+}
+function getStorageKey() {
+  return "exerciseRecords_" + getCurrentUser();
+}
+function getRecords() {
+  return JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
+}
+function saveRecords(records) {
+  localStorage.setItem(getStorageKey(), JSON.stringify(records));
+}
+
+function 新增紀錄() {
+  const type = document.getElementById("exerciseMode").value;
+  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
+
+  if (type === "重量型") {
+    name = document.getElementById("exerciseType").value;
+    val1 = document.getElementById("weight").value;
+    val2 = document.getElementById("sets").value;
+    val3 = document.getElementById("reps").value;
+    if (!val1 || !val2 || !val3) {
+      alert("請填入完整的重量型紀錄欄位！");
+      return;
+    }
+  } else {
+    name = document.getElementById("exerciseTypeTime").value;
+    val1 = document.getElementById("duration").value;
+    val2 = document.getElementById("calories").value;
+    val3 = document.getElementById("slope").value;
+    val4 = document.getElementById("speed").value;
+    if (!val1) {
+      alert("請填入運動時間（分鐘）！");
+      return;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const record = { type, name, val1, val2, val3, val4, time: now };
+  const all = getRecords();
+  all.push(record);
+  saveRecords(all);
+  alert("✅ 已新增紀錄！");
+  renderRecords();
+  renderCharts();
+}
+
+function 記錄一組() {
+  const all = getRecords();
+  if (all.length === 0) return alert("❗請先新增一筆紀錄");
+  const last = { ...all[all.length - 1], time: new Date().toISOString() };
+  all.push(last);
+  saveRecords(all);
+  alert("⭐ 已記錄一組！");
+  renderRecords();
+  renderCharts();
+}
+
+function filterExerciseRecords() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  const records = getRecords();
+  const filtered = records.filter(r => {
+    const date = r.time.slice(0, 10);
+    return date >= start && date <= end;
+  });
+  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
+}
+
+function clearFilteredExerciseData() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (!start || !end) return alert("請選擇開始與結束日期！");
+  let records = getRecords();
+  records = records.filter(r => {
+    const date = r.time.slice(0, 10);
+    return !(date >= start && date <= end);
+  });
+  saveRecords(records);
+  alert("🧹 已刪除所選時間範圍紀錄！");
+  location.reload();
+}
+
+function clearAllExerciseData() {
+  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
+  saveRecords([]);
+  alert("❌ 所有紀錄已清除！");
+  location.reload();
+}
+
+function logSet() { 記錄一組(); }
+</script>
+
+
+<script>
+function renderRecords() {
+  const records = getRecords();
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+  if (records.length === 0) {
+    container.innerHTML = "<p style='text-align:center;'>尚無紀錄</p>";
+    return;
+  }
+  records.slice().reverse().forEach(r => {
+    const div = document.createElement("div");
+    div.style.background = '#fff'; div.style.padding = '12px'; div.style.fontSize = '14px'; div.style.lineHeight = '1.6'; div.style.borderRadius = '10px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'; div.style.margin = '6px 0';
+    div.style.padding = "6px";
+    const time = new Date(r.time).toLocaleString();
+    let content = `<strong>📅 時間：</strong>${time}<br/><strong>📌 類型：</strong>${r.type}<br/><strong>🏃‍♀️ 名稱：</strong>${r.name || "未填寫"}`;
+    if (r.type === "重量型") {
+      content += `<br/><strong>💪 重量：</strong>${r.val1}kg × ${r.val2} 組 × ${r.val3} 次`;
+    } else {
+      content += `<br/><strong>⏱️ 時長：</strong>${r.val1} 分鐘，<strong>🔥 卡路里：</strong>${r.val2 || "--"} kcal`;
+    }
+    div.innerHTML = content;
+    container.appendChild(div);
+  });
+}
+
+function renderCharts() {
+  const records = getRecords();
+  const dateDurationMap = {};
+  const weightLoadMap = {};
+
+  records.forEach(r => {
+    const date = r.time.slice(0, 10);
+    if (r.type === "時間型" && r.val1) {
+      const duration = parseInt(r.val1);
+      if (!isNaN(duration)) {
+        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
+        dateDurationMap[date] += duration;
+      }
+    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
+      const name = r.name || "未命名";
+      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
+      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
+        const load = w * sets * reps;
+        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
+        weightLoadMap[name] += load;
+      }
+    }
+  });
+
+  const lineLabels = Object.keys(dateDurationMap).sort();
+  const lineData = lineLabels.map(d => dateDurationMap[d]);
+  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
+  new Chart(ctxLine, {
+    type: "line",
+    data: {
+      labels: lineLabels,
+      datasets: [{
+        label: "運動時間（分鐘）",
+        data: lineData,
+        borderColor: "blue",
+        fill: false
+      }]
+    }
+  });
+
+  const barLabels = Object.keys(weightLoadMap);
+  const barData = barLabels.map(k => weightLoadMap[k]);
+  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
+  new Chart(ctxBar, {
+    type: "bar",
+    data: {
+      labels: barLabels,
+      datasets: [{
+        label: "總運動負荷",
+        data: barData,
+        backgroundColor: ["skyblue", "orange", "green", "purple"]
+      }]
+    }
+  });
+}
+
+function toggleCharts() {
+  const container = document.getElementById("chartContainer");
+  container.style.display = container.style.display === "none" ? "block" : "none";
+  if (container.style.display === "block") renderCharts();
+}
+
+// 初始化畫面
+window.addEventListener("DOMContentLoaded", () => {
+  renderRecords();
+});
+</script>
+
+</body>
+</html>

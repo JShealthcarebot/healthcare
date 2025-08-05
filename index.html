@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Health Care</title>
+  <style>
+    body {
+      background-color: #effaf3;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 300px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+      color: #2e2e2e;
+    }
+    p.slogan {
+      margin-bottom: 20px;
+      color: #555;
+      font-size: 14px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Health Care</h1>
+    <p class="slogan">載入中...</p>
+    <input type="text" placeholder="帳號" id="account" />
+    <input type="password" placeholder="密碼" id="password" />
+    <button onclick="login()">登入</button>
+  </div>
+  <script>
+    function login() {
+      const acc = document.getElementById("account").value;
+      const pwd = document.getElementById("password").value;
+      const users = {
+        samelo: "1226",
+        jessie: "0621",
+        jenny: "0731",
+        admin: "Admin"
+      };
+      if (users[acc] === pwd) {
+        localStorage.setItem("currentUser", acc);
+        window.location.href = "main.html";
+      } else {
+        alert("帳號或密碼錯誤");
+      }
+    }
+
+    const loginSlogans = [
+      "減肥就是：每天多堅持一點點 💪",
+      "不要怕記錄，怕的是體重自己飆 📈",
+      "登入只是第一步，瘦才是終點！🚀",
+      "別只是想瘦，打開 App 開始做！🏃‍♀️",
+      "一身肥肉不是你的錯，不動才是！🔥",
+      "登入一下，健康一下 👨‍⚕️"
+    ];
+    document.querySelector(".slogan").textContent =
+      loginSlogans[Math.floor(Math.random() * loginSlogans.length)];
+  </script>
+</body>
+</html>
