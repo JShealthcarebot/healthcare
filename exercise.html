@@ -10,6 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+.chart-title { text-align: center; font-size: 18px; font-weight: bold; margin: 12px 0 6px; }
+canvas { min-height: 240px; }
     body {
       background-color: white;
       font-family: 'Segoe UI', sans-serif;
@@ -62,9 +64,88 @@
     }
   </style>
 <style>
+.chart-title { text-align: center; font-size: 18px; font-weight: bold; margin: 12px 0 6px; }
+canvas { min-height: 240px; }
 #summaryContent, #suggestionContent {
   transition: all 0.3s ease;
   overflow: hidden;
+}
+</style>
+<style>
+.chart-title { text-align: center; font-size: 18px; font-weight: bold; margin: 12px 0 6px; }
+canvas { min-height: 240px; }
+#chartContainer {
+  overflow-x: auto;
+  box-sizing: border-box;
+  padding: 0 10px;
+  width: 100%;
+  max-width: 100%;
+}
+#chartContainer canvas {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+#exerciseRecords {
+  max-width: 420px;
+  margin: 0 auto;
+  padding-bottom: 10px;
+}
+#exerciseRecords div {
+  margin: 4px 0 !important;
+  padding: 10px !important;
+  line-height: 1.4 !important;
+}
+</style>
+<style>
+.custom-btn {
+  background-color: #4ba3f2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+.custom-btn:hover {
+  background-color: #2a84cd;
+}
+</style>
+<style>
+.chart-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin: 10px 0 6px 0;
+  text-align: center;
+}
+canvas {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto 20px auto;
+}
+</style>
+<style>
+.chart-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+  margin: 20px 0;
+}
+.chart-title {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+canvas {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
 }
 </style>
 </head>
@@ -122,716 +203,1026 @@
 </div>
 <hr/>
 <div id="exerciseChartSection" style="margin-top: 20px;">
-<canvas id="exerciseChart"></canvas>
-<canvas id="loadChart" style="margin-top: 30px;"></canvas>
+<button class="custom-btn" onclick="toggleCharts()">📊 展開圖表</button>
+<div id="chartSection" style="display:none;"><div class="chart-card"><div class="chart-title">🔥 熱量消耗圖</div><canvas id="calorieChart" style="display:block;margin:0 auto 20px auto;"></canvas></div><div class="chart-card"><div class="chart-title">🏋️ 訓練負重圖</div><canvas id="loadChart" style="display:block;margin:0 auto 20px auto;"></canvas></div></div>
+<div style="text-align:center; margin-top:10px;">
+<button class="custom-btn" onclick="toggleRecords()" style="padding:8px 16px; font-size:14px; border-radius:8px;">📋 展開紀錄</button>
 </div>
-<div id="exerciseRecords"></div><div id="chartSection" style="margin-top:20px;">
-<button onclick="toggleCharts()">展開圖表</button>
+<div id="exerciseRecords" style="display:none;">
+</div><div id="chartSection" style="margin-top:20px;">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  function toggleCharts() {
-    const container = document.getElementById('chartContainer');
-    container.style.display = container.style.display === 'none' ? 'block' : 'none';
-     // Always render on toggle
-  }
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
 
-  
-
-function renderCharts() {
-  const records = getRecords();
-  const dateDurationMap = {};
-  const weightLoadMap = {};
-
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
   records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-      const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
       }
     }
   });
 
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
     type: "line",
     data: {
-      labels: lineLabels,
+      labels: calorieLabels,
       datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
         borderColor: "blue",
-        fill: false
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
       }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
     }
   });
 
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
-    type: "bar",
-    data: {
-      labels: barLabels,
-      datasets: [{
-        label: "總運動負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
-      }]
-    }
-  });
-}
-;
-  const weightLoadMap = {};
-
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
   records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-      const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
-      }
-    }
-  });
-
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
-    type: "line",
-    data: {
-      labels: lineLabels,
-      datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
-        borderColor: "blue",
-        fill: false
-      }]
-    }
-  });
-
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
-    type: "bar",
-    data: {
-      labels: barLabels,
-      datasets: [{
-        label: "總運動負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
-      }]
-    }
-  });
-}
-]
-      }
-    });
-  }
-</script>
-<script>
-  const user = localStorage.getItem("currentUser") || "default";
-  const storageKey = `exerciseRecords_${user}`;
-
-  function getRecords() {
-    return JSON.parse(localStorage.getItem(storageKey) || "[]");
-  }
-
-  function saveRecords(records) {
-    localStorage.setItem(storageKey, JSON.stringify(records));
-  }
-
-  
-
-function 新增紀錄() {
-  const type = document.getElementById("exerciseMode").value;
-  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
-
-  if (type === "重量型") {
-    name = document.getElementById("exerciseType").value;
-    val1 = document.getElementById("weight").value;
-    val2 = document.getElementById("sets").value;
-    val3 = document.getElementById("reps").value;
-    if (!val1 || !val2 || !val3) {
-      alert("請填入完整的重量型紀錄欄位！");
-      return;
-    }
-  } else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
-
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
-  renderRecords();
-  renderCharts();
-}
-} else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
-
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
-  renderRecords();
-  renderCharts();
-
-  }
-
-  function 記錄一組() {
-    const all = getRecords();
-    if (all.length === 0) return alert("❗請先新增一筆紀錄");
-    const last = { ...all[all.length - 1], time: new Date().toISOString() };
-    all.push(last);
-    saveRecords(all);
-    alert("⭐ 已記錄一組！");
-  renderRecords();
-  renderCharts();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("addRecordBtn")?.addEventListener("click", 新增紀錄);
-    document.getElementById("repeatRecordBtn")?.addEventListener("click", 記錄一組);
-  });
-</script>
-<script>
-function renderSummaryAndSuggestion() {
-  const records = getRecords();
-  const today = new Date().toISOString().slice(0, 10);
-  let timeSum = 0, loadSum = 0, calSum = 0;
-  let countTime = 0, countWeight = 0;
-  const recentRecords = [];
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (date === today) {
-      if (r.type === "時間型" && r.val1) {
-        const t = parseInt(r.val1);
-        if (!isNaN(t)) {
-          timeSum += t;
-          countTime++;
-        }
-        const cal = parseInt(r.val2);
-        if (!isNaN(cal)) calSum += cal;
-      }
-      if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-        const w = parseInt(r.val1), s = parseInt(r.val2), rps = parseInt(r.val3);
-        if (!isNaN(w) && !isNaN(s) && !isNaN(rps)) {
-          loadSum += w * s * rps;
-          countWeight++;
-        }
-      }
-    }
-
-    // 建議用：抓最近 7 天內紀錄
-    const recordDate = new Date(date);
-    const daysAgo = (new Date() - recordDate) / (1000 * 60 * 60 * 24);
-    if (daysAgo <= 7) {
-      recentRecords.push(r);
-    }
-  });
-
-  document.getElementById("summaryDate").innerText = "🗓️ 日期：" + today;
-  document.getElementById("summaryTime").innerText = "🏃‍♀️ 運動時間：" + timeSum + " 分鐘";
-  document.getElementById("summaryLoad").innerText = "🏋️‍♂️ 負荷總量：" + loadSum;
-  document.getElementById("summaryCalories").innerText = "🔥 消耗卡路里：約 " + (calSum || 0) + " kcal";
-
-  // 智慧建議
-  let tCount = 0, wCount = 0;
-  recentRecords.forEach(r => {
-    if (r.type === "時間型") tCount++;
-    if (r.type === "重量型") wCount++;
-  });
-
-  let suggestion = "";
-  if (tCount === 0 && wCount === 0) {
-    suggestion = "近期沒有任何紀錄，加油開始動起來！💪";
-  } else if (tCount > wCount * 1.5) {
-    suggestion = "你最近偏向有氧運動，建議搭配一些重量訓練更均衡喔～🧘‍♂️";
-  } else if (wCount > tCount * 1.5) {
-    suggestion = "你最近重量訓練很積極，別忘了安排休息與伸展～🧘‍♀️";
-  } else {
-    suggestion = "你維持了很好的有氧與重量訓練平衡，繼續保持！🔥";
-  }
-
-  document.getElementById("suggestionText").innerText = suggestion;
-  document.getElementById("suggestionCard").style.display = "block";
-}
-
-// 呼叫初始化一次
-
-</script>
-<script>
-function toggleSection(id) {
-  const el = document.getElementById(id);
-  if (el.style.display === "none") {
-    el.style.display = "block";
-  } else {
-    el.style.display = "none";
-  }
-}
-</script>
-<script>
-function handleAddRecord() {
-  const username = localStorage.getItem("currentUser") || "未命名";
-  const type = document.getElementById("exerciseType").value;
-  const name = document.getElementById("exerciseName").value.trim();
-  const val1 = document.getElementById("val1").value.trim();
-  const val2 = document.getElementById("val2").value.trim();
-  const val3 = document.getElementById("val3").value.trim();
-
-  if (!name || !val1) {
-    alert("請填寫完整資訊！");
-    return;
-  }
-
-  const record = {
-    time: new Date().toISOString(),
-    username, type, name, val1, val2, val3
-  };
-  const records = getRecords();
-  records.push(record);
-  localStorage.setItem("exerciseRecords", JSON.stringify(records));
-  
-  
-  
-}
-
-function filterRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return  // reset
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const d = r.time.slice(0, 10);
-    return d >= start && d <= end;
-  });
-  
-  
-}
-
-function clearFilteredRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) {
-    alert("請選擇日期範圍");
-    return;
-  }
-  let records = getRecords();
-  records = records.filter(r => {
-    const d = r.time.slice(0, 10);
-    return d < start || d > end;
-  });
-  localStorage.setItem("exerciseRecords", JSON.stringify(records));
-  
-  
-  
-}
-
-function clearAllRecords() {
-  if (!confirm("確定要清除所有運動紀錄？")) return;
-  localStorage.removeItem("exerciseRecords");
-  
-  
-  
-}
-
-function getRecords() {
-  return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
-}
-</script>
-</div><div id="chartContainer" style="display:none; margin-top: 20px;">
-<canvas height="200" id="exerciseChartLine" width="400"></canvas>
-</div><canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400"></canvas>
-</div>
-<script>
-function toggleInputFields() {
-  const mode = document.getElementById('exerciseMode').value;
-  document.getElementById('weightFields').style.display = mode === '重量型' ? 'block' : 'none';
-  document.getElementById('timeFields').style.display = mode === '時間型' ? 'block' : 'none';
-}
-function goMenu() {
-  window.location.href = "main.html";
-}
-function logout() {
-  window.location.href = "index.html";
-}
-</script>
-
-
-<script>
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
-
-function getRecordKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-
-function loadRecords() {
-  return JSON.parse(localStorage.getItem(getRecordKey()) || "[]");
-}
-
-function saveRecords(records) {
-  localStorage.setItem(getRecordKey(), JSON.stringify(records));
-}
-
-function addRecord() {
-  const type = document.getElementById("exerciseType").value;
-  const subtype = document.getElementById("exerciseSubtype").value;
-  const val1 = document.getElementById("exerciseVal1").value;
-  const val2 = document.getElementById("exerciseVal2").value;
-  const val3 = document.getElementById("exerciseVal3").value;
-  const val4 = document.getElementById("exerciseVal4").value;
-
-  const record = {
-    id: Date.now(),
-    type,
-    subtype,
-    timestamp: new Date().toISOString()
-  };
-
-  if (type === "時間型") {
-    record.duration = parseFloat(val1) || 0;
-    record.calories = parseFloat(val2) || 0;
-    record.slope = parseFloat(val3) || 0;
-    record.speed = parseFloat(val4) || 0;
-  } else {
-    record.weight = parseFloat(val1) || 0;
-    record.sets = parseFloat(val2) || 0;
-    record.reps = parseFloat(val3) || 0;
-  }
-
-  const records = loadRecords();
-  records.push(record);
-  saveRecords(records);
-  alert("✅ 紀錄新增成功！");
-  location.reload();
-}
-
-function addGroupRecord() {
-  alert("🧪 群組紀錄功能尚未實作，預留未來版本");
-}
-
-function filterRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = loadRecords();
-  const filtered = records.filter(r => {
-    const date = r.timestamp.split("T")[0];
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-function clearFilteredRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = loadRecords();
-  records = records.filter(r => {
-    const date = r.timestamp.split("T")[0];
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍的紀錄！");
-  location.reload();
-}
-
-function clearAllRecords() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-</script>
-<script>
-function logSet() { 記錄一組(); }
-
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
-function getExerciseKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getExerciseKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getExerciseKey(), JSON.stringify(records));
-}
-
-// 篩選
-function filterExerciseRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-// 清除所選時間
-function clearFilteredExerciseData() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = getRecords();
-  records = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍紀錄！");
-  location.reload();
-}
-
-// 清除全部
-function clearAllExerciseData() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-</script>
-
-
-<script>
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
-function getStorageKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(records));
-}
-
-function 新增紀錄() {
-  const type = document.getElementById("exerciseMode").value;
-  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
-
-  if (type === "重量型") {
-    name = document.getElementById("exerciseType").value;
-    val1 = document.getElementById("weight").value;
-    val2 = document.getElementById("sets").value;
-    val3 = document.getElementById("reps").value;
-    if (!val1 || !val2 || !val3) {
-      alert("請填入完整的重量型紀錄欄位！");
-      return;
-    }
-  } else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
-
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
-  renderRecords();
-  renderCharts();
-}
-
-function 記錄一組() {
-  const all = getRecords();
-  if (all.length === 0) return alert("❗請先新增一筆紀錄");
-  const last = { ...all[all.length - 1], time: new Date().toISOString() };
-  all.push(last);
-  saveRecords(all);
-  alert("⭐ 已記錄一組！");
-  renderRecords();
-  renderCharts();
-}
-
-function filterExerciseRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-function clearFilteredExerciseData() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = getRecords();
-  records = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍紀錄！");
-  location.reload();
-}
-
-function clearAllExerciseData() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-
-function logSet() { 記錄一組(); }
-</script>
-
-
-<script>
-function renderRecords() {
-  const records = getRecords();
-  const container = document.getElementById("exerciseRecords");
-  container.innerHTML = "";
-  if (records.length === 0) {
-    container.innerHTML = "<p style='text-align:center;'>尚無紀錄</p>";
-    return;
-  }
-  records.slice().reverse().forEach(r => {
-    const div = document.createElement("div");
-    div.style.background = '#fff'; div.style.padding = '12px'; div.style.fontSize = '14px'; div.style.lineHeight = '1.6'; div.style.borderRadius = '10px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'; div.style.margin = '6px 0';
-    div.style.padding = "6px";
-    const time = new Date(r.time).toLocaleString();
-    let content = `<strong>📅 時間：</strong>${time}<br/><strong>📌 類型：</strong>${r.type}<br/><strong>🏃‍♀️ 名稱：</strong>${r.name || "未填寫"}`;
     if (r.type === "重量型") {
-      content += `<br/><strong>💪 重量：</strong>${r.val1}kg × ${r.val2} 組 × ${r.val3} 次`;
-    } else {
-      content += `<br/><strong>⏱️ 時長：</strong>${r.val1} 分鐘，<strong>🔥 卡路里：</strong>${r.val2 || "--"} kcal`;
-    }
-    div.innerHTML = content;
-    container.appendChild(div);
-  });
-}
-
-function renderCharts() {
-  const records = getRecords();
-  const dateDurationMap = {};
-  const weightLoadMap = {};
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
       const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
-      }
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
     }
   });
 
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
-    type: "line",
-    data: {
-      labels: lineLabels,
-      datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
-        borderColor: "blue",
-        fill: false
-      }]
-    }
-  });
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
 
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
+  new Chart(document.getElementById("loadChart"), {
     type: "bar",
     data: {
-      labels: barLabels,
+      labels: loadLabels,
       datasets: [{
-        label: "總運動負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
       }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
     }
   });
-}
-
-function toggleCharts() {
-  const container = document.getElementById("chartContainer");
-  container.style.display = container.style.display === "none" ? "block" : "none";
-  if (container.style.display === "block") renderCharts();
-}
-
-// 初始化畫面
-window.addEventListener("DOMContentLoaded", () => {
-  renderRecords();
 });
-</script>
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
 
-</body>
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+</div><div id="chartContainer" style="display:none; margin-top: 20px;">
+
+</div>
+</div>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const currentUser = localStorage.getItem("currentUser") || "default";
+  const dataKey = "exercise_records_" + currentUser;
+  const records = JSON.parse(localStorage.getItem(dataKey) || "[]");
+
+  // === 熱量消耗圖（時間型） ===
+  const calorieMap = {};
+  records.forEach(r => {
+    if (r.type === "時間型") {
+      const date = r.time.slice(0, 10);
+      const val = parseInt(r.val2);
+      if (!isNaN(val)) {
+        calorieMap[date] = (calorieMap[date] || 0) + val;
+      }
+    }
+  });
+
+  const calorieLabels = Object.keys(calorieMap);
+  const calorieValues = Object.values(calorieMap);
+
+  new Chart(document.getElementById("calorieChart"), {
+    type: "line",
+    data: {
+      labels: calorieLabels,
+      datasets: [{
+        label: "每日總消耗熱量（時間型）",
+        data: calorieValues,
+        borderColor: "blue",
+        backgroundColor: "lightblue",
+        borderWidth: 3,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      }
+    }
+  });
+
+  // === 訓練負重圖（重量型） ===
+  const loadMap = {};
+  records.forEach(r => {
+    if (r.type === "重量型") {
+      const name = r.name || "未命名";
+      const w = parseFloat(r.val1) || 0;
+      const sets = parseInt(r.val2) || 0;
+      const reps = parseInt(r.val3) || 0;
+      const total = w * sets * reps;
+      if (!loadMap[name]) loadMap[name] = 0;
+      loadMap[name] += total;
+    }
+  });
+
+  const loadLabels = Object.keys(loadMap);
+  const loadValues = Object.values(loadMap);
+
+  new Chart(document.getElementById("loadChart"), {
+    type: "bar",
+    data: {
+      labels: loadLabels,
+      datasets: [{
+        label: "各項目累積總重量（單位計算為 kg×次數）",
+        data: loadValues,
+        backgroundColor: "rgba(135, 206, 250, 0.6)",
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      elements: { point: { radius: 5 }, line: { tension: 0.4, borderWidth: 3 } },
+      plugins: {
+        legend: { display: true },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+});
+};</script>
+<script>
+function toggleCharts() {
+  const chartDiv = document.getElementById("chartSection");
+  chartDiv.style.display = (chartDiv.style.display === "none") ? "block" : "none";
+}
+
+// Chart 美化效果附加至原始繪圖程式裡，略過此段
+</script>
+</div></body>
 </html>
