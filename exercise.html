@@ -60,14 +60,34 @@
     canvas {
       max-width: 100%;
     }
-  </style>
+  
+.custom-btn {
+    border: none;
+    padding: 8px 14px;
+    margin: 4px 3px;
+    border-radius: 8px;
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: bold;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+.custom-btn:hover {
+    background-color: #cbe9ff;
+    color: #000;
+    transform: scale(1.05);
+}
+.custom-btn:active {
+    transform: scale(0.98);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+}
+</style>
 <style>
 #summaryContent, #suggestionContent {
   transition: all 0.3s ease;
   overflow: hidden;
 }
 </style>
-
 <style>
     button {
         border: none;
@@ -90,7 +110,6 @@
         box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
     }
 </style>
-
 </head>
 <body>
 <img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
@@ -142,14 +161,12 @@
 <hr/>
 <div>
 <button onclick="exportExerciseToExcel()">📤 匯出 Excel</button>
-<input accept=".xlsx" id="excelFile" onchange="importExerciseFromExcel(event)" type="file"/>
+<input accept=".xlsx" class="custom-btn" id="excelFile" onchange="importExerciseFromExcel(event)" type="file"/>
 </div>
 <hr/>
-
-    <div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
-    <div id="exerciseRecords"></div>
-    <div id="chartSection" style="margin-top:20px;">
-
+<div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
+<div id="exerciseRecords"></div>
+<div id="chartSection" style="margin-top:20px;">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   function toggleCharts() {
@@ -502,30 +519,27 @@ function getRecords() {
 }
 </script>
 </div>
-    
 <div style="text-align:center; margin-top: 20px;">
-  <div style="font-weight:bold; margin-bottom: 10px;">📅 圖表顯示：</div>
-  <button onclick="setChartRange('today')" style="margin: 2px;">本日</button>
-  <button onclick="setChartRange('7')" style="margin: 2px;">本週</button>
-  <button onclick="setChartRange('30')" style="margin: 2px;">本月</button>
-  <button onclick="setChartRange('365')" style="margin: 2px;">本年</button>
-  <button onclick="showCustomRange()" style="margin: 2px;">自訂</button>
-  <div id="customRange" style="display:none; margin-top:10px;">
-    <input type="date" id="customStart"> ~ <input type="date" id="customEnd">
-    <button onclick="applyCustomRange()">套用</button>
-  </div>
+<div style="font-weight:bold; margin-bottom: 10px;">📅 圖表顯示：</div>
+<button onclick="setChartRange('today')" style="margin: 2px;">本日</button>
+<button onclick="setChartRange('7')" style="margin: 2px;">本週</button>
+<button onclick="setChartRange('30')" style="margin: 2px;">本月</button>
+<button onclick="setChartRange('365')" style="margin: 2px;">本年</button>
+<button onclick="showCustomRange()" style="margin: 2px;">自訂</button>
+<div id="customRange" style="display:none; margin-top:10px;">
+<input id="customStart" type="date"/> ~ <input id="customEnd" type="date"/>
+<button onclick="applyCustomRange()">套用</button>
 </div>
-
+</div>
 <div id="chartContainer" style="display:none; margin-top: 20px;">
-      <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:16px;">
-        <h3 style="margin:0 0 10px;">🔥 卡路里消耗趨勢</h3>
-        <canvas id="exerciseChartLine" height="200" width="400"></canvas>
-      </div>
-      <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-        <h3 style="margin:0 0 10px;">🏋️‍♂️ 總重量訓練負荷</h3>
-        <canvas id="exerciseChartBar" height="200" width="400"></canvas>
-      </div>
-    
+<div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:16px;">
+<h3 style="margin:0 0 10px;">🔥 卡路里消耗趨勢</h3>
+<canvas height="200" id="exerciseChartLine" width="400"></canvas>
+</div>
+<div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+<h3 style="margin:0 0 10px;">🏋️‍♂️ 總重量訓練負荷</h3>
+<canvas height="200" id="exerciseChartBar" width="400"></canvas>
+</div>
 <canvas height="200" id="exerciseChartLine" width="400"></canvas>
 </div><canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400"></canvas>
 </div>
@@ -542,8 +556,6 @@ function logout() {
   window.location.href = "index.html";
 }
 </script>
-
-
 <script>
 function getCurrentUser() {
   return localStorage.getItem("currentUser") || "guest";
@@ -683,8 +695,6 @@ function clearAllExerciseData() {
   location.reload();
 }
 </script>
-
-
 <script>
 function getCurrentUser() {
   return localStorage.getItem("currentUser") || "guest";
@@ -780,8 +790,6 @@ function clearAllExerciseData() {
 
 function logSet() { 記錄一組(); }
 </script>
-
-
 <script>
 
 function renderRecords(records = null) {
@@ -882,8 +890,6 @@ window.addEventListener("DOMContentLoaded", () => {
   renderRecords();
 });
 </script>
-
-
 <script>
 let currentChartRange = 'today';
 
@@ -924,6 +930,5 @@ function applyCustomRange() {
   renderCharts(getRecordsInRange(null, start, end));
 }
 </script>
-
 </body>
 </html>
