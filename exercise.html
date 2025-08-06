@@ -81,6 +81,12 @@
     transform: scale(0.98);
     box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
 }
+
+.custom-file {
+    width: 110px !important;
+    padding: 8px 0px;
+    text-align: center;
+}
 </style>
 <style>
 #summaryContent, #suggestionContent {
@@ -161,7 +167,7 @@
 <hr/>
 <div>
 <button onclick="exportExerciseToExcel()">📤 匯出 Excel</button>
-<input accept=".xlsx" class="custom-btn" id="excelFile" onchange="importExerciseFromExcel(event)" type="file"/>
+<input accept=".xlsx" class="custom-btn custom-btn custom-file" id="excelFile" onchange="importExerciseFromExcel(event)" style="width: 110px;" type="file"/>
 </div>
 <hr/>
 <div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
