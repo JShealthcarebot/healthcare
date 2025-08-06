@@ -67,6 +67,30 @@
   overflow: hidden;
 }
 </style>
+
+<style>
+    button {
+        border: none;
+        padding: 8px 14px;
+        margin: 4px 3px;
+        border-radius: 8px;
+        background-color: #f2f2f2;
+        color: #333;
+        font-weight: bold;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+    button:hover {
+        background-color: #cbe9ff;
+        color: #000;
+        transform: scale(1.05);
+    }
+    button:active {
+        transform: scale(0.98);
+        box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+    }
+</style>
+
 </head>
 <body>
 <img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
