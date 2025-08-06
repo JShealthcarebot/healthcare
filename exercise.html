@@ -121,7 +121,10 @@
 <input accept=".xlsx" id="excelFile" onchange="importExerciseFromExcel(event)" type="file"/>
 </div>
 <hr/>
-<div id="exerciseRecords"></div><div id="chartSection" style="margin-top:20px;">
+
+    <div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
+    <div id="exerciseRecords"></div>
+    <div id="chartSection" style="margin-top:20px;">
 <button onclick="toggleCharts()">展開圖表</button>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -477,11 +480,11 @@ function getRecords() {
 </div>
     <div id="chartContainer" style="display:none; margin-top: 20px;">
       <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:16px;">
-        <h3 style="margin:0 0 10px;">🔥 本日卡路里消耗趨勢</h3>
+        <h3 style="margin:0 0 10px;">🔥 卡路里消耗趨勢</h3>
         <canvas id="exerciseChartLine" height="200" width="400"></canvas>
       </div>
       <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-        <h3 style="margin:0 0 10px;">🏋️‍♂️ 重量訓練負荷紀錄</h3>
+        <h3 style="margin:0 0 10px;">🏋️‍♂️ 總重量訓練負荷</h3>
         <canvas id="exerciseChartBar" height="200" width="400"></canvas>
       </div>
     
@@ -742,8 +745,9 @@ function logSet() { 記錄一組(); }
 
 
 <script>
-function renderRecords() {
-  const records = getRecords();
+
+function renderRecords(records = null) {
+  records = records || getRecords();
   const container = document.getElementById("exerciseRecords");
   container.innerHTML = "";
   if (records.length === 0) {
@@ -753,16 +757,17 @@ function renderRecords() {
   records.slice().reverse().forEach(r => {
     const div = document.createElement("div");
     div.style.background = '#fff'; div.style.padding = '12px'; div.style.fontSize = '14px'; div.style.lineHeight = '1.6'; div.style.borderRadius = '10px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'; div.style.margin = '6px 0';
-    div.style.padding = "6px";
     const time = new Date(r.time).toLocaleString();
     let content = `<strong>📅 時間：</strong>${time}<br/><strong>📌 類型：</strong>${r.type}<br/><strong>🏃‍♀️ 名稱：</strong>${r.name || "未填寫"}`;
     if (r.type === "重量型") {
-      content += `<br/><strong>💪 重量：</strong>${r.val1}kg × ${r.val2} 組 × ${r.val3} 次`;
+      const total = parseInt(r.val1 || 0) * parseInt(r.val3 || 0);
+      content += `<br/><strong>💪 重量：</strong>${r.val1}kg × ${r.val2} 組 × ${r.val3} 次 = ${total} kg`;
     } else {
       content += `<br/><strong>⏱️ 時長：</strong>${r.val1} 分鐘，<strong>🔥 卡路里：</strong>${r.val2 || "--"} kcal`;
     }
     div.innerHTML = content;
     container.appendChild(div);
+
   });
 }
 
