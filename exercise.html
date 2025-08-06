@@ -184,7 +184,7 @@ function renderCharts() {
     data: {
       labels: barLabels,
       datasets: [{
-        label: "總運動負荷",
+        label: "總重量訓練負荷",
         data: barData,
         backgroundColor: ["skyblue", "orange", "green", "purple"]
       }]
@@ -237,7 +237,7 @@ function renderCharts() {
     data: {
       labels: barLabels,
       datasets: [{
-        label: "總運動負荷",
+        label: "總重量訓練負荷",
         data: barData,
         backgroundColor: ["skyblue", "orange", "green", "purple"]
       
@@ -291,6 +291,7 @@ function 新增紀錄() {
   alert("✅ 已新增紀錄！");
   renderRecords();
   renderCharts();
+  renderSummaryAndSuggestion();
 }
 } else {
     name = document.getElementById("exerciseTypeTime").value;
@@ -312,6 +313,7 @@ function 新增紀錄() {
   alert("✅ 已新增紀錄！");
   renderRecords();
   renderCharts();
+  renderSummaryAndSuggestion();
 
   }
 
@@ -324,6 +326,7 @@ function 新增紀錄() {
     alert("⭐ 已記錄一組！");
   renderRecords();
   renderCharts();
+  renderSummaryAndSuggestion();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -694,6 +697,7 @@ function 新增紀錄() {
   alert("✅ 已新增紀錄！");
   renderRecords();
   renderCharts();
+  renderSummaryAndSuggestion();
 }
 
 function 記錄一組() {
@@ -705,6 +709,7 @@ function 記錄一組() {
   alert("⭐ 已記錄一組！");
   renderRecords();
   renderCharts();
+  renderSummaryAndSuggestion();
 }
 
 function filterExerciseRecords() {
@@ -759,9 +764,15 @@ function renderRecords(records = null) {
     div.style.background = '#fff'; div.style.padding = '12px'; div.style.fontSize = '14px'; div.style.lineHeight = '1.6'; div.style.borderRadius = '10px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'; div.style.margin = '6px 0';
     const time = new Date(r.time).toLocaleString();
     let content = `<strong>📅 時間：</strong>${time}<br/><strong>📌 類型：</strong>${r.type}<br/><strong>🏃‍♀️ 名稱：</strong>${r.name || "未填寫"}`;
+    
     if (r.type === "重量型") {
-      const total = parseInt(r.val1 || 0) * parseInt(r.val3 || 0);
-      content += `<br/><strong>💪 重量：</strong>${r.val1}kg × ${r.val2} 組 × ${r.val3} 次 = ${total} kg`;
+      const sets = parseInt(r.val2 || 0);
+      const reps = parseInt(r.val3 || 0);
+      const w = parseInt(r.val1 || 0);
+      const total = w * sets * reps;
+      content += `<br/><strong>💪 重量：</strong>${w}kg × ${sets} 組 × ${reps} 次`;
+      content += `<br/><strong>📦 總重量：</strong>${total} kg`;
+    }
     } else {
       content += `<br/><strong>⏱️ 時長：</strong>${r.val1} 分鐘，<strong>🔥 卡路里：</strong>${r.val2 || "--"} kcal`;
     }
@@ -819,7 +830,7 @@ function renderCharts() {
     data: {
       labels: barLabels,
       datasets: [{
-        label: "總運動負荷",
+        label: "總重量訓練負荷",
         data: barData,
         backgroundColor: ["skyblue", "orange", "green", "purple"]
       }]
@@ -831,10 +842,14 @@ function toggleCharts() {
   const container = document.getElementById("chartContainer");
   container.style.display = container.style.display === "none" ? "block" : "none";
   if (container.style.display === "block") renderCharts();
+  renderSummaryAndSuggestion();
 }
+
 
 // 初始化畫面
 window.addEventListener("DOMContentLoaded", () => {
+  renderSummaryAndSuggestion();
+
   renderRecords();
 });
 </script>
