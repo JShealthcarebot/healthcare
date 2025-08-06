@@ -125,7 +125,7 @@
     <div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
     <div id="exerciseRecords"></div>
     <div id="chartSection" style="margin-top:20px;">
-<button onclick="toggleCharts()">展開圖表</button>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   function toggleCharts() {
@@ -480,12 +480,12 @@ function getRecords() {
 </div>
     
 <div style="text-align:center; margin-top: 20px;">
-  <label style="font-weight:bold; margin-right: 10px;">📅 圖表顯示：</label>
-  <button onclick="setChartRange('today')">本日</button>
-  <button onclick="setChartRange('7')">本週</button>
-  <button onclick="setChartRange('30')">本月</button>
-  <button onclick="setChartRange('365')">本年</button>
-  <button onclick="showCustomRange()">自訂</button>
+  <div style="font-weight:bold; margin-bottom: 10px;">📅 圖表顯示：</div>
+  <button onclick="setChartRange('today')" style="margin: 2px;">本日</button>
+  <button onclick="setChartRange('7')" style="margin: 2px;">本週</button>
+  <button onclick="setChartRange('30')" style="margin: 2px;">本月</button>
+  <button onclick="setChartRange('365')" style="margin: 2px;">本年</button>
+  <button onclick="showCustomRange()" style="margin: 2px;">自訂</button>
   <div id="customRange" style="display:none; margin-top:10px;">
     <input type="date" id="customStart"> ~ <input type="date" id="customEnd">
     <button onclick="applyCustomRange()">套用</button>
