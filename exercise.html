@@ -609,6 +609,8 @@ function addRecord() {
   const records = loadRecords();
   records.push(record);
   saveRecords(records);
+  renderRecords(records);
+  renderCharts(records);
   alert("✅ 紀錄新增成功！");
   location.reload();
 }
@@ -639,6 +641,8 @@ function clearFilteredRecords() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
+  renderRecords(records);
+  renderCharts(records);
   alert("🧹 已刪除所選時間範圍的紀錄！");
   location.reload();
 }
@@ -683,6 +687,8 @@ function clearFilteredExerciseData() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
+  renderRecords(records);
+  renderCharts(records);
   alert("🧹 已刪除所選時間範圍紀錄！");
   location.reload();
 }
@@ -770,6 +776,8 @@ function clearFilteredExerciseData() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
+  renderRecords(records);
+  renderCharts(records);
   alert("🧹 已刪除所選時間範圍紀錄！");
   location.reload();
 }
@@ -925,3 +933,11 @@ function applyCustomRange() {
 </script>
 </body>
 </html>
+
+<script>
+window.onload = function () {
+  const records = getRecords();
+  renderRecords(records);
+  renderCharts(records);
+};
+</script>
