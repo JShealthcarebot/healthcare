@@ -174,356 +174,241 @@
 <div id="exerciseRecords"></div>
 <div id="chartSection" style="margin-top:20px;">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  function toggleCharts() {
-    const container = document.getElementById('chartContainer');
-    container.style.display = container.style.display === 'none' ? 'block' : 'none';
-     // Always render on toggle
-  }
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
 
-  
-
-function renderCharts() {
-  const records = getRecords();
-  const dateDurationMap = {};
-  const weightLoadMap = {};
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-      const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
-      }
-    }
-  });
-
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
-    type: "line",
-    data: {
-      labels: lineLabels,
-      datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
-        borderColor: "blue",
-        fill: false
-      }]
-    }
-  });
-
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
-    type: "bar",
-    data: {
-      labels: barLabels,
-      datasets: [{
-        label: "總重量訓練負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
-      }]
-    }
-  });
-}
-;
-  const weightLoadMap = {};
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-      const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
-      }
-    }
-  });
-
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
-    type: "line",
-    data: {
-      labels: lineLabels,
-      datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
-        borderColor: "blue",
-        fill: false
-      }]
-    }
-  });
-
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
-    type: "bar",
-    data: {
-      labels: barLabels,
-      datasets: [{
-        label: "總重量訓練負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
-      
-    });
-  }
-</script>
-<script>
-  const user = localStorage.getItem("currentUser") || "default";
-  const storageKey = `exerciseRecords_${user}`;
-
-  function getRecords() {
-    return JSON.parse(localStorage.getItem(storageKey) || "[]");
-  }
-
-  function saveRecords(records) {
-    localStorage.setItem(storageKey, JSON.stringify(records));
-  }
-
-  
-
-function 新增紀錄() {
-  const type = document.getElementById("exerciseMode").value;
-  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
-
-  if (type === "重量型") {
-    name = document.getElementById("exerciseType").value;
-    val1 = document.getElementById("weight").value;
-    val2 = document.getElementById("sets").value;
-    val3 = document.getElementById("reps").value;
-    if (!val1 || !val2 || !val3) {
-      alert("請填入完整的重量型紀錄欄位！");
-      return;
-    }
-  } else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
-
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
+// 初始化載入紀錄
+window.onload = function () {
   renderRecords();
-  renderCharts();
-}
-} else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
+};
 
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
-  renderRecords();
-  renderCharts();
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
 
-  }
-
-  function 記錄一組() {
-    const all = getRecords();
-    if (all.length === 0) return alert("❗請先新增一筆紀錄");
-    const last = { ...all[all.length - 1], time: new Date().toISOString() };
-    all.push(last);
-    saveRecords(all);
-    alert("⭐ 已記錄一組！");
-  renderRecords();
-  renderCharts();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("addRecordBtn")?.addEventListener("click", 新增紀錄);
-    document.getElementById("repeatRecordBtn")?.addEventListener("click", 記錄一組);
-  });
-</script>
-<script>
-function renderSummaryAndSuggestion() {
-  const records = getRecords();
-  const today = new Date().toISOString().slice(0, 10);
-  let timeSum = 0, loadSum = 0, calSum = 0;
-  let countTime = 0, countWeight = 0;
-  const recentRecords = [];
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (date === today) {
-      if (r.type === "時間型" && r.val1) {
-        const t = parseInt(r.val1);
-        if (!isNaN(t)) {
-          timeSum += t;
-          countTime++;
-        }
-        const cal = parseInt(r.val2);
-        if (!isNaN(cal)) calSum += cal;
-      }
-      if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-        const w = parseInt(r.val1), s = parseInt(r.val2), rps = parseInt(r.val3);
-        if (!isNaN(w) && !isNaN(s) && !isNaN(rps)) {
-          loadSum += w * s * rps;
-          countWeight++;
-        }
-      }
-    }
-
-    // 建議用：抓最近 7 天內紀錄
-    const recordDate = new Date(date);
-    const daysAgo = (new Date() - recordDate) / (1000 * 60 * 60 * 24);
-    if (daysAgo <= 7) {
-      recentRecords.push(r);
-    }
-  });
-
-  document.getElementById("summaryDate").innerText = "🗓️ 日期：" + today;
-  document.getElementById("summaryTime").innerText = "🏃‍♀️ 運動時間：" + timeSum + " 分鐘";
-  document.getElementById("summaryLoad").innerText = "🏋️‍♂️ 負荷總量：" + loadSum;
-  document.getElementById("summaryCalories").innerText = "🔥 消耗卡路里：約 " + (calSum || 0) + " kcal";
-
-  // 智慧建議
-  let tCount = 0, wCount = 0;
-  recentRecords.forEach(r => {
-    if (r.type === "時間型") tCount++;
-    if (r.type === "重量型") wCount++;
-  });
-
-  let suggestion = "";
-  if (tCount === 0 && wCount === 0) {
-    suggestion = "近期沒有任何紀錄，加油開始動起來！💪";
-  } else if (tCount > wCount * 1.5) {
-    suggestion = "你最近偏向有氧運動，建議搭配一些重量訓練更均衡喔～🧘‍♂️";
-  } else if (wCount > tCount * 1.5) {
-    suggestion = "你最近重量訓練很積極，別忘了安排休息與伸展～🧘‍♀️";
-  } else {
-    suggestion = "你維持了很好的有氧與重量訓練平衡，繼續保持！🔥";
-  }
-
-  document.getElementById("suggestionText").innerText = suggestion;
-  document.getElementById("suggestionCard").style.display = "block";
-}
-
-// 呼叫初始化一次
-
-</script>
-<script>
-function toggleSection(id) {
-  const el = document.getElementById(id);
-  if (el.style.display === "none") {
-    el.style.display = "block";
-  } else {
-    el.style.display = "none";
-  }
-}
-</script>
-<script>
-function handleAddRecord() {
-  const username = localStorage.getItem("currentUser") || "未命名";
-  const type = document.getElementById("exerciseType").value;
-  const name = document.getElementById("exerciseName").value.trim();
-  const val1 = document.getElementById("val1").value.trim();
-  const val2 = document.getElementById("val2").value.trim();
-  const val3 = document.getElementById("val3").value.trim();
-
-  if (!name || !val1) {
-    alert("請填寫完整資訊！");
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
     return;
   }
 
-  const record = {
-    time: new Date().toISOString(),
-    username, type, name, val1, val2, val3
-  };
-  const records = getRecords();
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
   records.push(record);
-  localStorage.setItem("exerciseRecords", JSON.stringify(records));
-  
-  
-  
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
 }
 
-function filterRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return  // reset
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const d = r.time.slice(0, 10);
-    return d >= start && d <= end;
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
   });
-  
-  
-}
-
-function clearFilteredRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) {
-    alert("請選擇日期範圍");
-    return;
-  }
-  let records = getRecords();
-  records = records.filter(r => {
-    const d = r.time.slice(0, 10);
-    return d < start || d > end;
-  });
-  localStorage.setItem("exerciseRecords", JSON.stringify(records));
-  
-  
-  
-}
-
-function clearAllRecords() {
-  if (!confirm("確定要清除所有運動紀錄？")) return;
-  localStorage.removeItem("exerciseRecords");
-  
-  
-  
-}
-
-function getRecords() {
-  return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
 }
 </script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
 </div>
 <div style="text-align:center; margin-top: 20px;">
 <div style="font-weight:bold; margin-bottom: 10px;">📅 圖表顯示：</div>
@@ -549,392 +434,287 @@ function getRecords() {
 <canvas height="200" id="exerciseChartLine" width="400"></canvas>
 </div><canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400"></canvas>
 </div>
+
 <script>
-function toggleInputFields() {
-  const mode = document.getElementById('exerciseMode').value;
-  document.getElementById('weightFields').style.display = mode === '重量型' ? 'block' : 'none';
-  document.getElementById('timeFields').style.display = mode === '時間型' ? 'block' : 'none';
-}
-function goMenu() {
-  window.location.href = "main.html";
-}
-function logout() {
-  window.location.href = "index.html";
-}
-</script>
-<script>
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
 
-function getRecordKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-
-function loadRecords() {
-  return JSON.parse(localStorage.getItem(getRecordKey()) || "[]");
-}
-
-function saveRecords(records) {
-  localStorage.setItem(getRecordKey(), JSON.stringify(records));
-}
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
 
 function addRecord() {
-  const type = document.getElementById("exerciseType").value;
-  const subtype = document.getElementById("exerciseSubtype").value;
-  const val1 = document.getElementById("exerciseVal1").value;
-  const val2 = document.getElementById("exerciseVal2").value;
-  const val3 = document.getElementById("exerciseVal3").value;
-  const val4 = document.getElementById("exerciseVal4").value;
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
 
-  const record = {
-    id: Date.now(),
-    type,
-    subtype,
-    timestamp: new Date().toISOString()
-  };
-
-  if (type === "時間型") {
-    record.duration = parseFloat(val1) || 0;
-    record.calories = parseFloat(val2) || 0;
-    record.slope = parseFloat(val3) || 0;
-    record.speed = parseFloat(val4) || 0;
-  } else {
-    record.weight = parseFloat(val1) || 0;
-    record.sets = parseFloat(val2) || 0;
-    record.reps = parseFloat(val3) || 0;
-  }
-
-  const records = loadRecords();
-  records.push(record);
-  saveRecords(records);
-  alert("✅ 紀錄新增成功！");
-  location.reload();
-}
-
-function addGroupRecord() {
-  alert("🧪 群組紀錄功能尚未實作，預留未來版本");
-}
-
-function filterRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = loadRecords();
-  const filtered = records.filter(r => {
-    const date = r.timestamp.split("T")[0];
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-function clearFilteredRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = loadRecords();
-  records = records.filter(r => {
-    const date = r.timestamp.split("T")[0];
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍的紀錄！");
-  location.reload();
-}
-
-function clearAllRecords() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-</script>
-<script>
-function logSet() { 記錄一組(); }
-
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
-function getExerciseKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getExerciseKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getExerciseKey(), JSON.stringify(records));
-}
-
-// 篩選
-function filterExerciseRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-// 清除所選時間
-function clearFilteredExerciseData() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = getRecords();
-  records = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍紀錄！");
-  location.reload();
-}
-
-// 清除全部
-function clearAllExerciseData() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-</script>
-<script>
-function getCurrentUser() {
-  return localStorage.getItem("currentUser") || "guest";
-}
-function getStorageKey() {
-  return "exerciseRecords_" + getCurrentUser();
-}
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(records));
-}
-
-function 新增紀錄() {
-  const type = document.getElementById("exerciseMode").value;
-  let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
-
-  if (type === "重量型") {
-    name = document.getElementById("exerciseType").value;
-    val1 = document.getElementById("weight").value;
-    val2 = document.getElementById("sets").value;
-    val3 = document.getElementById("reps").value;
-    if (!val1 || !val2 || !val3) {
-      alert("請填入完整的重量型紀錄欄位！");
-      return;
-    }
-  } else {
-    name = document.getElementById("exerciseTypeTime").value;
-    val1 = document.getElementById("duration").value;
-    val2 = document.getElementById("calories").value;
-    val3 = document.getElementById("slope").value;
-    val4 = document.getElementById("speed").value;
-    if (!val1) {
-      alert("請填入運動時間（分鐘）！");
-      return;
-    }
-  }
-
-  const now = new Date().toISOString();
-  const record = { type, name, val1, val2, val3, val4, time: now };
-  const all = getRecords();
-  all.push(record);
-  saveRecords(all);
-  alert("✅ 已新增紀錄！");
-  renderRecords();
-  renderCharts();
-}
-
-function 記錄一組() {
-  const all = getRecords();
-  if (all.length === 0) return alert("❗請先新增一筆紀錄");
-  const last = { ...all[all.length - 1], time: new Date().toISOString() };
-  all.push(last);
-  saveRecords(all);
-  alert("⭐ 已記錄一組！");
-  renderRecords();
-  renderCharts();
-}
-
-function filterExerciseRecords() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  const records = getRecords();
-  const filtered = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return date >= start && date <= end;
-  });
-  alert(`🔍 共找到 ${filtered.length} 筆紀錄`);
-}
-
-function clearFilteredExerciseData() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  if (!start || !end) return alert("請選擇開始與結束日期！");
-  let records = getRecords();
-  records = records.filter(r => {
-    const date = r.time.slice(0, 10);
-    return !(date >= start && date <= end);
-  });
-  saveRecords(records);
-  alert("🧹 已刪除所選時間範圍紀錄！");
-  location.reload();
-}
-
-function clearAllExerciseData() {
-  if (!confirm("確定要清除所有紀錄？此動作無法復原！")) return;
-  saveRecords([]);
-  alert("❌ 所有紀錄已清除！");
-  location.reload();
-}
-
-function logSet() { 記錄一組(); }
-</script>
-<script>
-
-function renderRecords(records = null) {
-  records = records || getRecords();
-  const container = document.getElementById("exerciseRecords");
-  container.innerHTML = "";
-  if (records.length === 0) {
-    container.innerHTML = "<p style='text-align:center;'>尚無紀錄</p>";
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
     return;
   }
-  records.slice().reverse().forEach(r => {
-    const div = document.createElement("div");
-    div.style.background = '#fff'; div.style.padding = '12px'; div.style.fontSize = '14px'; div.style.lineHeight = '1.6'; div.style.borderRadius = '10px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'; div.style.margin = '6px 0';
-    const time = new Date(r.time).toLocaleString();
-    let content = `<strong>📅 時間：</strong>${time}<br/><strong>📌 類型：</strong>${r.type}<br/><strong>🏃‍♀️ 名稱：</strong>${r.name || "未填寫"}`;
-    
-    if (r.type === "重量型") {
-      const sets = parseInt(r.val2 || 0);
-      const reps = parseInt(r.val3 || 0);
-      const w = parseInt(r.val1 || 0);
-      const total = w * sets * reps;
-      content += `<br/><strong>💪 重量：</strong>${w}kg × ${sets} 組 × ${reps} 次`;
-      content += `<br/><strong>📦 總重量：</strong>${total} kg`;
-    }
-    } else {
-      content += `<br/><strong>⏱️ 時長：</strong>${r.val1} 分鐘，<strong>🔥 卡路里：</strong>${r.val2 || "--"} kcal`;
-    }
-    div.innerHTML = content;
-    container.appendChild(div);
 
-  });
-}
-
-function renderCharts() {
-  const records = getRecords();
-  const dateDurationMap = {};
-  const weightLoadMap = {};
-
-  records.forEach(r => {
-    const date = r.time.slice(0, 10);
-    if (r.type === "時間型" && r.val1) {
-      const duration = parseInt(r.val1);
-      if (!isNaN(duration)) {
-        if (!dateDurationMap[date]) dateDurationMap[date] = 0;
-        dateDurationMap[date] += duration;
-      }
-    } else if (r.type === "重量型" && r.val1 && r.val2 && r.val3) {
-      const name = r.name || "未命名";
-      const w = parseInt(r.val1), sets = parseInt(r.val2), reps = parseInt(r.val3);
-      if (!isNaN(w) && !isNaN(sets) && !isNaN(reps)) {
-        const load = w * sets * reps;
-        if (!weightLoadMap[name]) weightLoadMap[name] = 0;
-        weightLoadMap[name] += load;
-      }
-    }
-  });
-
-  const lineLabels = Object.keys(dateDurationMap).sort();
-  const lineData = lineLabels.map(d => dateDurationMap[d]);
-  const ctxLine = document.getElementById("exerciseChartLine").getContext("2d");
-  new Chart(ctxLine, {
-    type: "line",
-    data: {
-      labels: lineLabels,
-      datasets: [{
-        label: "運動時間（分鐘）",
-        data: lineData,
-        borderColor: "blue",
-        fill: false
-      }]
-    }
-  });
-
-  const barLabels = Object.keys(weightLoadMap);
-  const barData = barLabels.map(k => weightLoadMap[k]);
-  const ctxBar = document.getElementById("exerciseChartBar").getContext("2d");
-  new Chart(ctxBar, {
-    type: "bar",
-    data: {
-      labels: barLabels,
-      datasets: [{
-        label: "總重量訓練負荷",
-        data: barData,
-        backgroundColor: ["skyblue", "orange", "green", "purple"]
-      }]
-    }
-  });
-}
-
-function toggleCharts() {
-  const container = document.getElementById("chartContainer");
-  container.style.display = container.style.display === "none" ? "block" : "none";
-  if (container.style.display === "block") renderCharts();
-}
-
-// 初始化畫面
-window.addEventListener("DOMContentLoaded", () => {
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
   renderRecords();
-});
-</script>
-<script>
-let currentChartRange = 'today';
+}
 
-function getRecordsInRange(days = 1, startDate = null, endDate = null) {
-  const all = getRecords();
-  const now = new Date();
-  return all.filter(r => {
-    const d = new Date(r.time);
-    if (startDate && endDate) {
-      return d >= new Date(startDate) && d <= new Date(endDate);
-    }
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days + 1);
-    return d >= cutoff && d <= now;
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
   });
 }
+</script>
 
-function setChartRange(range) {
-  currentChartRange = range;
-  document.getElementById("customRange").style.display = "none";
-  let records = [];
-  if (range === 'today') {
-    records = getRecordsInRange(1);
-  } else if (!isNaN(parseInt(range))) {
-    records = getRecordsInRange(parseInt(range));
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
   }
-  renderCharts(records);
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
 }
 
-function showCustomRange() {
-  document.getElementById("customRange").style.display = "block";
-}
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
 
-function applyCustomRange() {
-  const start = document.getElementById("customStart").value;
-  const end = document.getElementById("customEnd").value;
-  if (!start || !end) return alert("請選擇自訂起訖日期");
-  renderCharts(getRecordsInRange(null, start, end));
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
 }
 </script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
+
+<script>
+const currentUser = localStorage.getItem("currentUser") || "guest";
+const recordKey = `exerciseRecords_${currentUser}`;
+
+// 初始化載入紀錄
+window.onload = function () {
+  renderRecords();
+};
+
+function addRecord() {
+  const date = document.getElementById("exerciseDate")?.value || "";
+  const type = document.getElementById("exerciseType")?.value || "";
+  const duration = document.getElementById("exerciseDuration")?.value || "";
+  const calories = document.getElementById("caloriesBurned")?.value || "";
+
+  if (!date || !type || !duration || !calories) {
+    alert("請完整填寫所有欄位！");
+    return;
+  }
+
+  const record = { date, type, duration, calories };
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  records.push(record);
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  renderRecords();
+}
+
+function renderRecords() {
+  const records = JSON.parse(localStorage.getItem(recordKey)) || [];
+  const container = document.getElementById("exerciseRecords");
+  container.innerHTML = "";
+
+  records.forEach((rec) => {
+    const card = document.createElement("div");
+    card.className = "record-card";
+    card.innerHTML = `
+      <p>📅 ${rec.date}</p>
+      <p>🏋️‍♀️ ${rec.type}</p>
+      <p>⏱️ ${rec.duration} 分鐘</p>
+      <p>🔥 ${rec.calories} kcal</p>
+    `;
+    container.appendChild(card);
+  });
+}
+</script>
+
 </body>
 </html>
