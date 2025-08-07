@@ -935,5 +935,37 @@ function applyCustomRange() {
   renderCharts(getRecordsInRange(null, start, end));
 }
 </script>
-</body>
+<script>
+function renderRecords() {
+  const records = getRecords();
+  const container = document.getElementById("recordContainer");
+  container.innerHTML = "";
+
+  if (records.length === 0) {
+    container.innerHTML = "<p>尚無紀錄</p>";
+    return;
+  }
+
+  records.forEach((r, index) => {
+    const div = document.createElement("div");
+    div.className = "record-card";
+    let content = `<b>${r.date}</b>｜`;
+
+    if (r.type === "重量型") {
+      content += `💪 ${r.name}｜${r.weight}kg × ${r.sets}組 × ${r.reps}下`;
+    } else {
+      content += `🏃 ${r.name}｜${r.duration} 分｜${r.calories} kcal`;
+      if (r.slop) content += `｜坡度 ${r.slop}`;
+      if (r.speed) content += `｜速度 ${r.speed}`;
+    }
+
+    div.innerHTML = content;
+    container.appendChild(div);
+  });
+}
+
+window.onload = function () {
+  renderRecords();
+};
+</script></body>
 </html>
