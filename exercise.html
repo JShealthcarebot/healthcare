@@ -116,6 +116,24 @@
         box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
     }
 </style>
+
+<script>
+function getUsername() {
+  return localStorage.getItem("loggedInUser") || "guest";
+}
+function getStorageKey() {
+  return "exerciseRecords_" + getUsername();
+}
+function getRecords() {
+  const key = getStorageKey();
+  return JSON.parse(localStorage.getItem(key) || "[]");
+}
+function saveRecords(records) {
+  const key = getStorageKey();
+  localStorage.setItem(key, JSON.stringify(records));
+}
+</script>
+
 </head>
 <body>
 <img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
@@ -295,17 +313,7 @@ function renderCharts() {
   const user = localStorage.getItem("currentUser") || "default";
   const storageKey = `exerciseRecords_${user}`;
 
-  function getRecords() {
-    return JSON.parse(localStorage.getItem(storageKey) || "[]");
-  }
-
-  function saveRecords(records) {
-    localStorage.setItem(storageKey, JSON.stringify(records));
-  }
-
-  
-
-function 新增紀錄() {
+  function 新增紀錄() {
   const type = document.getElementById("exerciseMode").value;
   let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
 
@@ -520,9 +528,6 @@ function clearAllRecords() {
   
 }
 
-function getRecords() {
-  return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
-}
 </script>
 </div>
 <div style="text-align:center; margin-top: 20px;">
@@ -573,10 +578,6 @@ function getRecordKey() {
 
 function loadRecords() {
   return JSON.parse(localStorage.getItem(getRecordKey()) || "[]");
-}
-
-function saveRecords(records) {
-  localStorage.setItem(getRecordKey(), JSON.stringify(records));
 }
 
 function addRecord() {
@@ -658,13 +659,6 @@ function getCurrentUser() {
 function getExerciseKey() {
   return "exerciseRecords_" + getCurrentUser();
 }
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getExerciseKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getExerciseKey(), JSON.stringify(records));
-}
-
 // 篩選
 function filterExerciseRecords() {
   const start = document.getElementById("startDate").value;
@@ -708,13 +702,6 @@ function getCurrentUser() {
 function getStorageKey() {
   return "exerciseRecords_" + getCurrentUser();
 }
-function getRecords() {
-  return JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
-}
-function saveRecords(records) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(records));
-}
-
 function 新增紀錄() {
   const type = document.getElementById("exerciseMode").value;
   let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
