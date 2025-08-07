@@ -1,18 +1,16 @@
+
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   運動紀錄 🏃‍♀️ | Health Care
-  </title>
-  <link href="style.css" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js">
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-  </script>
-  <style>
-   body {
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>運動紀錄 🏃‍♀️ | Health Care</title>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    body {
       background-color: white;
       font-family: 'Segoe UI', sans-serif;
     }
@@ -89,15 +87,15 @@
     padding: 8px 0px;
     text-align: center;
 }
-  </style>
-  <style>
-   #summaryContent, #suggestionContent {
+</style>
+<style>
+#summaryContent, #suggestionContent {
   transition: all 0.3s ease;
   overflow: hidden;
 }
-  </style>
-  <style>
-   button {
+</style>
+<style>
+    button {
         border: none;
         padding: 8px 14px;
         margin: 4px 3px;
@@ -117,105 +115,67 @@
         transform: scale(0.98);
         box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
     }
-  </style>
- </head>
- <body>
-  <img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
+</style>
+</head>
+<body>
+<img id="profileAvatar" onclick="window.location.href='profile.html'" src="avatar-neutral.png" style="position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%;
          box-shadow: 0 0 5px rgba(0,0,0,0.2); cursor: pointer; z-index: 999;"/>
-  <div class="card">
-   <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-   </div>
-   <div class="top-buttons">
-    <button class="menu-btn" onclick="goMenu()">
-     主選單
-    </button>
-    <button class="logout-btn" onclick="logout()">
-     登出
-    </button>
-   </div>
-   <h2>
-    運動紀錄 🏃‍♀️
-   </h2>
-   <p :="" class="slogan" left;="">
-    這裡是 運動紀錄 🏃‍♀️，讓我們一起變健康！😄
-   </p>
-   <div class="summary-card" id="summaryCard" style="background:#fff8e1; border:2px solid #ffd54f; padding:15px; border-radius:10px; margin-bottom:20px;">
-    <h3 style="margin-top:0;color:#3e2723;font-weight:bold;">
-     📘 今日運動總結
-    </h3>
-    <p id="summaryDate">
-     📅 日期：
-    </p>
-    <p id="summaryTime">
-     🏃‍♂️ 運動時間：
-    </p>
-    <p id="summaryLoad">
-     🏋️‍♀️ 負荷總量：
-    </p>
-    <p id="summaryCalories">
-     🔥 消耗卡路里：
-    </p>
-   </div>
-   <div class="input-section">
-    <select id="exerciseMode" onchange="toggleInputFields()">
-     <option value="重量型">
-      重量型
-     </option>
-     <option value="時間型">
-      時間型
-     </option>
-    </select>
-    <div id="weightFields">
-     <input id="exerciseType" placeholder="運動類型（如：深蹲）" type="text"/>
-     <input id="weight" placeholder="重量（kg，可選）" type="number"/>
-     <input id="sets" placeholder="組數" type="number"/>
-     <input id="reps" placeholder="每組次數" type="number"/>
-    </div>
-    <div id="timeFields" style="display: none;">
-     <input id="exerciseTypeTime" placeholder="運動類型（如：跑步）" type="text"/>
-     <input id="duration" placeholder="運動時數（分鐘）" type="number"/>
-     <input id="calories" placeholder="消耗卡路里（kcal）" type="number"/>
-     <input id="slope" placeholder="坡度（如跑步機）" type="number"/>
-     <input id="speed" placeholder="速度（km/h）" type="number"/>
-    </div>
-    <button id="addRecordBtn" onclick="新增紀錄()">
-     ➕ 新增紀錄
-    </button>
-    <button onclick="記錄一組()">
-     💥 紀錄一組
-    </button>
-   </div>
-   <hr/>
-   <div class="filter-section">
-    <input id="startDate" placeholder="開始日期" type="date"/>
-    <input id="endDate" placeholder="結束日期" type="date"/>
-    <button onclick="filterExerciseRecords()">
-     📆 篩選
-    </button>
-    <button onclick="clearFilteredExerciseData()">
-     🧹 清除所選時間紀錄
-    </button>
-    <button onclick="clearAllExerciseData()">
-     ❌ 清除全部
-    </button>
-   </div>
-   <hr/>
-   <div>
-    <button onclick="exportExerciseToExcel()">
-     📤 匯出 Excel
-    </button>
-    <input accept=".xlsx" class="custom-btn custom-btn custom-file" id="excelFile" onchange="importExerciseFromExcel(event)" style="width: 110px;" type="file"/>
-   </div>
-   <hr/>
-   <div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;">
-   </div>
-   <div id="exerciseRecords">
-   </div>
-   <div id="chartSection" style="margin-top:20px;">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js">
-    </script>
-    <script>
-     function toggleCharts() {
+<div class="card">
+<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+</div>
+<div class="top-buttons">
+<button class="menu-btn" onclick="goMenu()">主選單</button>
+<button class="logout-btn" onclick="logout()">登出</button>
+</div>
+<h2>運動紀錄 🏃‍♀️</h2> <p :="" class="slogan" left;="">這裡是 運動紀錄 🏃‍♀️，讓我們一起變健康！😄</p>
+<div class="summary-card" id="summaryCard" style="background:#fff8e1; border:2px solid #ffd54f; padding:15px; border-radius:10px; margin-bottom:20px;">
+<h3 style="margin-top:0;color:#3e2723;font-weight:bold;">📘 今日運動總結</h3>
+<p id="summaryDate">📅 日期：</p>
+<p id="summaryTime">🏃‍♂️ 運動時間：</p>
+<p id="summaryLoad">🏋️‍♀️ 負荷總量：</p>
+<p id="summaryCalories">🔥 消耗卡路里：</p>
+</div>
+<div class="input-section">
+<select id="exerciseMode" onchange="toggleInputFields()">
+<option value="重量型">重量型</option>
+<option value="時間型">時間型</option>
+</select>
+<div id="weightFields">
+<input id="exerciseType" placeholder="運動類型（如：深蹲）" type="text"/>
+<input id="weight" placeholder="重量（kg，可選）" type="number"/>
+<input id="sets" placeholder="組數" type="number"/>
+<input id="reps" placeholder="每組次數" type="number"/>
+</div>
+<div id="timeFields" style="display: none;">
+<input id="exerciseTypeTime" placeholder="運動類型（如：跑步）" type="text"/>
+<input id="duration" placeholder="運動時數（分鐘）" type="number"/>
+<input id="calories" placeholder="消耗卡路里（kcal）" type="number"/>
+<input id="slope" placeholder="坡度（如跑步機）" type="number"/>
+<input id="speed" placeholder="速度（km/h）" type="number"/>
+</div>
+<button id="addRecordBtn" onclick="新增紀錄()">➕ 新增紀錄</button>
+<button onclick="記錄一組()">💥 紀錄一組</button>
+</div>
+<hr/>
+<div class="filter-section">
+<input id="startDate" placeholder="開始日期" type="date"/>
+<input id="endDate" placeholder="結束日期" type="date"/>
+<button onclick="filterExerciseRecords()">📆 篩選</button>
+<button onclick="clearFilteredExerciseData()">🧹 清除所選時間紀錄</button>
+<button onclick="clearAllExerciseData()">❌ 清除全部</button>
+</div>
+<hr/>
+<div>
+<button onclick="exportExerciseToExcel()">📤 匯出 Excel</button>
+<input accept=".xlsx" class="custom-btn custom-btn custom-file" id="excelFile" onchange="importExerciseFromExcel(event)" style="width: 110px;" type="file"/>
+</div>
+<hr/>
+<div id="filterMessage" style="text-align:center; font-size:14px; color:#555; margin-top:10px;"></div>
+<div id="exerciseRecords"></div>
+<div id="chartSection" style="margin-top:20px;">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function toggleCharts() {
     const container = document.getElementById('chartContainer');
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
      // Always render on toggle
@@ -330,9 +290,9 @@ function renderCharts() {
       
     });
   }
-    </script>
-    <script>
-     const user = localStorage.getItem("currentUser") || "default";
+</script>
+<script>
+  const user = localStorage.getItem("currentUser") || "default";
   const storageKey = `exerciseRecords_${user}`;
 
   function getRecords() {
@@ -378,6 +338,7 @@ function 新增紀錄() {
   alert("✅ 已新增紀錄！");
   renderRecords();
   renderCharts();
+}
 } else {
     name = document.getElementById("exerciseTypeTime").value;
     val1 = document.getElementById("duration").value;
@@ -416,9 +377,9 @@ function 新增紀錄() {
     document.getElementById("addRecordBtn")?.addEventListener("click", 新增紀錄);
     document.getElementById("repeatRecordBtn")?.addEventListener("click", 記錄一組);
   });
-    </script>
-    <script>
-     function renderSummaryAndSuggestion() {
+</script>
+<script>
+function renderSummaryAndSuggestion() {
   const records = getRecords();
   const today = new Date().toISOString().slice(0, 10);
   let timeSum = 0, loadSum = 0, calSum = 0;
@@ -482,9 +443,10 @@ function 新增紀錄() {
 }
 
 // 呼叫初始化一次
-    </script>
-    <script>
-     function toggleSection(id) {
+
+</script>
+<script>
+function toggleSection(id) {
   const el = document.getElementById(id);
   if (el.style.display === "none") {
     el.style.display = "block";
@@ -492,9 +454,9 @@ function 新增紀錄() {
     el.style.display = "none";
   }
 }
-    </script>
-    <script>
-     function handleAddRecord() {
+</script>
+<script>
+function handleAddRecord() {
   const username = localStorage.getItem("currentUser") || "未命名";
   const type = document.getElementById("exerciseType").value;
   const name = document.getElementById("exerciseName").value.trim();
@@ -561,61 +523,34 @@ function clearAllRecords() {
 function getRecords() {
   return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
 }
-    </script>
-   </div>
-   <div style="text-align:center; margin-top: 20px;">
-    <div style="font-weight:bold; margin-bottom: 10px;">
-     📅 圖表顯示：
-    </div>
-    <button onclick="setChartRange('today')" style="margin: 2px;">
-     本日
-    </button>
-    <button onclick="setChartRange('7')" style="margin: 2px;">
-     本週
-    </button>
-    <button onclick="setChartRange('30')" style="margin: 2px;">
-     本月
-    </button>
-    <button onclick="setChartRange('365')" style="margin: 2px;">
-     本年
-    </button>
-    <button onclick="showCustomRange()" style="margin: 2px;">
-     自訂
-    </button>
-    <div id="customRange" style="display:none; margin-top:10px;">
-     <input id="customStart" type="date"/>
-     ~
-     <input id="customEnd" type="date"/>
-     <button onclick="applyCustomRange()">
-      套用
-     </button>
-    </div>
-   </div>
-   <div id="chartContainer" style="display:none; margin-top: 20px;">
-    <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:16px;">
-     <h3 style="margin:0 0 10px;">
-      🔥 卡路里消耗趨勢
-     </h3>
-     <canvas height="200" id="exerciseChartLine" width="400">
-     </canvas>
-    </div>
-    <div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-     <h3 style="margin:0 0 10px;">
-      🏋️‍♂️ 總重量訓練負荷
-     </h3>
-     <canvas height="200" id="exerciseChartBar" width="400">
-     </canvas>
-    </div>
-    <canvas height="200" id="exerciseChartLine" width="400">
-    </canvas>
-   </div>
-   <canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400">
-   </canvas>
-   <div id="recordContainer" style="margin-top: 12px;">
-   </div>
-  </div>
-  <script>
-   function toggleInputFields() {
+</script>
+</div>
+<div style="text-align:center; margin-top: 20px;">
+<div style="font-weight:bold; margin-bottom: 10px;">📅 圖表顯示：</div>
+<button onclick="setChartRange('today')" style="margin: 2px;">本日</button>
+<button onclick="setChartRange('7')" style="margin: 2px;">本週</button>
+<button onclick="setChartRange('30')" style="margin: 2px;">本月</button>
+<button onclick="setChartRange('365')" style="margin: 2px;">本年</button>
+<button onclick="showCustomRange()" style="margin: 2px;">自訂</button>
+<div id="customRange" style="display:none; margin-top:10px;">
+<input id="customStart" type="date"/> ~ <input id="customEnd" type="date"/>
+<button onclick="applyCustomRange()">套用</button>
+</div>
+</div>
+<div id="chartContainer" style="display:none; margin-top: 20px;">
+<div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:16px;">
+<h3 style="margin:0 0 10px;">🔥 卡路里消耗趨勢</h3>
+<canvas height="200" id="exerciseChartLine" width="400"></canvas>
+</div>
+<div class="chart-card" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+<h3 style="margin:0 0 10px;">🏋️‍♂️ 總重量訓練負荷</h3>
+<canvas height="200" id="exerciseChartBar" width="400"></canvas>
+</div>
+<canvas height="200" id="exerciseChartLine" width="400"></canvas>
+</div><canvas height="200" id="exerciseChartBar" style="margin-top: 20px;" width="400"></canvas>
+</div>
+<script>
+function toggleInputFields() {
   const mode = document.getElementById('exerciseMode').value;
   document.getElementById('weightFields').style.display = mode === '重量型' ? 'block' : 'none';
   document.getElementById('timeFields').style.display = mode === '時間型' ? 'block' : 'none';
@@ -626,9 +561,9 @@ function goMenu() {
 function logout() {
   window.location.href = "index.html";
 }
-  </script>
-  <script>
-   function getCurrentUser() {
+</script>
+<script>
+function getCurrentUser() {
   return localStorage.getItem("currentUser") || "guest";
 }
 
@@ -713,9 +648,9 @@ function clearAllRecords() {
   alert("❌ 所有紀錄已清除！");
   location.reload();
 }
-  </script>
-  <script>
-   function logSet() { 記錄一組(); }
+</script>
+<script>
+function logSet() { 記錄一組(); }
 
 function getCurrentUser() {
   return localStorage.getItem("currentUser") || "guest";
@@ -765,9 +700,9 @@ function clearAllExerciseData() {
   alert("❌ 所有紀錄已清除！");
   location.reload();
 }
-  </script>
-  <script>
-   function getCurrentUser() {
+</script>
+<script>
+function getCurrentUser() {
   return localStorage.getItem("currentUser") || "guest";
 }
 function getStorageKey() {
@@ -860,9 +795,10 @@ function clearAllExerciseData() {
 }
 
 function logSet() { 記錄一組(); }
-  </script>
-  <script>
-   function renderRecords(records = null) {
+</script>
+<script>
+
+function renderRecords(records = null) {
   records = records || getRecords();
   const container = document.getElementById("exerciseRecords");
   container.innerHTML = "";
@@ -959,9 +895,9 @@ function toggleCharts() {
 window.addEventListener("DOMContentLoaded", () => {
   renderRecords();
 });
-  </script>
-  <script>
-   let currentChartRange = 'today';
+</script>
+<script>
+let currentChartRange = 'today';
 
 function getRecordsInRange(days = 1, startDate = null, endDate = null) {
   const all = getRecords();
@@ -999,39 +935,6 @@ function applyCustomRange() {
   if (!start || !end) return alert("請選擇自訂起訖日期");
   renderCharts(getRecordsInRange(null, start, end));
 }
-  </script>
-  <script>
-   function renderRecords() {
-  const records = getRecords();
-  const container = document.getElementById("recordContainer");
-  container.innerHTML = "";
-
-  if (records.length === 0) {
-    container.innerHTML = "<p>尚無紀錄</p>";
-    return;
-  }
-
-  records.forEach((r, index) => {
-    const div = document.createElement("div");
-    div.className = "record-card";
-    let content = `<b>${r.date}</b>｜`;
-
-    if (r.type === "重量型") {
-      content += `💪 ${r.name}｜${r.weight}kg × ${r.sets}組 × ${r.reps}下`;
-    } else {
-      content += `🏃 ${r.name}｜${r.duration} 分｜${r.calories} kcal`;
-      if (r.slop) content += `｜坡度 ${r.slop}`;
-      if (r.speed) content += `｜速度 ${r.speed}`;
-    }
-
-    div.innerHTML = content;
-    container.appendChild(div);
-  });
-}
-
-window.onload = function () {
-  renderRecords();
-};
-  </script>
- </body>
+</script>
+</body>
 </html>
