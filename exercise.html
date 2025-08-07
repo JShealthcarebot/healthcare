@@ -119,7 +119,7 @@
 
 <script>
 function getUsername() {
-  return localStorage.getItem("loggedInUser") || "guest";
+  return localStorage.getItem("loggedInUser") || "default";
 }
 function getStorageKey() {
   return "exerciseRecords_" + getUsername();
@@ -132,6 +132,38 @@ function saveRecords(records) {
   const key = getStorageKey();
   localStorage.setItem(key, JSON.stringify(records));
 }
+function renderRecords(records) {
+  const container = document.getElementById("recordList");
+  if (!container) return;
+  container.innerHTML = "";
+  if (records.length === 0) {
+    container.innerHTML = "<p>尚無紀錄</p>";
+    return;
+  }
+  records.forEach((r) => {
+    const div = document.createElement("div");
+    div.className = "record-card";
+    div.innerText = `📝 ${r.date}｜${r.type}｜${r.calories || 0} kcal`;
+    container.appendChild(div);
+  });
+}
+function addRecord() {
+  const type = document.getElementById("exerciseType")?.value || "未填寫";
+  const calories = parseInt(document.getElementById("exerciseCalories")?.value || "0");
+  if (!type || isNaN(calories)) {
+    alert("請正確填寫資料");
+    return;
+  }
+  const records = getRecords();
+  const now = new Date();
+  const date = now.toISOString().split("T")[0];
+  records.push({ type, calories, date });
+  saveRecords(records);
+  renderRecords(records);
+}
+window.onload = function () {
+  renderRecords(getRecords());
+};
 </script>
 
 </head>
@@ -313,7 +345,17 @@ function renderCharts() {
   const user = localStorage.getItem("currentUser") || "default";
   const storageKey = `exerciseRecords_${user}`;
 
-  function 新增紀錄() {
+  function getRecords() {
+    return JSON.parse(localStorage.getItem(storageKey) || "[]");
+  }
+
+  function saveRecords(records) {
+    localStorage.setItem(storageKey, JSON.stringify(records));
+  }
+
+  
+
+function 新增紀錄() {
   const type = document.getElementById("exerciseMode").value;
   let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
 
@@ -528,6 +570,9 @@ function clearAllRecords() {
   
 }
 
+function getRecords() {
+  return JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
+}
 </script>
 </div>
 <div style="text-align:center; margin-top: 20px;">
@@ -580,6 +625,10 @@ function loadRecords() {
   return JSON.parse(localStorage.getItem(getRecordKey()) || "[]");
 }
 
+function saveRecords(records) {
+  localStorage.setItem(getRecordKey(), JSON.stringify(records));
+}
+
 function addRecord() {
   const type = document.getElementById("exerciseType").value;
   const subtype = document.getElementById("exerciseSubtype").value;
@@ -609,8 +658,6 @@ function addRecord() {
   const records = loadRecords();
   records.push(record);
   saveRecords(records);
-  renderRecords(records);
-  renderCharts(records);
   alert("✅ 紀錄新增成功！");
   location.reload();
 }
@@ -641,8 +688,6 @@ function clearFilteredRecords() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
-  renderRecords(records);
-  renderCharts(records);
   alert("🧹 已刪除所選時間範圍的紀錄！");
   location.reload();
 }
@@ -663,6 +708,13 @@ function getCurrentUser() {
 function getExerciseKey() {
   return "exerciseRecords_" + getCurrentUser();
 }
+function getRecords() {
+  return JSON.parse(localStorage.getItem(getExerciseKey()) || "[]");
+}
+function saveRecords(records) {
+  localStorage.setItem(getExerciseKey(), JSON.stringify(records));
+}
+
 // 篩選
 function filterExerciseRecords() {
   const start = document.getElementById("startDate").value;
@@ -687,8 +739,6 @@ function clearFilteredExerciseData() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
-  renderRecords(records);
-  renderCharts(records);
   alert("🧹 已刪除所選時間範圍紀錄！");
   location.reload();
 }
@@ -708,6 +758,13 @@ function getCurrentUser() {
 function getStorageKey() {
   return "exerciseRecords_" + getCurrentUser();
 }
+function getRecords() {
+  return JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
+}
+function saveRecords(records) {
+  localStorage.setItem(getStorageKey(), JSON.stringify(records));
+}
+
 function 新增紀錄() {
   const type = document.getElementById("exerciseMode").value;
   let name = "", val1 = "", val2 = "", val3 = "", val4 = "";
@@ -776,8 +833,6 @@ function clearFilteredExerciseData() {
     return !(date >= start && date <= end);
   });
   saveRecords(records);
-  renderRecords(records);
-  renderCharts(records);
   alert("🧹 已刪除所選時間範圍紀錄！");
   location.reload();
 }
@@ -933,11 +988,3 @@ function applyCustomRange() {
 </script>
 </body>
 </html>
-
-<script>
-window.onload = function () {
-  const records = getRecords();
-  renderRecords(records);
-  renderCharts(records);
-};
-</script>
