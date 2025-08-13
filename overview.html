@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><title>健康總覽 📊 | Health Care</title><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://cdn.jsdelivr.net"/><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>
+:root{--bg:#eaf8ff;--card:#d7f2ff;--text:#113048;--muted:#5b7284;--primary:#2d9cdb;--danger:#e74c3c;--white:#fff;--shadow:0 10px 30px rgba(25,79,116,.12);--radius:22px}
+html,body{height:100%}body{margin:0;background:var(--bg);font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans TC',Arial,sans-serif;color:var(--text)}
+.card{background:var(--card);max-width:520px;width:92vw;margin:64px auto;padding:28px 24px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.btn{appearance:none;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-weight:700;letter-spacing:.3px;background:#eef7ff;color:var(--primary);box-shadow:0 4px 10px rgba(45,156,219,.12);transition:transform .12s ease,background .12s ease}
+.btn:hover{transform:translateY(-1px);background:#e4f2ff}.btn:active{transform:translateY(0)}.btn.primary{background:var(--primary);color:#fff}.btn.danger{background:var(--danger);color:#fff;box-shadow:0 6px 14px rgba(231,76,60,.18)}.btn.block{width:100%}
+h1{font-size:28px;margin:6px 0 6px;display:flex;align-items:center;gap:8px}.slogan{color:var(--muted);font-size:14px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}.row{display:flex;gap:10px}
+.field{position:relative}.label{font-size:13px;color:var(--muted);margin:2px 2px 6px}
+.input{width:100%;padding:12px 14px;font-size:16px;border-radius:14px;border:1px solid #cfe5f4;outline:0;background:#f7fcff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.input:focus{border-color:#9dd3f3;background:#fff;box-shadow:0 0 0 3px rgba(45,156,219,.15)}
+.summary{margin:14px 0 8px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #dfeef8;text-align:center;font-weight:600}
+.record{background:#fff;border:1px solid #e9f2f9;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(12,50,78,.06);color:#234;display:flex;justify-content:space-between;align-items:center}
+.list{display:grid;gap:10px}.empty{text-align:center;color:#7b92a3;background:#fff;border:1px dashed #cfe0ed;padding:12px;border-radius:14px}
+#chartContainer{display:none;margin-top:18px}.chart{background:#fff;border:1px solid #e9f2f9;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(12,50,78,.06)}
+.chart canvas{display:block;width:100% !important;height:240px !important;max-height:240px !important}@media(min-width:640px){.chart canvas{height:260px !important;max-height:260px !important}}
+#profileAvatar{position:fixed;top:14px;right:14px;width:50px;height:50px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);border:3px solid rgba(255,255,255,.8);z-index:9;object-fit:cover;background:#fff}
+.center{text-align:center}
+</style></head><body>
+<img id="profileAvatar" src="avatar-neutral.png" onclick="location.href='profile.html'"/>
+<div class="card"><div class="top"><button class="btn" onclick="goMenu()">主選單</button><button class="btn danger" onclick="logout()">登出</button></div>
+<h1>健康總覽 📊</h1><p class="slogan">小步快走，累積大進步！</p>
+<div class="summary" id="ovToday">載入中…</div>
+<div class="center" style="margin-top:12px;"><button id="ovToggle" class="btn" onclick="ovToggle()">📈 展開圖表</button></div>
+<div id="chartContainer"><div class="chart"><h3 style="margin:0 0 12px;">🔥 每日淨卡路里（飲食-運動）</h3><canvas id="ovNet"></canvas></div></div>
+</div>
+<script>
+function currentUserId(){return localStorage.getItem('currentUser')||'guest';}
+function loadAvatar(){const uid=currentUserId();try{const p=JSON.parse(localStorage.getItem(`profile_${uid}`))||{};const g=(p.gender||'').toLowerCase();const img=document.getElementById('profileAvatar');if(g==='male'||g==='男'||g==='男性')img.src='avatar-male.png';else if(g==='female'||g==='女'||g==='女性')img.src='avatar-female.png';else img.src='avatar-neutral.png';}catch(e){}}
+function goMenu(){location.href='main.html';}
+function logout(){location.href='index.html';}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+
+const uid=currentUserId();
+function getStore(k){return JSON.parse(localStorage.getItem(`${k}_${uid}`))||[];}
+function ovSummary(){const t=todayISO();const diet=getStore('diet').filter(r=>r.date===t);const ex=getStore('exerciseRecords').filter(r=>r.date===t);const water=getStore('water').filter(r=>r.date===t);const inC=diet.reduce((s,r)=>s+(r.cal||0),0);const outC=ex.reduce((s,r)=>s+(r.calories||0),0);const ml=water.reduce((s,r)=>s+(r.ml||0),0);ovToday.innerHTML=`今日攝取：<b>${inC} kcal</b>　運動消耗：<b>${outC} kcal</b>　淨值：<b>${inC-outC} kcal</b><br>飲水：<b>${ml} ml</b>`;}
+let ovReady=false,netChart=null;
+function ovToggle(){const box=chartContainer;const btn=ovToggle;const show=box.style.display==='none'||box.style.display==='';box.style.display=show?'block':'none';document.getElementById('ovToggle').textContent=show?'📉 收合圖表':'📈 展開圖表';if(show)ovBuild();}
+function ovBuild(){const diet=getStore('diet');const ex=getStore('exerciseRecords');const dates=new Set([...diet.map(r=>r.date),...ex.map(r=>r.date)]);const labels=[...dates].sort();const net=labels.map(d=>{const inC=diet.filter(r=>r.date===d).reduce((s,r)=>s+(r.cal||0),0);const outC=ex.filter(r=>r.date===d).reduce((s,r)=>s+(r.calories||0),0);return inC-outC;});const ctx=ovNet.getContext('2d');if(!ovReady){netChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'淨卡路里',data:net,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});ovReady=true;}else{netChart.data.labels=labels;netChart.data.datasets[0].data=net;netChart.update();}}
+window.onload=function(){loadAvatar();ovSummary();};
+</script></body></html>

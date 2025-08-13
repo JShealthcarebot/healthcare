@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><title>運動紀錄 🏃‍♀️ | Health Care</title><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://cdn.jsdelivr.net"/><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>
+:root{--bg:#eaf8ff;--card:#d7f2ff;--text:#113048;--muted:#5b7284;--primary:#2d9cdb;--danger:#e74c3c;--white:#fff;--shadow:0 10px 30px rgba(25,79,116,.12);--radius:22px}
+html,body{height:100%}body{margin:0;background:var(--bg);font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans TC',Arial,sans-serif;color:var(--text)}
+.card{background:var(--card);max-width:520px;width:92vw;margin:64px auto;padding:28px 24px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.btn{appearance:none;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-weight:700;letter-spacing:.3px;background:#eef7ff;color:var(--primary);box-shadow:0 4px 10px rgba(45,156,219,.12);transition:transform .12s ease,background .12s ease}
+.btn:hover{transform:translateY(-1px);background:#e4f2ff}.btn:active{transform:translateY(0)}.btn.primary{background:var(--primary);color:#fff}.btn.danger{background:var(--danger);color:#fff;box-shadow:0 6px 14px rgba(231,76,60,.18)}.btn.block{width:100%}
+h1{font-size:28px;margin:6px 0 6px;display:flex;align-items:center;gap:8px}.slogan{color:var(--muted);font-size:14px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}.row{display:flex;gap:10px}
+.field{position:relative}.label{font-size:13px;color:var(--muted);margin:2px 2px 6px}
+.input{width:100%;padding:12px 14px;font-size:16px;border-radius:14px;border:1px solid #cfe5f4;outline:0;background:#f7fcff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.input:focus{border-color:#9dd3f3;background:#fff;box-shadow:0 0 0 3px rgba(45,156,219,.15)}
+.summary{margin:14px 0 8px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #dfeef8;text-align:center;font-weight:600}
+.record{background:#fff;border:1px solid #e9f2f9;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(12,50,78,.06);color:#234;display:flex;justify-content:space-between;align-items:center}
+.list{display:grid;gap:10px}.empty{text-align:center;color:#7b92a3;background:#fff;border:1px dashed #cfe0ed;padding:12px;border-radius:14px}
+#chartContainer{display:none;margin-top:18px}.chart{background:#fff;border:1px solid #e9f2f9;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(12,50,78,.06)}
+.chart canvas{display:block;width:100% !important;height:240px !important;max-height:240px !important}@media(min-width:640px){.chart canvas{height:260px !important;max-height:260px !important}}
+#profileAvatar{position:fixed;top:14px;right:14px;width:50px;height:50px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);border:3px solid rgba(255,255,255,.8);z-index:9;object-fit:cover;background:#fff}
+.center{text-align:center}
+</style></head><body>
+<img id="profileAvatar" src="avatar-neutral.png" onclick="location.href='profile.html'"/>
+<div class="card"><div class="top"><button class="btn" onclick="goMenu()">主選單</button><button class="btn danger" onclick="logout()">登出</button></div>
+<h1>運動紀錄 🏃‍♀️</h1><p class="slogan">保持運動，保持能量！</p>
+<div class="grid">
+  <div class="field"><div class="label">模式</div><select id="mode" class="input"><option>重量型</option><option>時間型</option></select></div>
+  <div id="wBox">
+    <div class="field"><div class="label">日期</div><input id="w_date" type="date" class="input"></div>
+    <div class="field"><div class="label">類型</div><input id="w_type" class="input" placeholder="深蹲"></div>
+    <div class="row">
+      <div class="field" style="flex:1;"><div class="label">重量(kg)</div><input id="w_kg" type="number" class="input"></div>
+      <div class="field" style="flex:1;"><div class="label">組數</div><input id="w_sets" type="number" class="input"></div>
+      <div class="field" style="flex:1;"><div class="label">次數</div><input id="w_reps" type="number" class="input"></div>
+    </div>
+  </div>
+  <div id="tBox" style="display:none;">
+    <div class="field"><div class="label">日期</div><input id="t_date" type="date" class="input"></div>
+    <div class="field"><div class="label">類型</div><input id="t_type" class="input" placeholder="跑步"></div>
+    <div class="row">
+      <div class="field" style="flex:1;"><div class="label">分鐘</div><input id="t_min" type="number" class="input"></div>
+      <div class="field" style="flex:1;"><div class="label">卡路里(kcal)</div><input id="t_kcal" type="number" class="input" placeholder="留空估算"></div>
+    </div>
+  </div>
+  <button class="btn primary block" onclick="addRec()">＋ 新增紀錄</button>
+</div>
+<div class="summary" id="exSum">今日：0 分・負荷 0・0 kcal</div>
+<div id="exList" class="list"><div class="empty">目前沒有紀錄</div></div>
+<div class="center" style="margin-top:12px;"><button id="exToggle" class="btn" onclick="exToggleCharts()">📈 展開圖表</button></div>
+<div id="exCharts" style="display:none;">
+  <div class="chart"><h3 style="margin:0 0 12px;">🔥 卡路里</h3><canvas id="exLine"></canvas></div>
+  <div class="chart" style="margin-top:12px;"><h3 style="margin:0 0 12px;">🏋️‍♂️ 負荷</h3><canvas id="exBar"></canvas></div>
+</div>
+</div>
+<script>
+function currentUserId(){return localStorage.getItem('currentUser')||'guest';}
+function loadAvatar(){const uid=currentUserId();try{const p=JSON.parse(localStorage.getItem(`profile_${uid}`))||{};const g=(p.gender||'').toLowerCase();const img=document.getElementById('profileAvatar');if(g==='male'||g==='男'||g==='男性')img.src='avatar-male.png';else if(g==='female'||g==='女'||g==='女性')img.src='avatar-female.png';else img.src='avatar-neutral.png';}catch(e){}}
+function goMenu(){location.href='main.html';}
+function logout(){location.href='index.html';}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+
+const exKey=`exerciseRecords_${currentUserId()}`;
+function exGet(){return JSON.parse(localStorage.getItem(exKey))||[];} function exSet(v){localStorage.setItem(exKey,JSON.stringify(v));}
+function exMode(){return document.getElementById('mode').value;}
+document.addEventListener('change',e=>{if(e.target.id==='mode'){const m=exMode();wBox.style.display=(m==='重量型')?'block':'none';tBox.style.display=(m==='時間型')?'block':'none';}});
+function estKcal(type,min){const p=JSON.parse(localStorage.getItem(`profile_${currentUserId()}`))||{};const w=Number(p.weight)||60;const t=(type||'').toLowerCase();const MET=(t.includes('run')||t.includes('跑'))?9.8:(t.includes('walk')||t.includes('走'))?3.5:(t.includes('bike')||t.includes('單車')||t.includes('腳踏'))?7.5:(t.includes('aerobic')||t.includes('有氧'))?6:5;return Math.round(MET*w*(Number(min||0)/60));}
+function addRec(){const m=exMode();const list=exGet();if(m==='重量型'){const d=w_date.value,ty=w_type.value.trim(),kg=Number(w_kg.value||0),s=Number(w_sets.value||0),r=Number(w_reps.value||0);if(!d||!ty||!s||!r){alert('請完整填寫');return;}list.push({mode:'重量型',date:d,type:ty,weightKg:kg,sets:s,reps:r,load:kg*s*r,durationMin:0,calories:0});}else{const d=t_date.value,ty=t_type.value.trim(),min=Number(t_min.value||0);let kcal=Number(t_kcal.value||0);if(!d||!ty||!min){alert('請完整填寫');return;}if(!kcal)kcal=estKcal(ty,min);list.push({mode:'時間型',date:d,type:ty,weightKg:0,sets:0,reps:0,load:0,durationMin:min,calories:kcal});}exSet(list);exRender();exSummary();exBuild();}
+function exRender(){const box=exList;const list=exGet();box.innerHTML='';if(list.length===0){box.innerHTML='<div class=empty>目前沒有紀錄</div>';return;}list.sort((a,b)=>new Date(b.date)-new Date(a.date));list.forEach(r=>{const div=document.createElement('div');div.className='record';div.innerHTML=(r.mode==='重量型')?`<div>📅 ${r.date}　🏷️ ${r.type}</div><div>${r.weightKg}kg・${r.sets}x${r.reps}・${r.load}</div>`:`<div>📅 ${r.date}　🏷️ ${r.type}</div><div>${r.durationMin}分・${r.calories}kcal</div>`;box.appendChild(div);});}
+function exSummary(){const list=exGet();const t=todayISO();let m=0,l=0,k=0;list.forEach(r=>{if(r.date===t){m+=r.durationMin||0;l+=r.load||0;k+=r.calories||0;}});exSum.textContent=`今日：${m} 分・負荷 ${l}・${k} kcal`;}
+let exReady=false,exLineChart=null,exBarChart=null;
+function exToggleCharts(){const box=exCharts;const btn=exToggle;const show=box.style.display==='none';box.style.display=show?'block':'none';btn.textContent=show?'📉 收合圖表':'📈 展開圖表';if(show)exBuild();}
+function exBuild(){const list=exGet();const byDate={},byType={};list.forEach(r=>{byDate[r.date]=(byDate[r.date]||0)+Number(r.calories||0);if(r.mode==='重量型'){byType[r.type]=(byType[r.type]||0)+Number(r.load||0);}});const dates=Object.keys(byDate).sort();const kcals=dates.map(d=>byDate[d]);const types=Object.keys(byType);const loads=types.map(t=>byType[t]);const c1=exLine.getContext('2d');const c2=exBar.getContext('2d');if(!exReady){exLineChart=new Chart(c1,{type:'line',data:{labels:dates,datasets:[{label:'kcal',data:kcals,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});exBarChart=new Chart(c2,{type:'bar',data:{labels:types,datasets:[{label:'總負荷',data:loads}]} ,options:{responsive:true,maintainAspectRatio:false}});exReady=true;}else{exLineChart.data.labels=dates;exLineChart.data.datasets[0].data=kcals;exLineChart.update();exBarChart.data.labels=types;exBarChart.data.datasets[0].data=loads;exBarChart.update();}}
+window.onload=function(){loadAvatar();const iso=todayISO();if(!w_date.value)w_date.value=iso;if(!t_date.value)t_date.value=iso;exRender();exSummary();};
+</script></body></html>
