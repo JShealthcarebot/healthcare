@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>health care｜個人資料</title>
+  <meta name="color-scheme" content="light only" />
+  <style>
+    :root{
+      --bg1:#e9f7ff;
+      --bg2:#f7fff9;
+      --card:#ffffff;
+      --primary:#2b7cff;
+      --primary-dark:#1f5ec1;
+      --accent:#13c2c2;
+      --ok:#10b981;
+      --err:#ef4444;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --shadow:0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --radius:18px;
+      --btn-radius:22px;
+      --field-w: 340px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%; margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% -10%,var(--bg1),transparent 60%),
+        radial-gradient(1000px 700px at 120% 10%,var(--bg2),transparent 60%),
+        linear-gradient(180deg,#f8fbff,#f6fff7 80%);
+    }
+    .wrap{min-height:100%; display:grid; place-items:center; padding:24px}
+    .card{
+      position:relative;
+      width:clamp(320px, 94vw, 860px);
+      padding:26px 22px 22px;
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid rgba(43,124,255,.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card::after{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius:calc(var(--radius) + 2px);
+      background:linear-gradient(120deg, rgba(43,124,255,.08), rgba(16,185,129,.08));
+      filter:blur(12px); z-index:-1;
+    }
+    .toolbar{position:absolute; right:16px; top:16px; display:flex; gap:10px; align-items:center}
+    .logout{border:none;border-radius:20px;padding:10px 14px;background:var(--err);color:#fff;font-weight:700;cursor:pointer;
+      box-shadow:0 8px 14px rgba(239,68,68,.25);
+    }
+    .avatar-mini{width:46px; height:46px; border-radius:50%; overflow:hidden; background:#fff; border:1px solid #e5e7eb; box-shadow:var(--shadow); }
+    .avatar-mini img{width:100%; height:100%; object-fit:cover}
+
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+    .brand svg{width:40px; height:40px; filter: drop-shadow(0 6px 10px rgba(43,124,255,.25));}
+    .brand h1{margin:0; font-size:22px; font-weight:800; letter-spacing:.4px;
+      background:linear-gradient(90deg,#2b7cff,var(--accent),#16a34a);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .subtitle{color:var(--muted); margin:4px 2px 14px; font-size:14px}
+
+    /* Back button fixed-style (top-left circle) */
+    .back{
+      position:absolute; left:14px; top:14px;
+      width:46px; height:46px; border-radius:50%;
+      display:grid; place-items:center;
+      border:1px solid #e5e7eb; background:#ffffff; box-shadow:var(--shadow);
+      cursor:pointer; user-select:none;
+    }
+    .back span{font-size:22px}
+
+    /* Profile hero */
+    .hero{
+      display:grid; grid-template-columns: 180px 1fr; gap:16px; align-items:center;
+      padding:12px; border-radius:16px; background:linear-gradient(180deg,#f7fbff,#ffffff);
+      border:1px solid #e8f1ff;
+    }
+    .hero .avatar{
+      width:160px; height:160px; border-radius:50%; overflow:hidden; background:#fff; border:1px solid #e5e7eb; box-shadow:var(--shadow);
+      display:grid; place-items:center; margin:auto;
+    }
+    .hero .avatar img{width:100%; height:100%; object-fit:cover}
+    .hero .summary{display:grid; gap:6px}
+    .pill{display:inline-block;background:#eaf3ff;color:#315a9f;padding:6px 10px;border-radius:14px;font-size:12px}
+
+    /* Form */
+    form{margin-top:12px}
+    .grid{display:grid; gap:14px}
+    @media(min-width:760px){ .grid{grid-template-columns:1fr 1fr} }
+    .field{display:grid; gap:6px; max-width:var(--field-w)}
+    label{font-size:13px; color:var(--muted); padding-left:2px}
+    input, select{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #e5e7eb; background:#fbfdff; outline:none; font-size:16px;
+      transition:border .2s ease, box-shadow .2s ease;
+    }
+    input:focus, select:focus{ border-color:#c7ddff; box-shadow:0 0 0 6px rgba(43,124,255,.08) }
+    .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:10px}
+    .btn{
+      padding:12px 16px; border:none; border-radius:var(--btn-radius); color:#fff; font-size:16px; font-weight:700; cursor:pointer;
+      background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+      box-shadow:0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);
+    }
+    .btn.secondary{background:#eef5ff; color:#315a9f; border:1px solid #d6e6ff}
+    .btn.danger{background:linear-gradient(180deg,#ef4444,#b91c1c); box-shadow:0 10px 16px rgba(239,68,68,.25), inset 0 1px 0 rgba(255,255,255,.3)}
+
+    .note{color:var(--muted); font-size:12px; margin-top:6px}
+    .msg{margin-top:8px; padding:10px 12px; border-radius:12px; display:none; font-size:14px}
+    .msg.ok{display:block; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0}
+    .msg.err{display:block; background:#fef2f2; color:#7f1d1d; border:1px solid #fecaca}
+
+    .foot{margin-top:12px; text-align:center; color:var(--muted); font-size:12px}
+
+    @media (max-width:600px){
+      :root{ --field-w: 86vw; }
+      .hero{ grid-template-columns: 1fr; text-align:center }
+      .hero .summary{ justify-items:center }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" role="main" aria-label="Profile card">
+      <button class="back" id="btnBack" title="返回"><span>⬅️</span></button>
+
+      <div class="toolbar">
+        <div class="avatar-mini"><img id="miniAvatar" src="avatar-neutral.png" alt="avatar"></div>
+        <button class="logout" id="btnLogout">登出</button>
+      </div>
+
+      <div class="brand">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#ff9aa2"/></linearGradient>
+            <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#2b7cff"/><stop offset="1" stop-color="#13c2c2"/></linearGradient>
+          </defs>
+          <path d="M22 10c-6 0-10 4.8-10 10.7 0 11.2 20 23.8 20 23.8s20-12.6 20-23.8C52 14.8 48 10 42 10c-4.2 0-7 2.4-10 6-2.8-3.6-5.8-6-10-6z" fill="url(#g1)"/>
+          <rect x="10" y="38" width="44" height="6" rx="3" fill="url(#g2)"/>
+          <rect x="6" y="35" width="6" height="12" rx="2" fill="#2b7cff"/>
+          <rect x="52" y="35" width="6" height="12" rx="2" fill="#13c2c2"/>
+        </svg>
+        <h1>health care</h1>
+      </div>
+      <div class="subtitle">個人資料設定｜讓每頁頭像與建議更貼近你 ✨</div>
+
+      <section class="hero">
+        <div class="avatar">
+          <img id="heroAvatar" src="avatar-neutral.png" alt="avatar-large">
+        </div>
+        <div class="summary">
+          <div class="pill" id="rolePill">《優秀人才》</div>
+          <div class="note">切換性別會即時更新右上角與這裡的頭像。</div>
+        </div>
+      </section>
+
+      <form id="profileForm" autocomplete="off">
+        <div class="grid">
+          <div class="field">
+            <label for="nickname">暱稱</label>
+            <input id="nickname" type="text" placeholder="輸入暱稱，如 Jessie" />
+          </div>
+          <div class="field">
+            <label for="gender">性別</label>
+            <select id="gender">
+              <option value="neutral">未設定</option>
+              <option value="female">女性</option>
+              <option value="male">男性</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="height">身高（cm）</label>
+            <input id="height" type="number" inputmode="decimal" placeholder="如 165" />
+          </div>
+          <div class="field">
+            <label for="weight">體重（kg）</label>
+            <input id="weight" type="number" inputmode="decimal" placeholder="如 60.5" />
+          </div>
+          <div class="field">
+            <label for="age">年齡</label>
+            <input id="age" type="number" inputmode="numeric" placeholder="如 28" />
+          </div>
+          <div class="field">
+            <label for="birthday">生日</label>
+            <input id="birthday" type="date" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">儲存資料</button>
+          <button type="button" class="btn secondary" id="btnMain">回主選單</button>
+          <button type="button" class="btn danger" id="btnDelete">刪除帳號</button>
+        </div>
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="foot">小提醒：資料只供本機/帳號使用，換裝置請先備份。</div>
+    </main>
+  </div>
+
+  <script>
+    // Utilities
+    function byId(id){ return document.getElementById(id); }
+    function setAvatarByGender(g){
+      const map = { male:'avatar-male.png', female:'avatar-female.png', neutral:'avatar-neutral.png' };
+      const src = map[(g||'neutral').toLowerCase()] || map.neutral;
+      byId('heroAvatar').src = src;
+      byId('miniAvatar').src = src;
+    }
+    function showMsg(text, ok=false){
+      const m = byId('msg'); m.className = 'msg ' + (ok?'ok':'err'); m.textContent = text; m.style.display='block';
+    }
+
+    // Require login
+    const currentUser = localStorage.getItem('hc_currentUser');
+    if(!currentUser){ window.location.href = 'index.html'; }
+
+    // Role pill
+    (function syncRole(){
+      const role = localStorage.getItem('hc_role') || 'user';
+      byId('rolePill').textContent = role === 'admin' ? '《管理者》' : '《優秀人才》';
+      byId('rolePill').style.background = role === 'admin' ? '#ffe9e9' : '#eaf3ff';
+      byId('rolePill').style.color = role === 'admin' ? '#b91c1c' : '#315a9f';
+    })();
+
+    // Load profile (per user key), also fallback to legacy keys
+    const profileKey = 'hc_profile_' + currentUser;
+    let profile = {};
+    try{ profile = JSON.parse(localStorage.getItem(profileKey) || '{}'); }catch(_){ profile = {}; }
+
+    // Populate fields
+    byId('nickname').value = profile.nickname || '';
+    byId('gender').value = (localStorage.getItem('hc_profile_gender') || profile.gender || 'neutral');
+    byId('height').value = profile.height || '';
+    byId('weight').value = profile.weight || '';
+    byId('age').value = profile.age || '';
+    byId('birthday').value = profile.birthday || '';
+
+    // Initial avatar
+    setAvatarByGender(byId('gender').value);
+
+    // Gender change -> avatar + storage key
+    byId('gender').addEventListener('change', (e)=>{
+      const g = e.target.value;
+      setAvatarByGender(g);
+      localStorage.setItem('hc_profile_gender', g);              // for pages already using this
+      localStorage.setItem('hc_profile_gender_' + currentUser, g); // per-user tracking
+    });
+
+    // Save
+    byId('profileForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const data = {
+        nickname: byId('nickname').value.trim(),
+        gender: byId('gender').value,
+        height: byId('height').value,
+        weight: byId('weight').value,
+        age: byId('age').value,
+        birthday: byId('birthday').value
+      };
+      try{
+        localStorage.setItem(profileKey, JSON.stringify(data));
+        localStorage.setItem('hc_profile_gender', data.gender);
+        localStorage.setItem('hc_profile_gender_' + currentUser, data.gender);
+        showMsg('已儲存 ✅', true);
+      }catch(err){
+        showMsg('儲存失敗：' + (err.message || err), false);
+      }
+    });
+
+    // Delete account (double confirm)
+    byId('btnDelete').addEventListener('click', ()=>{
+      const a = confirm('確定要刪除此帳號的所有本機資料嗎？此動作無法復原。');
+      if(!a) return;
+      const b = prompt('為安全起見，請輸入 DELETE 以確認：');
+      if((b||'').toUpperCase() !== 'DELETE'){ alert('輸入錯誤，已取消。'); return; }
+      try{
+        // Clear per-user known keys
+        localStorage.removeItem('hc_profile_gender_' + currentUser);
+        localStorage.removeItem(profileKey);
+        // TODO: 如有其他模組資料，可依 key 前綴清除
+        // 登出
+        localStorage.removeItem('hc_currentUser');
+        localStorage.removeItem('hc_role');
+      }catch(_){}
+      alert('帳號資料已清除。');
+      window.location.href = 'index.html';
+    });
+
+    // Back / Main / Logout
+    byId('btnBack').addEventListener('click', ()=>{
+      if(document.referrer){ history.back(); } else { window.location.href = 'main.html'; }
+    });
+    byId('btnMain').addEventListener('click', ()=> window.location.href = 'main.html');
+    byId('btnLogout').addEventListener('click', ()=>{
+      localStorage.removeItem('hc_currentUser');
+      localStorage.removeItem('hc_role');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+
+/* hc-theme.css — drop-in visual refresh (no ID changes) */
+:root{
+  --bg1:#e9f7ff;
+  --bg2:#f7fff9;
+  --card:#ffffff;
+  --primary:#2b7cff;
+  --primary-dark:#1f5ec1;
+  --accent:#13c2c2;
+  --ok:#10b981;
+  --err:#ef4444;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --shadow: 0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+  --radius:16px;
+  --btn-radius:22px;
+}
+*{box-sizing:border-box}
+html,body{
+  height:100%; margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 800px at 20% -10%,var(--bg1),transparent 60%),
+    radial-gradient(1000px 700px at 120% 10%,var(--bg2),transparent 60%),
+    linear-gradient(180deg,#f8fbff,#f6fff7 80%);
+}
+.hc-wrap{min-height:100%; display:grid; place-items:center; padding:24px}
+.card{
+  position:relative;
+  width:clamp(300px,92vw,920px);
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  border:1px solid rgba(43,124,255,.08);
+  padding:22px 18px 18px;
+}
+.hc-header{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+.hc-header svg{width:32px; height:32px; filter: drop-shadow(0 6px 10px rgba(43,124,255,.25));}
+.hc-header h1{margin:0;font-size:20px;letter-spacing:.3px;font-weight:800;
+  background:linear-gradient(90deg,#2b7cff,var(--accent),#16a34a);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hc-sub{color:var(--muted); margin:4px 2px 12px; font-size:14px}
+.hc-toolbar{position:absolute; right:14px; top:14px; display:flex; gap:10px; align-items:center; z-index:5}
+.hc-avatar{width:44px; height:44px; border-radius:50%; overflow:hidden; background:#fff; border:1px solid #e5e7eb; box-shadow:var(--shadow); cursor:pointer}
+.hc-avatar img{width:100%; height:100%; object-fit:cover}
+.hc-logout{border:none; border-radius:20px; padding:10px 14px; background:var(--err); color:#fff; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 14px rgba(239,68,68,.25);
+}
+
+.hc-row{display:grid; gap:12px; justify-items:stretch}
+@media(min-width:720px){ .hc-row{grid-template-columns:1fr 1fr; } }
+
+/* Inputs & selects */
+.hc-input, input[type="text"], input[type="password"], input[type="number"], input[type="date"], select, textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  outline:none;
+  background:#fbfdff;
+  transition:border .2s ease, box-shadow .2s ease;
+  font-size:16px;
+}
+.hc-input:focus, input:focus, select:focus, textarea:focus{
+  border-color:#c7ddff; box-shadow:0 0 0 6px rgba(43,124,255,.08);
+}
+
+/* Primary & secondary buttons */
+.hc-btn, button.primary{
+  padding:12px 16px; border:none; border-radius:var(--btn-radius); color:#fff; font-size:16px; font-weight:700; cursor:pointer;
+  background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+  box-shadow:0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.hc-btn:active, button.primary:active{transform:translateY(1px)}
+button.secondary{
+  padding:12px 16px; border-radius:var(--btn-radius); background:#eef5ff; color:#315a9f; border:1px solid #d6e6ff; font-weight:700; cursor:pointer;
+}
+
+/* Tables */
+table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px}
+thead th{background:#f3f8ff; color:#315a9f; text-align:left; padding:12px; border-bottom:1px solid #e5efff}
+tbody td{padding:10px 12px; border-bottom:1px solid #f1f5f9}
+tbody tr:hover{background:#f8fbff}
+
+/* Charts spacing */
+canvas{max-width:100%}
+.chart-block{margin-top:12px; padding:12px; background:#f7fbff; border:1px solid #e8f1ff; border-radius:12px}
+
+/* Helper chip */
+.hc-chip{display:inline-block; background:#eaf3ff; color:#315a9f; padding:8px 12px; border-radius:14px; font-size:12px; margin-bottom:8px}
+/* Footer */
+.hc-foot{margin-top:12px; text-align:center; color:var(--muted); font-size:12px}
+
+/* Keep avatar above anything */
+.hc-avatar{z-index:9; position:relative}
+@media(max-width:420px){
+  .card{padding:20px 14px 16px}
+}
