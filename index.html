@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>health care｜登入</title>
+  <meta name="color-scheme" content="light only" />
+  <style>
+    :root {
+      --bg1: #e9f7ff;
+      --bg2: #f7fff9;
+      --card: #ffffff;
+      --primary: #2b7cff;
+      --primary-dark: #1f5ec1;
+      --text: #2b2b2b;
+      --muted: #6b7280;
+      --ok: #10b981;
+      --err: #ef4444;
+      --shadow: 0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --field-width: 320px;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 20% -10%, var(--bg1), transparent 60%),
+                  radial-gradient(1000px 700px at 120% 10%, var(--bg2), transparent 60%),
+                  linear-gradient(180deg, #f8fbff, #f6fff7 80%);
+    }
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      position: relative;
+      width: clamp(300px, 92vw, 520px);
+      padding: 28px 24px 24px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(43, 124, 255, .08);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+    .brand svg {
+      width: 44px;
+      height: 44px;
+      filter: drop-shadow(0 6px 10px rgba(43, 124, 255, .25));
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: .5px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #2b7cff, #13c2c2, #16a34a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .tagline {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 4px 0 18px;
+      min-height: 20px;
+      line-height: 1.4;
+    }
+    .form {
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .field {
+      width: var(--field-width);
+      display: grid;
+      gap: 6px;
+    }
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      padding-left: 4px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      outline: none;
+      background: #fbfdff;
+      transition: border .2s ease, box-shadow .2s ease, transform .05s ease;
+      font-size: 16px;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: #c7ddff;
+      box-shadow: 0 0 0 6px rgba(43,124,255,.08);
+    }
+    .btn {
+      width: var(--field-width);
+      padding: 12px 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);
+      transition: transform .04s ease, filter .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      user-select: none;
+    }
+    .msg {
+      width: var(--field-width);
+      margin: 6px auto 0;
+      text-align: center;
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      display: none;
+    }
+    .msg.ok { display: block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .msg.err { display: block; background: #fef2f2; color: #7f1d1d; border: 1px solid #fecaca; }
+    .footer {
+      text-align: center;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Mobile */
+    @media (max-width: 420px) {
+      :root { --field-width: 86vw; }
+      .brand h1 { font-size: 22px; }
+      .brand svg { width: 40px; height: 40px; }
+      .card { padding: 22px 16px 18px; }
+    }
+
+    /* Hide Chrome/iOS autofill glow */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      border: 1px solid #e5e7eb;
+      -webkit-text-fill-color: var(--text);
+      -webkit-box-shadow: 0 0 0px 1000px #fbfdff inset;
+      transition: background-color 5000s ease-in-out 0s;
+      caret-color: var(--text);
+    }
+
+    /* Fun micro-3D */
+    .card::after{
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: calc(var(--radius) + 2px);
+      background: linear-gradient(120deg, rgba(43,124,255,.08), rgba(16,185,129,.08));
+      z-index: -1;
+      filter: blur(10px);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" role="main" aria-label="Login card">
+      <div class="brand" aria-label="health care brand">
+        <!-- Simple stylized heart + dumbbell logo (vector) -->
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="#ff6b6b"/>
+              <stop offset="1" stop-color="#ff9aa2"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" x2="1">
+              <stop offset="0" stop-color="#2b7cff"/>
+              <stop offset="1" stop-color="#13c2c2"/>
+            </linearGradient>
+          </defs>
+          <!-- heart -->
+          <path d="M22 10c-6 0-10 4.8-10 10.7 0 11.2 20 23.8 20 23.8s20-12.6 20-23.8C52 14.8 48 10 42 10c-4.2 0-7 2.4-10 6-2.8-3.6-5.8-6-10-6z" fill="url(#g1)"/>
+          <!-- dumbbell -->
+          <rect x="10" y="38" width="44" height="6" rx="3" fill="url(#g2)"/>
+          <rect x="6" y="35" width="6" height="12" rx="2" fill="#2b7cff"/>
+          <rect x="52" y="35" width="6" height="12" rx="2" fill="#13c2c2"/>
+        </svg>
+        <h1>health care</h1>
+      </div>
+      <p id="tagline" class="tagline" aria-live="polite"></p>
+
+      <!-- Anti-autofill decoys (hidden) -->
+      <input type="text" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;border:0;padding:0;" tabindex="-1" aria-hidden="true" />
+      <input type="password" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;border:0;padding:0;" tabindex="-1" aria-hidden="true" />
+
+      <form id="loginForm" class="form" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="account">帳號</label>
+          <input id="account" name="account" type="text" inputmode="latin" autocomplete="new-username" placeholder="請輸入帳號（區分大小寫）" required />
+        </div>
+        <div class="field">
+          <label for="password">密碼</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" placeholder="請輸入密碼（區分大小寫）" required />
+        </div>
+        <button type="submit" class="btn" id="loginBtn" aria-label="登入">登入</button>
+
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="footer">保持優雅，拒絕暴飲暴食 ✨</div>
+    </main>
+  </div>
+
+  <script>
+    // --- Random humorous tagline ---
+    (function showTagline(){
+      const lines = [
+        "今天先登入，明天先瘦一點點。",
+        "紀錄一下，體重就會有禮貌。",
+        "喝水、動一動、少外送，健康自己送。",
+        "輸入帳密比減肥容易多了（先從容易的開始）。",
+        "不必苦，持續就很酷。",
+        "紀錄是最強增肌劑。",
+        "當別人還在數羊，你已經在數步數。",
+        "今天的你，比昨天的體重更值得驕傲。"
+      ];
+      const t = document.getElementById('tagline');
+      t.textContent = lines[Math.floor(Math.random()*lines.length)];
+    })();
+
+    // --- Built-in accounts (frontend only, per your spec) ---
+    const USERS = {
+      "admin": "Admin",
+      "samelo": "1226",
+      "jessie": "0621",
+      "jenny": "0731"
+    };
+
+    function saveLogin(account){
+      try{
+        localStorage.setItem("hc_currentUser", account);
+        const role = account === "admin" ? "admin" : "user";
+        localStorage.setItem("hc_role", role);
+        // Optional: reset per-user runtime states on fresh login
+      }catch(e){ /* ignore quota errors */ }
+    }
+
+    function showMsg(text, ok=false){
+      const m = document.getElementById('msg');
+      m.className = 'msg ' + (ok ? 'ok' : 'err');
+      m.textContent = text;
+      m.style.display = 'block';
+    }
+
+    // Prevent autofill 'suggestion' drop-down from shifting layout on iOS
+    for (const el of [document.getElementById('account'), document.getElementById('password')]){
+      el.setAttribute('autocorrect','off');
+      el.setAttribute('autocapitalize','none');
+      el.setAttribute('spellcheck','false');
+    }
+
+    // --- Submit handler ---
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const acc = (document.getElementById('account').value || "").trim();
+      const pwd = (document.getElementById('password').value || "").trim();
+
+      if (!acc || !pwd){
+        showMsg("請完整輸入帳號與密碼。");
+        return;
+      }
+
+      if (USERS[acc] && USERS[acc] === pwd){
+        saveLogin(acc);
+        showMsg("登入成功，馬上前往主選單…", true);
+        // Short delay for a tiny feedback
+        setTimeout(()=>{ window.location.href = "main.html"; }, 400);
+      } else {
+        showMsg("帳號或密碼不正確。");
+      }
+    });
+  </script>
+</body>
+</html>
