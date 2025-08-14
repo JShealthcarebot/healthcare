@@ -1,37 +1,154 @@
-<!DOCTYPE html><html lang="zh-Hant"><head><title>主選單 | Health Care</title><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://cdn.jsdelivr.net"/><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>
-:root{--bg:#eaf8ff;--card:#d7f2ff;--text:#113048;--muted:#5b7284;--primary:#2d9cdb;--danger:#e74c3c;--white:#fff;--shadow:0 10px 30px rgba(25,79,116,.12);--radius:22px}
-html,body{height:100%}body{margin:0;background:var(--bg);font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans TC',Arial,sans-serif;color:var(--text)}
-.card{background:var(--card);max-width:520px;width:92vw;margin:64px auto;padding:28px 24px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.btn{appearance:none;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-weight:700;letter-spacing:.3px;background:#eef7ff;color:var(--primary);box-shadow:0 4px 10px rgba(45,156,219,.12);transition:transform .12s ease,background .12s ease}
-.btn:hover{transform:translateY(-1px);background:#e4f2ff}.btn:active{transform:translateY(0)}.btn.primary{background:var(--primary);color:#fff}.btn.danger{background:var(--danger);color:#fff;box-shadow:0 6px 14px rgba(231,76,60,.18)}.btn.block{width:100%}
-h1{font-size:28px;margin:6px 0 6px;display:flex;align-items:center;gap:8px}.slogan{color:var(--muted);font-size:14px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:1fr;gap:12px}.row{display:flex;gap:10px}
-.field{position:relative}.label{font-size:13px;color:var(--muted);margin:2px 2px 6px}
-.input{width:100%;padding:12px 14px;font-size:16px;border-radius:14px;border:1px solid #cfe5f4;outline:0;background:#f7fcff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-.input:focus{border-color:#9dd3f3;background:#fff;box-shadow:0 0 0 3px rgba(45,156,219,.15)}
-.summary{margin:14px 0 8px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #dfeef8;text-align:center;font-weight:600}
-.record{background:#fff;border:1px solid #e9f2f9;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(12,50,78,.06);color:#234;display:flex;justify-content:space-between;align-items:center}
-.list{display:grid;gap:10px}.empty{text-align:center;color:#7b92a3;background:#fff;border:1px dashed #cfe0ed;padding:12px;border-radius:14px}
-#chartContainer{display:none;margin-top:18px}.chart{background:#fff;border:1px solid #e9f2f9;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(12,50,78,.06)}
-.chart canvas{display:block;width:100% !important;height:240px !important;max-height:240px !important}@media(min-width:640px){.chart canvas{height:260px !important;max-height:260px !important}}
-#profileAvatar{position:fixed;top:14px;right:14px;width:50px;height:50px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);border:3px solid rgba(255,255,255,.8);z-index:9;object-fit:cover;background:#fff}
-.center{text-align:center}
-</style></head><body>
-<img id="profileAvatar" src="avatar-neutral.png" onclick="location.href='profile.html'"/>
-<div class="card"><div class="top"><button class="btn" onclick="goMenu()">主選單</button><button class="btn danger" onclick="logout()">登出</button></div>
-<h1>主選單</h1><p class="slogan">選擇要記錄的項目吧 ✨</p>
-<div class="grid">
-  <button class="btn primary" onclick="location.href='exercise.html'">運動紀錄</button>
-  <button class="btn primary" onclick="location.href='diet.html'">飲食紀錄</button>
-  <button class="btn primary" onclick="location.href='water.html'">喝水紀錄</button>
-  <button class="btn primary" onclick="location.href='weight.html'">體重紀錄</button>
-  <button class="btn" onclick="location.href='overview.html'">健康總覽</button>
-</div></div>
-<script>
-function currentUserId(){return localStorage.getItem('currentUser')||'guest';}
-function loadAvatar(){const uid=currentUserId();try{const p=JSON.parse(localStorage.getItem(`profile_${uid}`))||{};const g=(p.gender||'').toLowerCase();const img=document.getElementById('profileAvatar');if(g==='male'||g==='男'||g==='男性')img.src='avatar-male.png';else if(g==='female'||g==='女'||g==='女性')img.src='avatar-female.png';else img.src='avatar-neutral.png';}catch(e){}}
-function goMenu(){location.href='main.html';}
-function logout(){location.href='index.html';}
-function todayISO(){return new Date().toISOString().slice(0,10);}
-window.onload=loadAvatar;</script></body></html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>health care｜主選單</title>
+  <meta name="color-scheme" content="light only" />
+  <style>
+    :root{
+      --bg1:#e9f7ff;
+      --bg2:#f7fff9;
+      --card:#ffffff;
+      --primary:#2b7cff;
+      --primary-dark:#1f5ec1;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --shadow: 0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --radius:16px;
+      --btn-radius: 22px;
+      --btn-w: 320px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Heiti TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;background:
+      radial-gradient(1200px 800px at 20% -10%,var(--bg1),transparent 60%),
+      radial-gradient(1000px 700px at 120% 10%,var(--bg2),transparent 60%),
+      linear-gradient(180deg,#f8fbff,#f6fff7 80%);
+      color:var(--text);
+    }
+    .wrap{min-height:100%;display:grid;place-items:center;padding:24px}
+    .card{
+      position:relative;
+      width:clamp(300px,92vw,560px);
+      padding:26px 20px 24px;
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(43,124,255,.08);
+    }
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .brand svg{width:40px;height:40px;filter: drop-shadow(0 6px 10px rgba(43,124,255,.25));}
+    .brand h1{margin:0;font-size:22px;letter-spacing:.4px;font-weight:800;background:linear-gradient(90deg,#2b7cff,#13c2c2,#16a34a);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .subtitle{color:var(--muted);margin:6px 2px 14px;font-size:14px}
+    .chip{display:inline-block;background:#eaf3ff;color:#315a9f;padding:8px 12px;border-radius:14px;font-size:12px;margin-bottom:8px}
+    .menu{display:grid;justify-items:center;gap:14px;margin-top:6px}
+    .menu-btn{
+      width:var(--btn-w);
+      padding:14px 16px;
+      border:none;
+      border-radius:var(--btn-radius);
+      color:#fff;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+      box-shadow:0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);
+      transition:transform .04s ease, filter .2s ease;
+    }
+    .menu-btn:active{transform:translateY(1px)}
+    .row-actions{
+      position:absolute;right:16px;top:16px;display:flex;gap:10px;align-items:center;
+    }
+    .logout{
+      border:none;border-radius:20px;padding:10px 14px;background:#ef4444;color:#fff;font-weight:700;cursor:pointer;
+      box-shadow:0 8px 14px rgba(239,68,68,.25);
+    }
+    .avatar{
+      width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#ffffff;border:1px solid #e5e7eb;
+      box-shadow:var(--shadow); cursor:pointer; overflow:hidden;
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .footer{margin-top:14px;text-align:center;color:var(--muted);font-size:12px}
+    @media (max-width:420px){:root{--btn-w:86vw} .card{padding:22px 16px 18px} .row-actions{right:12px;top:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" role="main" aria-label="Main menu">
+      <div class="row-actions">
+        <div id="avatar" class="avatar" title="個人資料（點擊前往）">
+          <img id="avatarImg" alt="avatar" src="avatar-neutral.png">
+        </div>
+        <button class="logout" id="btnLogout">登出</button>
+      </div>
+      <div class="brand" aria-label="brand">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="#ff6b6b"/>
+              <stop offset="1" stop-color="#ff9aa2"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" x2="1">
+              <stop offset="0" stop-color="#2b7cff"/>
+              <stop offset="1" stop-color="#13c2c2"/>
+            </linearGradient>
+          </defs>
+          <path d="M22 10c-6 0-10 4.8-10 10.7 0 11.2 20 23.8 20 23.8s20-12.6 20-23.8C52 14.8 48 10 42 10c-4.2 0-7 2.4-10 6-2.8-3.6-5.8-6-10-6z" fill="url(#g1)"/>
+          <rect x="10" y="38" width="44" height="6" rx="3" fill="url(#g2)"/>
+          <rect x="6" y="35" width="6" height="12" rx="2" fill="#2b7cff"/>
+          <rect x="52" y="35" width="6" height="12" rx="2" fill="#13c2c2"/>
+        </svg>
+        <h1>health care</h1>
+      </div>
+      <div class="chip">主選單</div>
+      <div class="subtitle">選擇要記錄的項目吧 ✨</div>
+
+      <div class="menu">
+        <button class="menu-btn" data-link="exercise.html">運動紀錄</button>
+        <button class="menu-btn" data-link="diet.html">飲食紀錄</button>
+        <button class="menu-btn" data-link="water.html">喝水紀錄</button>
+        <button class="menu-btn" data-link="weight.html">體重紀錄</button>
+        <button class="menu-btn" data-link="overview.html">健康總覽</button>
+      </div>
+
+      <div class="footer">今天按下其中一顆按鈕，明天少一點藉口。</div>
+    </main>
+  </div>
+  <script>
+    // 必須登入檢查
+    (function requireLogin(){
+      const u = localStorage.getItem("hc_currentUser");
+      if(!u){ window.location.href = "index.html"; }
+    })();
+
+    // 統一按鈕導頁
+    document.querySelectorAll(".menu-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const link = btn.getAttribute("data-link");
+        if(link){ window.location.href = link; }
+      });
+    });
+
+    // 登出
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      localStorage.removeItem("hc_currentUser");
+      localStorage.removeItem("hc_role");
+      window.location.href = "index.html";
+    });
+
+    // 頭像（依個人資料 gender 決定圖示）
+    (function syncAvatar(){
+      // 假設 profile.html 會把性別存在 localStorage: hc_profile_gender -> 'male'|'female'|'neutral'
+      const g = (localStorage.getItem("hc_profile_gender") || "neutral").toLowerCase();
+      const map = { male:"avatar-male.png", female:"avatar-female.png", neutral:"avatar-neutral.png" };
+      const src = map[g] || map.neutral;
+      document.getElementById("avatarImg").src = src;
+    })();
+
+    // 點擊頭像前往個人頁
+    document.getElementById("avatar").addEventListener("click", () => {
+      window.location.href = "profile.html";
+    });
+  </script>
+</body>
+</html>
