@@ -1,42 +1,102 @@
-<!DOCTYPE html><html lang="zh-Hant"><head><title>健康總覽 📊 | Health Care</title><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://cdn.jsdelivr.net"/><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>
-:root{--bg:#eaf8ff;--card:#d7f2ff;--text:#113048;--muted:#5b7284;--primary:#2d9cdb;--danger:#e74c3c;--white:#fff;--shadow:0 10px 30px rgba(25,79,116,.12);--radius:22px}
-html,body{height:100%}body{margin:0;background:var(--bg);font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans TC',Arial,sans-serif;color:var(--text)}
-.card{background:var(--card);max-width:520px;width:92vw;margin:64px auto;padding:28px 24px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.btn{appearance:none;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-weight:700;letter-spacing:.3px;background:#eef7ff;color:var(--primary);box-shadow:0 4px 10px rgba(45,156,219,.12);transition:transform .12s ease,background .12s ease}
-.btn:hover{transform:translateY(-1px);background:#e4f2ff}.btn:active{transform:translateY(0)}.btn.primary{background:var(--primary);color:#fff}.btn.danger{background:var(--danger);color:#fff;box-shadow:0 6px 14px rgba(231,76,60,.18)}.btn.block{width:100%}
-h1{font-size:28px;margin:6px 0 6px;display:flex;align-items:center;gap:8px}.slogan{color:var(--muted);font-size:14px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:1fr;gap:12px}.row{display:flex;gap:10px}
-.field{position:relative}.label{font-size:13px;color:var(--muted);margin:2px 2px 6px}
-.input{width:100%;padding:12px 14px;font-size:16px;border-radius:14px;border:1px solid #cfe5f4;outline:0;background:#f7fcff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-.input:focus{border-color:#9dd3f3;background:#fff;box-shadow:0 0 0 3px rgba(45,156,219,.15)}
-.summary{margin:14px 0 8px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #dfeef8;text-align:center;font-weight:600}
-.record{background:#fff;border:1px solid #e9f2f9;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(12,50,78,.06);color:#234;display:flex;justify-content:space-between;align-items:center}
-.list{display:grid;gap:10px}.empty{text-align:center;color:#7b92a3;background:#fff;border:1px dashed #cfe0ed;padding:12px;border-radius:14px}
-#chartContainer{display:none;margin-top:18px}.chart{background:#fff;border:1px solid #e9f2f9;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(12,50,78,.06)}
-.chart canvas{display:block;width:100% !important;height:240px !important;max-height:240px !important}@media(min-width:640px){.chart canvas{height:260px !important;max-height:260px !important}}
-#profileAvatar{position:fixed;top:14px;right:14px;width:50px;height:50px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);border:3px solid rgba(255,255,255,.8);z-index:9;object-fit:cover;background:#fff}
-.center{text-align:center}
-</style></head><body>
-<img id="profileAvatar" src="avatar-neutral.png" onclick="location.href='profile.html'"/>
-<div class="card"><div class="top"><button class="btn" onclick="goMenu()">主選單</button><button class="btn danger" onclick="logout()">登出</button></div>
-<h1>健康總覽 📊</h1><p class="slogan">小步快走，累積大進步！</p>
-<div class="summary" id="ovToday">載入中…</div>
-<div class="center" style="margin-top:12px;"><button id="ovToggle" class="btn" onclick="ovToggle()">📈 展開圖表</button></div>
-<div id="chartContainer"><div class="chart"><h3 style="margin:0 0 12px;">🔥 每日淨卡路里（飲食-運動）</h3><canvas id="ovNet"></canvas></div></div>
-</div>
-<script>
-function currentUserId(){return localStorage.getItem('currentUser')||'guest';}
-function loadAvatar(){const uid=currentUserId();try{const p=JSON.parse(localStorage.getItem(`profile_${uid}`))||{};const g=(p.gender||'').toLowerCase();const img=document.getElementById('profileAvatar');if(g==='male'||g==='男'||g==='男性')img.src='avatar-male.png';else if(g==='female'||g==='女'||g==='女性')img.src='avatar-female.png';else img.src='avatar-neutral.png';}catch(e){}}
-function goMenu(){location.href='main.html';}
-function logout(){location.href='index.html';}
-function todayISO(){return new Date().toISOString().slice(0,10);}
 
-const uid=currentUserId();
-function getStore(k){return JSON.parse(localStorage.getItem(`${k}_${uid}`))||[];}
-function ovSummary(){const t=todayISO();const diet=getStore('diet').filter(r=>r.date===t);const ex=getStore('exerciseRecords').filter(r=>r.date===t);const water=getStore('water').filter(r=>r.date===t);const inC=diet.reduce((s,r)=>s+(r.cal||0),0);const outC=ex.reduce((s,r)=>s+(r.calories||0),0);const ml=water.reduce((s,r)=>s+(r.ml||0),0);ovToday.innerHTML=`今日攝取：<b>${inC} kcal</b>　運動消耗：<b>${outC} kcal</b>　淨值：<b>${inC-outC} kcal</b><br>飲水：<b>${ml} ml</b>`;}
-let ovReady=false,netChart=null;
-function ovToggle(){const box=chartContainer;const btn=ovToggle;const show=box.style.display==='none'||box.style.display==='';box.style.display=show?'block':'none';document.getElementById('ovToggle').textContent=show?'📉 收合圖表':'📈 展開圖表';if(show)ovBuild();}
-function ovBuild(){const diet=getStore('diet');const ex=getStore('exerciseRecords');const dates=new Set([...diet.map(r=>r.date),...ex.map(r=>r.date)]);const labels=[...dates].sort();const net=labels.map(d=>{const inC=diet.filter(r=>r.date===d).reduce((s,r)=>s+(r.cal||0),0);const outC=ex.filter(r=>r.date===d).reduce((s,r)=>s+(r.calories||0),0);return inC-outC;});const ctx=ovNet.getContext('2d');if(!ovReady){netChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'淨卡路里',data:net,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});ovReady=true;}else{netChart.data.labels=labels;netChart.data.datasets[0].data=net;netChart.update();}}
-window.onload=function(){loadAvatar();ovSummary();};
-</script></body></html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>health care｜健康總覽</title>
+  <meta name="color-scheme" content="light only" />
+  <link rel="stylesheet" href="hc-theme.css">
+  <style>
+    /* Page-specific tweaks */
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+    @media(min-width:780px){ .stats{grid-template-columns:repeat(4,1fr)} }
+    .stat{background:#ffffff;border:1px solid #e8f1ff;border-radius:14px;padding:12px;box-shadow:0 6px 12px rgba(43,124,255,.08)}
+    .stat .v{font-size:22px;font-weight:800;margin-top:6px}
+    .row{display:grid;gap:8px;margin-top:12px}
+    .filters{display:grid;gap:8px;grid-template-columns:1fr 1fr;align-items:end;max-width:520px}
+    .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .quick button{padding:8px 12px;border-radius:16px;border:1px solid #d6e6ff;background:#eef5ff;color:#315a9f;font-weight:700;cursor:pointer}
+    .lists{display:grid;gap:12px;margin-top:12px}
+    .list{background:#ffffff;border:1px solid #e8f1ff;border-radius:12px;padding:10px}
+    .list h3{margin:0 0 6px 0;font-size:15px;color:#315a9f}
+    .list ul{margin:0;padding-left:18px}
+    .list li{margin:4px 0}
+    .btn{padding:12px 16px;border:none;border-radius:22px;background:linear-gradient(180deg,#2b7cff,#1f5ec1);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);}
+  </style>
+</head>
+<body>
+  <div class="hc-wrap">
+    <main class="card">
+      <div class="hc-toolbar">
+        <div class="hc-avatar" id="avatar"><img id="hcAvatarImg" alt="avatar" src="avatar-neutral.png"></div>
+        <button class="hc-logout" id="btnLogout">登出</button>
+      </div>
+      <div class="hc-header">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#ff9aa2"/></linearGradient>
+            <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#2b7cff"/><stop offset="1" stop-color="#13c2c2"/></linearGradient>
+          </defs>
+          <path d="M22 10c-6 0-10 4.8-10 10.7 0 11.2 20 23.8 20 23.8s20-12.6 20-23.8C52 14.8 48 10 42 10c-4.2 0-7 2.4-10 6-2.8-3.6-5.8-6-10-6z" fill="url(#g1)"/>
+          <rect x="10" y="38" width="44" height="6" rx="3" fill="url(#g2)"/>
+          <rect x="6" y="35" width="6" height="12" rx="2" fill="#2b7cff"/>
+          <rect x="52" y="35" width="6" height="12" rx="2" fill="#13c2c2"/>
+        </svg>
+        <h1>health care</h1>
+      </div>
+      <div class="hc-sub">小步快走，累積大進步！</div>
+      <div class="hc-chip">健康總覽 📊</div>
+
+      <!-- Today stats -->
+      <section class="stats" id="todayStats">
+        <div class="stat"><div>今日攝取</div><div class="v" id="todayIntake">0 kcal</div></div>
+        <div class="stat"><div>運動消耗</div><div class="v" id="todayBurn">0 kcal</div></div>
+        <div class="stat"><div>淨值（攝取-消耗）</div><div class="v" id="todayNet">0 kcal</div></div>
+        <div class="stat"><div>飲水</div><div class="v" id="todayWater">0 ml</div></div>
+      </section>
+
+      <!-- Filters -->
+      <section class="row">
+        <div class="hc-chip">時間範圍</div>
+        <div class="filters">
+          <div>
+            <label for="start">開始日期</label>
+            <input id="start" type="date" class="hc-input">
+          </div>
+          <div>
+            <label for="end">結束日期</label>
+            <input id="end" type="date" class="hc-input">
+          </div>
+        </div>
+        <div class="quick">
+          <button data-range="1">1天</button>
+          <button data-range="3">3天</button>
+          <button data-range="7">7天</button>
+          <button data-range="30">30天</button>
+          <button data-range="365">一年</button>
+          <button id="apply" class="btn">套用篩選</button>
+        </div>
+      </section>
+
+      <!-- Chart -->
+      <section class="chart-block">
+        <canvas id="netChart" height="140"></canvas>
+      </section>
+
+      <!-- Lists -->
+      <section class="lists">
+        <div class="list"><h3>飲食紀錄（所選期間）</h3><ul id="listDiet"></ul></div>
+        <div class="list"><h3>運動紀錄（所選期間）</h3><ul id="listEx"></ul></div>
+        <div class="list"><h3>飲水紀錄（所選期間）</h3><ul id="listWater"></ul></div>
+      </section>
+
+      <div class="hc-foot">圖表顯示「卡路里淨值」＝攝取 − 消耗。若為負值表示當天赤字。</div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="hc-ui.js"></script>
+  <script src="hc-overview.js"></script>
+</body>
+</html>
