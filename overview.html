@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -6,32 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>health care｜健康總覽</title>
   <meta name="color-scheme" content="light only" />
+  <!-- 可選：全站統一樣式與工具列（若你已使用我給的設計包） -->
   <link rel="stylesheet" href="hc-theme.css">
   <style>
-    /* Page-specific tweaks */
-    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
-    @media(min-width:780px){ .stats{grid-template-columns:repeat(4,1fr)} }
-    .stat{background:#ffffff;border:1px solid #e8f1ff;border-radius:14px;padding:12px;box-shadow:0 6px 12px rgba(43,124,255,.08)}
-    .stat .v{font-size:22px;font-weight:800;margin-top:6px}
-    .row{display:grid;gap:8px;margin-top:12px}
-    .filters{display:grid;gap:8px;grid-template-columns:1fr 1fr;align-items:end;max-width:520px}
-    .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .quick button{padding:8px 12px;border-radius:16px;border:1px solid #d6e6ff;background:#eef5ff;color:#315a9f;font-weight:700;cursor:pointer}
-    .lists{display:grid;gap:12px;margin-top:12px}
-    .list{background:#ffffff;border:1px solid #e8f1ff;border-radius:12px;padding:10px}
-    .list h3{margin:0 0 6px 0;font-size:15px;color:#315a9f}
-    .list ul{margin:0;padding-left:18px}
-    .list li{margin:4px 0}
-    .btn{padding:12px 16px;border:none;border-radius:22px;background:linear-gradient(180deg,#2b7cff,#1f5ec1);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 10px 16px rgba(43,124,255,.25), inset 0 1px 0 rgba(255,255,255,.3);}
+    :root{ --stat-w: 220px; }
+    .top-actions{position:absolute; right:16px; top:16px; display:flex; gap:10px; align-items:center;}
+    .chip-main{ display:inline-block; background:#eaf3ff; color:#315a9f; padding:8px 12px; border-radius:14px; font-size:12px; text-decoration:none; }
+    .stat-row{ display:flex; flex-wrap:wrap; gap:12px; }
+    .stat{ width:var(--stat-w); background:#fff; border:1px solid #e8f1ff; border-radius:12px; padding:12px; box-shadow:0 6px 12px rgba(0,0,0,.04); }
+    .stat .k{ font-size:12px; color:#6b7280; }
+    .stat .v{ font-size:20px; font-weight:800; margin-top:4px; }
+    .range-row{ display:grid; gap:10px; grid-template-columns:1fr 1fr auto auto auto auto auto; align-items:center; }
+    .range-row input{ padding:10px 12px; border-radius:12px; border:1px solid #e5e7eb; }
+    .qbtn{ padding:8px 10px; border-radius:16px; border:1px solid #d6e6ff; background:#eef5ff; color:#315a9f; cursor:pointer; font-weight:700; }
+    .chart-block{ margin-top:12px; padding:12px; background:#f7fbff; border:1px solid #e8f1ff; border-radius:12px }
+    .table-wrap{ margin-top:12px; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px }
+    thead th{ background:#f3f8ff; color:#315a9f; text-align:left; padding:12px; border-bottom:1px solid #e5efff }
+    tbody td{ padding:10px 12px; border-bottom:1px solid #f1f5f9; }
+    tbody tr:hover{ background:#f8fbff; }
+    .note{ margin-top:8px; text-align:center; color:#6b7280; font-size:12px; }
+    @media (max-width: 840px){
+      .range-row{ grid-template-columns:1fr 1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="hc-wrap">
-    <main class="card">
-      <div class="hc-toolbar">
-        <div class="hc-avatar" id="avatar"><img id="hcAvatarImg" alt="avatar" src="avatar-neutral.png"></div>
-        <button class="hc-logout" id="btnLogout">登出</button>
+    <main class="card" role="main" aria-label="Overview">
+      <div class="top-actions">
+        <a class="chip-main" href="main.html">主選單</a>
+        <button id="btnLogout" class="hc-logout">登出</button>
       </div>
+
       <div class="hc-header">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <defs>
@@ -46,57 +52,66 @@
         <h1>health care</h1>
       </div>
       <div class="hc-sub">小步快走，累積大進步！</div>
-      <div class="hc-chip">健康總覽 📊</div>
 
-      <!-- Today stats -->
-      <section class="stats" id="todayStats">
-        <div class="stat"><div>今日攝取</div><div class="v" id="todayIntake">0 kcal</div></div>
-        <div class="stat"><div>運動消耗</div><div class="v" id="todayBurn">0 kcal</div></div>
-        <div class="stat"><div>淨值（攝取-消耗）</div><div class="v" id="todayNet">0 kcal</div></div>
-        <div class="stat"><div>飲水</div><div class="v" id="todayWater">0 ml</div></div>
-      </section>
+      <!-- 今日統計 -->
+      <div class="stat-row" id="todayStats">
+        <div class="stat"><div class="k">今日攝取</div><div class="v" id="tIntake">0 kcal</div></div>
+        <div class="stat"><div class="k">運動消耗</div><div class="v" id="tBurn">0 kcal</div></div>
+        <div class="stat"><div class="k">淨值（攝取-消耗）</div><div class="v" id="tNet">0 kcal</div></div>
+        <div class="stat"><div class="k">飲水</div><div class="v" id="tWater">0 ml</div></div>
+      </div>
 
-      <!-- Filters -->
-      <section class="row">
-        <div class="hc-chip">時間範圍</div>
-        <div class="filters">
-          <div>
-            <label for="start">開始日期</label>
-            <input id="start" type="date" class="hc-input">
-          </div>
-          <div>
-            <label for="end">結束日期</label>
-            <input id="end" type="date" class="hc-input">
-          </div>
-        </div>
-        <div class="quick">
-          <button data-range="1">1天</button>
-          <button data-range="3">3天</button>
-          <button data-range="7">7天</button>
-          <button data-range="30">30天</button>
-          <button data-range="365">一年</button>
-          <button id="apply" class="btn">套用篩選</button>
-        </div>
-      </section>
+      <!-- 範圍選擇 -->
+      <div class="hc-chip" style="margin-top:10px;">統計區間</div>
+      <div class="range-row">
+        <input id="startDate" type="date">
+        <input id="endDate" type="date">
+        <button class="qbtn" data-q="1">1天</button>
+        <button class="qbtn" data-q="3">3天</button>
+        <button class="qbtn" data-q="7">7天</button>
+        <button class="qbtn" data-q="30">30天</button>
+        <button class="qbtn" data-q="365">一年</button>
+      </div>
 
-      <!-- Chart -->
-      <section class="chart-block">
-        <canvas id="netChart" height="140"></canvas>
-      </section>
+      <!-- 圖表（卡路里淨值） -->
+      <div class="chart-block">
+        <canvas id="netChart" height="260"></canvas>
+        <div class="note">顯示為「卡路里淨值（攝取−消耗）」之每日走勢。</div>
+      </div>
 
-      <!-- Lists -->
-      <section class="lists">
-        <div class="list"><h3>飲食紀錄（所選期間）</h3><ul id="listDiet"></ul></div>
-        <div class="list"><h3>運動紀錄（所選期間）</h3><ul id="listEx"></ul></div>
-        <div class="list"><h3>飲水紀錄（所選期間）</h3><ul id="listWater"></ul></div>
-      </section>
-
-      <div class="hc-foot">圖表顯示「卡路里淨值」＝攝取 − 消耗。若為負值表示當天赤字。</div>
+      <!-- 每日彙總表 -->
+      <div class="table-wrap">
+        <div class="hc-chip">每日彙總（所選期間）</div>
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>攝取 (kcal)</th>
+              <th>消耗 (kcal)</th>
+              <th>淨值 (kcal)</th>
+              <th>飲水 (ml)</th>
+            </tr>
+          </thead>
+          <tbody id="sumBody">
+            <tr><td colspan="5" style="text-align:center;color:#6b7280;">本期間沒有資料</td></tr>
+          </tbody>
+        </table>
+      </div>
     </main>
   </div>
 
+  <!-- 你若已在其他頁載入 hc-ui.js，這裡可省略；但我們僅需處理登出按鈕 -->
+  <script>
+    document.getElementById('btnLogout').addEventListener('click',()=>{
+      localStorage.removeItem('hc_currentUser');
+      localStorage.removeItem('hc_role');
+      location.href='index.html';
+    });
+  </script>
+
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="hc-ui.js"></script>
+  <!-- Overview Logic -->
   <script src="hc-overview.js"></script>
 </body>
 </html>
