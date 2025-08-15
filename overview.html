@@ -1,236 +1,149 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>health care｜健康總覽（單檔版）</title>
-  <meta name="color-scheme" content="light only" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>health care｜資料診斷工具</title>
   <style>
-    /* ===== Inline theme (from hc-theme.css, trimmed to what's used here) ===== */
-    :root{
-      --bg1:#e9f7ff; --bg2:#f7fff9; --card:#ffffff;
-      --primary:#2b7cff; --primary-dark:#1f5ec1; --accent:#13c2c2;
-      --text:#1f2937; --muted:#6b7280; --err:#ef4444;
-      --shadow: 0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
-      --radius:16px; --btn-radius:22px;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      height:100%; margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 800px at 20% -10%,var(--bg1),transparent 60%),
-        radial-gradient(1000px 700px at 120% 10%,var(--bg2),transparent 60%),
-        linear-gradient(180deg,#f8fbff,#f6fff7 80%);
-    }
-    .hc-wrap{min-height:100%; display:grid; place-items:center; padding:24px}
-    .card{position:relative; width:clamp(320px,92vw,1080px); background:var(--card);
-      border-radius:24px; box-shadow:var(--shadow); border:1px solid rgba(43,124,255,.08);
-      padding:22px 18px 18px;
-    }
-    .hc-header{display:flex; align-items:center; gap:10px; margin-bottom:8px}
-    .hc-header svg{width:32px; height:32px; filter: drop-shadow(0 6px 10px rgba(43,124,255,.25));}
-    .hc-header h1{margin:0; font-size:20px; font-weight:800; letter-spacing:.3px;
-      background:linear-gradient(90deg,#2b7cff,var(--accent),#16a34a);
-      -webkit-background-clip:text; background-clip:text; color:transparent;
-    }
-    .hc-sub{color:var(--muted); margin:4px 2px 12px; font-size:14px}
-    .top-actions{position:absolute; right:16px; top:16px; display:flex; gap:10px; z-index:50}
-    .hc-logout{border:none; border-radius:20px; padding:10px 14px; background:var(--err); color:#fff; font-weight:700; cursor:pointer;
-      box-shadow:0 8px 14px rgba(239,68,68,.25);}
-    .chip-main{display:inline-block; background:#eaf3ff; color:#315a9f; padding:8px 12px; border-radius:14px; font-size:12px; text-decoration:none}
-
-    .stat-row{ display:flex; flex-wrap:wrap; gap:12px; }
-    .stat{ min-width:220px; background:#fff; border:1px solid #e8f1ff; border-radius:12px; padding:12px; box-shadow:0 6px 12px rgba(0,0,0,.04); }
-    .stat .k{ font-size:12px; color:#6b7280; }
-    .stat .v{ font-size:20px; font-weight:800; margin-top:4px; }
-
-    .hc-chip{display:inline-block; background:#eaf3ff; color:#315a9f; padding:8px 12px; border-radius:14px; font-size:12px; margin:8px 0}
-    .range-row{ display:grid; gap:10px; grid-template-columns:1fr 1fr repeat(6,auto); align-items:center; }
-    input[type="date"]{ padding:10px 12px; border-radius:12px; border:1px solid #e5e7eb; background:#fbfdff; font-size:16px }
-    .qbtn{ padding:8px 10px; border-radius:16px; border:1px solid #d6e6ff; background:#eef5ff; color:#315a9f; cursor:pointer; font-weight:700; }
-
-    .chart-block{ margin-top:12px; padding:12px; background:#f7fbff; border:1px solid #e8f1ff; border-radius:12px }
-    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; margin-top:12px }
-    thead th{ background:#f3f8ff; color:#315a9f; text-align:left; padding:12px; border-bottom:1px solid #e5efff }
-    tbody td{ padding:10px 12px; border-bottom:1px solid #f1f5f9; }
-    tbody tr:hover{ background:#f8fbff; }
-    .note{ margin-top:8px; text-align:center; color:#6b7280; font-size:12px; }
-
-    @media (max-width: 900px){ .range-row{ grid-template-columns:1fr 1fr; } }
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;margin:24px;color:#111}
+    h1{margin:0 0 8px}
+    .card{border:1px solid #e5e7eb; border-radius:12px; padding:16px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,.05)}
+    table{width:100%; border-collapse:collapse; margin-top:8px}
+    th,td{padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:left; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+    code{background:#f7fafc; padding:2px 6px; border-radius:6px}
+    button{padding:10px 12px; border-radius:10px; border:1px solid #d6e6ff; background:#eef5ff; cursor:pointer; font-weight:700}
+    .ok{color:#065f46} .warn{color:#92400e}
   </style>
 </head>
 <body>
-  <div class="hc-wrap">
-    <main class="card">
-      <div class="top-actions">
-        <a class="chip-main" href="main.html">主選單</a>
-        <button id="btnLogout" class="hc-logout">登出</button>
-      </div>
+  <h1>health care｜資料診斷工具</h1>
+  <p>用來檢查為什麼 <code>健康總覽</code> 看不到數據。此頁只讀/寫你的瀏覽器 <code>localStorage</code>。</p>
 
-      <div class="hc-header">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#ff9aa2"/></linearGradient>
-            <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#2b7cff"/><stop offset="1" stop-color="#13c2c2"/></linearGradient>
-          </defs>
-        <path d="M22 10c-6 0-10 4.8-10 10.7 0 11.2 20 23.8 20 23.8s20-12.6 20-23.8C52 14.8 48 10 42 10c-4.2 0-7 2.4-10 6-2.8-3.6-5.8-6-10-6z" fill="url(#g1)"/>
-        <rect x="10" y="38" width="44" height="6" rx="3" fill="url(#g2)"/>
-        <rect x="6" y="35" width="6" height="12" rx="2" fill="#2b7cff"/>
-        <rect x="52" y="35" width="6" height="12" rx="2" fill="#13c2c2"/>
-        </svg>
-        <h1>health care</h1>
-      </div>
-      <div class="hc-sub">小步快走，累積大進步！</div>
-
-      <div class="stat-row">
-        <div class="stat"><div class="k">今日攝取</div><div class="v" id="tIntake">0 kcal</div></div>
-        <div class="stat"><div class="k">運動消耗</div><div class="v" id="tBurn">0 kcal</div></div>
-        <div class="stat"><div class="k">淨值（攝取-消耗）</div><div class="v" id="tNet">0 kcal</div></div>
-        <div class="stat"><div class="k">飲水</div><div class="v" id="tWater">0 ml</div></div>
-      </div>
-
-      <div class="hc-chip">統計區間</div>
-      <div class="range-row">
-        <input id="startDate" type="date">
-        <input id="endDate" type="date">
-        <button class="qbtn" data-q="today">今日</button>
-        <button class="qbtn" data-q="1">1天</button>
-        <button class="qbtn" data-q="3">3天</button>
-        <button class="qbtn" data-q="7">7天</button>
-        <button class="qbtn" data-q="30">30天</button>
-        <button class="qbtn" data-q="365">一年</button>
-      </div>
-
-      <div class="chart-block">
-        <canvas id="netChart" height="260"></canvas>
-        <div class="note">顯示為「卡路里淨值（攝取−消耗）」之每日走勢。</div>
-      </div>
-
-      <table>
-        <thead><tr><th>日期</th><th>攝取</th><th>消耗</th><th>淨值</th><th>飲水</th></tr></thead>
-        <tbody id="sumBody"><tr><td colspan="5" style="text-align:center;color:#6b7280;">本期間沒有資料</td></tr></tbody>
-      </table>
-    </main>
+  <div class="card">
+    <h2>目前登入者</h2>
+    <div id="user"></div>
+    <button id="btnSetUser">（可選）把登入者設為 admin</button>
   </div>
 
-  <script>
-    document.getElementById('btnLogout').addEventListener('click',()=>{
-      localStorage.removeItem('hc_currentUser');
-      localStorage.removeItem('hc_role');
-      location.href='index.html';
-    });
-  </script>
+  <div class="card">
+    <h2>可能的資料鍵</h2>
+    <div id="keys"></div>
+  </div>
 
-  <!-- Chart.js UMD -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <div class="card">
+    <h2>每個模組的欄位偵測</h2>
+    <table id="probe"><thead><tr><th>模組</th><th>Key</th><th>日期欄位</th><th>卡路里/毫升欄位</th><th>樣本數</th></tr></thead><tbody></tbody></table>
+  </div>
 
-  <script>
-  // ===== Inline hc-overview.js v2 =====
-  (function(){
-    const user = localStorage.getItem('hc_currentUser');
-    if(!user){ location.href='index.html'; return; }
-    const els = {
-      tIntake: document.getElementById('tIntake'),
-      tBurn:   document.getElementById('tBurn'),
-      tNet:    document.getElementById('tNet'),
-      tWater:  document.getElementById('tWater'),
-      start:   document.getElementById('startDate'),
-      end:     document.getElementById('endDate'),
-      sumBody: document.getElementById('sumBody'),
-    };
-    function localYMD(d){ const y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), da=('0'+d.getDate()).slice(-2); return y+'-'+m+'-'+da; }
-    function toDateAny(s){
-      if(!s) return null;
-      if (s instanceof Date) return s;
-      if (typeof s!=='string') return null;
-      const t=s.trim();
-      if(/^\\d{4}-\\d{2}-\\d{2}$/.test(t)) return new Date(t+'T00:00:00');
-      if(/^\\d{4}\\/\\d{2}\\/\\d{2}$/.test(t)) return new Date(t.replaceAll('/','-')+'T00:00:00');
-      const d=new Date(t); return isNaN(d)?null:d;
+  <div class="card">
+    <h2>今日統計（以本地時區判斷）</h2>
+    <div id="today"></div>
+  </div>
+
+  <div class="card">
+    <h2>一鍵注入「今日」範例資料（安全測試）</h2>
+    <p>會在 <code>hc_diet_&lt;user&gt;</code>、<code>hc_exercise_&lt;user&gt;</code>、<code>hc_water_&lt;user&gt;</code> 追加 1 筆資料；不會覆蓋原資料。</p>
+    <button id="seed">注入範例資料</button>
+    <span id="seedMsg"></span>
+  </div>
+
+<script>
+  const byId = id=>document.getElementById(id);
+  function localYMD(d){const y=d.getFullYear(),m=('0'+(d.getMonth()+1)).slice(-2),da=('0'+d.getDate()).slice(-2);return `${y}-${m}-${da}`;}
+  function toDateAny(s){
+    if(!s) return null; if(s instanceof Date) return s;
+    if(typeof s!=='string') return null;
+    const t=s.trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(t)) return new Date(t+'T00:00:00');
+    if(/^\d{4}\/\d{2}\/\d{2}$/.test(t)) return new Date(t.replaceAll('/','-')+'T00:00:00');
+    const d=new Date(t); return isNaN(d)?null:d;
+  }
+  function num(v){ if(typeof v==='number') return v; if(typeof v==='string'){ const n=parseFloat(v.replace(/[^\d.-]/g,'')); return isNaN(n)?0:n;} return 0; }
+
+  function pickKey(module, user){
+    const exact=`hc_${module}_${user}`;
+    if(localStorage.getItem(exact)!=null) return exact;
+    let best=null, score=-1;
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i)||''; const v=localStorage.getItem(k)||'';
+      const sc=(k.toLowerCase().includes(module)?2:0)+(k.toLowerCase().includes(user.toLowerCase())?2:0)+(v.trim().startsWith('[')?1:0);
+      if(sc>score){ score=sc; best=k; }
     }
-    function within(d,s,e){ if(!d) return false; if(s && d<s) return false; if(e && d>e) return false; return true; }
-    function num(v){ if(typeof v==='number') return v; if(typeof v==='string'){ const n=parseFloat(v.replace(/[^\d.-]/g,'')); return isNaN(n)?0:n;} return 0; }
+    return best;
+  }
+  function loadList(key){ try{ const a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; } }
+  function probeFields(list, isWater){
+    const dC=['date','datetime','time','timestamp','createdAt'];
+    const kC=isWater?['ml','volume','amount','water','intakeMl']:['kcal','calories','cal','intake','consume','burned'];
+    let dateKey=null, valKey=null;
+    for(const it of list){
+      if(!dateKey){ for(const k of dC){ if(k in it && toDateAny(it[k])){ dateKey=k; break; } } }
+      if(!valKey){ for(const k of kC){ const v=it[k]; if(v!=null && !isNaN(parseFloat(String(v)))){ valKey=k; break; } } }
+      if(dateKey && valKey) break;
+    }
+    return {dateKey,valKey};
+  }
 
-    function pickKey(module){
-      const exact=`hc_${module}_${user}`;
-      if(localStorage.getItem(exact)!=null) return exact;
-      let best=null, score=-1;
-      for(let i=0;i<localStorage.length;i++){
-        const k=localStorage.key(i)||''; const v=localStorage.getItem(k)||'';
-        const sc=(k.toLowerCase().includes(module)?2:0)+(k.toLowerCase().includes(user.toLowerCase())?2:0)+(v.trim().startsWith('[')?1:0);
-        if(sc>score){ score=sc; best=k; }
+  function render(){
+    const user = localStorage.getItem('hc_currentUser') || '(未登入)';
+    byId('user').textContent = user;
+
+    // 列出所有像樣的 key
+    const lines=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i); const v = localStorage.getItem(k)||'';
+      if(!v.trim().startsWith('[')) continue;
+      lines.push(`<code>${k}</code> (len=${v.length})`);
+    }
+    byId('keys').innerHTML = lines.length? lines.join('<br>') : '<span class="warn">沒有找到陣列型的資料鍵。</span>';
+
+    // 探測三模組
+    const mods=[['diet',false],['exercise',false],['water',true]];
+    const tbody = byId('probe').querySelector('tbody');
+    tbody.innerHTML='';
+    const today = localYMD(new Date());
+    const todaySum = {in:0, ex:0, wat:0};
+    for(const [mod,isWater] of mods){
+      const key = pickKey(mod, user);
+      const list = key ? loadList(key) : [];
+      const pf = probeFields(list, isWater);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${mod}</td><td><code>${key||'-'}</code></td><td>${pf.dateKey||'-'}</td><td>${pf.valKey||'-'}</td><td>${list.length}</td>`;
+      tbody.appendChild(tr);
+      if(list.length && pf.dateKey && pf.valKey){
+        for(const it of list){
+          const d = toDateAny(it[pf.dateKey]);
+          if(localYMD(d)===today){
+            if(mod==='diet') todaySum.in += num(it[pf.valKey]);
+            if(mod==='exercise') todaySum.ex += num(it[pf.valKey]);
+            if(mod==='water') todaySum.wat += num(it[pf.valKey]);
+          }
+        }
       }
-      return best;
     }
-    function loadList(module){ const key=pickKey(module); if(!key) return []; try{ const a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; } }
-    function probeFields(list, isWater){
-      const dC=['date','datetime','time','timestamp','createdAt'];
-      const kC=isWater?['ml','volume','amount','water','intakeMl']:['kcal','calories','cal','intake','consume','burned'];
-      let dateKey=null, valKey=null;
-      for(const it of list){ if(!it||typeof it!=='object') continue;
-        if(!dateKey){ for(const k of dC){ if(k in it && toDateAny(it[k])){ dateKey=k; break; } } }
-        if(!valKey){ for(const k of kC){ const v=it[k]; if(v!=null && !isNaN(parseFloat(String(v)))){ valKey=k; break; } } }
-        if(dateKey && valKey) break;
-      }
-      return {dateKey, valKey};
+    byId('today').innerHTML = `今日攝取：<b class="ok">${Math.round(todaySum.in)}</b> kcal，
+      運動消耗：<b class="ok">${Math.round(todaySum.ex)}</b> kcal，
+      淨值：<b class="ok">${Math.round(todaySum.in - todaySum.ex)}</b> kcal，
+      飲水：<b class="ok">${Math.round(todaySum.wat)}</b> ml`;
+  }
+
+  byId('btnSetUser').onclick = ()=>{ localStorage.setItem('hc_currentUser','admin'); render(); };
+  byId('seed').onclick = ()=>{
+    const user = localStorage.getItem('hc_currentUser') || 'admin';
+    const today = new Date(); const day = today.toISOString().slice(0,10);
+    function push(key, obj){
+      let arr=[]; try{ arr=JSON.parse(localStorage.getItem(key)||'[]'); if(!Array.isArray(arr)) arr=[]; }catch(_){}
+      arr.push(obj); localStorage.setItem(key, JSON.stringify(arr));
     }
+    push(`hc_diet_${user}`, { date: day, kcal: 600, name: "測試-早餐" });
+    push(`hc_exercise_${user}`, { date: day, calories: 200, name: "測試-慢跑" });
+    push(`hc_water_${user}`, { date: day, ml: 500 });
+    byId('seedMsg').textContent = '已注入今天的測試資料，回健康總覽重整即可看到。';
+    render();
+  };
 
-    function calcToday(){
-      const todayStr = localYMD(new Date());
-      const diet=loadList('diet'), ex=loadList('exercise'), wat=loadList('water');
-      const fd=probeFields(diet,false), fe=probeFields(ex,false), fw=probeFields(wat,true);
-      const tIn = diet.reduce((s,it)=> localYMD(toDateAny(it?.[fd.dateKey]))===todayStr ? s+num(it?.[fd.valKey]) : s, 0);
-      const tEx = ex.reduce((s,it)=> localYMD(toDateAny(it?.[fe.dateKey]))===todayStr ? s+num(it?.[fe.valKey]) : s, 0);
-      const tWt = wat.reduce((s,it)=> localYMD(toDateAny(it?.[fw.dateKey]))===todayStr ? s+num(it?.[fw.valKey]) : s, 0);
-      els.tIntake.textContent = Math.round(tIn)+' kcal';
-      els.tBurn.textContent   = Math.round(tEx)+' kcal';
-      els.tNet.textContent    = Math.round(tIn - tEx)+' kcal';
-      els.tWater.textContent  = Math.round(tWt)+' ml';
-    }
-
-    let chart;
-    function calcRange(){
-      const s = els.start.value? new Date(els.start.value+'T00:00:00'):null;
-      const e = els.end.value? new Date(els.end.value+'T23:59:59'):null;
-      if(!s||!e||s>e) return;
-      const diet=loadList('diet'), ex=loadList('exercise'), wat=loadList('water');
-      const fd=probeFields(diet,false), fe=probeFields(ex,false), fw=probeFields(wat,true);
-      const map={}; function ensure(k){ if(!map[k]) map[k]={in:0,ex:0,wat:0}; return map[k]; }
-      for(const it of diet){ const d=toDateAny(it?.[fd.dateKey]); if(d && within(d,s,e)) ensure(localYMD(d)).in += num(it?.[fd.valKey]); }
-      for(const it of ex){ const d=toDateAny(it?.[fe.dateKey]); if(d && within(d,s,e)) ensure(localYMD(d)).ex += num(it?.[fe.valKey]); }
-      for(const it of wat){ const d=toDateAny(it?.[fw.dateKey]); if(d && within(d,s,e)) ensure(localYMD(d)).wat += num(it?.[fw.valKey]); }
-      const days=[]; for(let d=new Date(s); d<=e; d.setDate(d.getDate()+1)){ const k=localYMD(d); days.push(k); ensure(k); }
-      if(els.sumBody){
-        els.sumBody.innerHTML = days.map(day=>{
-          const o=map[day], net=o.in-o.ex;
-          return `<tr><td>${day}</td><td>${Math.round(o.in)}</td><td>${Math.round(o.ex)}</td><td>${Math.round(net)}</td><td>${Math.round(o.wat)}</td></tr>`;
-        }).join('');
-      }
-      const ctx=document.getElementById('netChart');
-      const netSeries=days.map(d=>map[d].in-map[d].ex);
-      if(chart) chart.destroy();
-      chart = new Chart(ctx, {type:'line', data:{labels:days, datasets:[{label:'卡路里淨值（攝取-消耗）', data:netSeries, tension:.3}]},
-        options:{responsive:true, scales:{y:{beginAtZero:false}}}});
-    }
-
-    document.querySelectorAll('.qbtn').forEach(b=>{
-      b.addEventListener('click',()=>{
-        const q=b.dataset.q, now=new Date();
-        if(q==='today'){ els.start.value=localYMD(now); els.end.value=localYMD(now); }
-        else{ const n=parseInt(q,10)||7; const s=new Date(now); s.setDate(now.getDate()-(n-1)); els.start.value=localYMD(s); els.end.value=localYMD(now); }
-        calcRange();
-      });
-    });
-    document.addEventListener('hc:records:updated', calcRange);
-
-    (function init(){
-      calcToday();
-      const now=new Date(), s7=new Date(now); s7.setDate(now.getDate()-6);
-      els.start.value=localYMD(s7); els.end.value=localYMD(now); calcRange();
-    })();
-  })();
-  </script>
+  render();
+</script>
 </body>
 </html>
