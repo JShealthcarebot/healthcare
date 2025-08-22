@@ -1,149 +1,410 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>health care｜資料診斷工具</title>
-  <style>
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;margin:24px;color:#111}
-    h1{margin:0 0 8px}
-    .card{border:1px solid #e5e7eb; border-radius:12px; padding:16px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,.05)}
-    table{width:100%; border-collapse:collapse; margin-top:8px}
-    th,td{padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:left; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
-    code{background:#f7fafc; padding:2px 6px; border-radius:6px}
-    button{padding:10px 12px; border-radius:10px; border:1px solid #d6e6ff; background:#eef5ff; cursor:pointer; font-weight:700}
-    .ok{color:#065f46} .warn{color:#92400e}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>總覽與建議｜Health Care</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#e8f8ff;
+    --panel:#eafaff;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --danger:#ef4444;
+    --ok:#10b981;
+    --text:#0f172a;
+    --muted:#475569;
+    --shadow-lg: 0 18px 60px rgba(0,0,0,.10);
+    --shadow-md: 0 10px 26px rgba(0,0,0,.08);
+    --radius: 24px;
+    --gutter: 16px;
+  }
+  *{ box-sizing:border-box; }
+  html, body { height:100%; }
+  body{
+    margin:0;
+    font-family:'Noto Sans TC', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', 'PingFang TC', 'Noto Sans TC', Arial, 'Microsoft JhengHei', sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(900px 600px at 8% 4%, #ecf8ff, transparent 60%),
+      radial-gradient(900px 700px at 92% 0%, #e9fffa, transparent 65%),
+      var(--canvas);
+    display:flex; align-items:flex-start; justify-content:center; padding:24px;
+  }
+  .shell{
+    width:min(1200px, 96vw);
+    background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.45)), var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 18px 20px 24px 20px;
+  }
+
+  /* Header */
+  .header{ display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:center; margin:4px 4px 8px 4px; }
+  .h-left h1{ margin:8px 0 2px 0; font-size:28px; font-weight:900; letter-spacing:.5px; }
+  .h-left .slogan{ margin:0; color:var(--muted); font-size:14px; }
+  .h-right{ display:flex; align-items:center; gap:12px; }
+  .userbox{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:56px; height:56px; border-radius:50%; overflow:hidden; border:4px solid #fff; background:#fff; box-shadow:0 8px 20px rgba(0,0,0,.18); }
+  .avatar img{ width:100%; height:100%; display:block; border-radius:50%; object-fit:cover; }
+  .badge{ font-size:13px; font-weight:800; padding:6px 10px; border-radius:14px; background:#e6ffed; color:#16a34a; border:2px solid #16a34a; }
+  .badge.admin{ background:#ffe6e6; color:#dc2626; border-color:#dc2626; }
+
+  /* Buttons - same as index/main */
+  .btn{ padding:12px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:800; font-size:15px;
+        box-shadow: 0 10px 24px rgba(37,99,235,.35); transition: transform .06s ease, box-shadow .2s ease; white-space:nowrap; }
+  .btn:active{ transform: translateY(1px); box-shadow: 0 6px 18px rgba(37,99,235,.45); }
+  .btn-primary{ background: var(--primary); color:#fff; }
+  .btn-secondary{ background:#f1f5f9; color:#0f172a; box-shadow:0 6px 16px rgba(15,23,42,.12); }
+  .btn.small{ padding:8px 12px; font-size:13px; }
+
+  /* Sections */
+  .section{ margin-top:10px; }
+  .grid-2{ display:grid; grid-template-columns: 1fr; gap:var(--gutter); }
+  .grid-3{ display:grid; grid-template-columns: 1fr; gap:var(--gutter); }
+  @media (min-width:840px){ .grid-2{ grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width:1100px){ .grid-3{ grid-template-columns: repeat(3, 1fr); } }
+
+  .card{ background:var(--card); border-radius:20px; box-shadow:var(--shadow-md); padding:12px; }
+  .card h3{ margin:8px 8px 6px 8px; font-size:16px; font-weight:900; }
+  .card .muted{ color:#64748b; font-size:12px; margin:0 8px; }
+  .card .body{ padding:6px 8px 10px 8px; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ font-size:12px; padding:8px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a; box-shadow:0 6px 16px rgba(15,23,42,.12); }
+  .chip.ok{ background:#ecfdf5; color:#065f46; }
+  .chip.warn{ background:#fff7ed; color:#7c2d12; }
+  .chip.bad{ background:#fef2f2; color:#7f1d1d; }
+
+  .advice{ display:grid; grid-template-columns: 1fr; gap:var(--gutter); }
+  @media (min-width:840px){ .advice{ grid-template-columns: repeat(3, 1fr); } }
+  .advice .card h3{ display:flex; align-items:center; gap:8px; }
+
+  canvas{ width:100%; height:240px; }
+
+  .footer-actions{ display:flex; gap:10px; justify-content:center; margin-top:16px; }
+</style>
 </head>
 <body>
-  <h1>health care｜資料診斷工具</h1>
-  <p>用來檢查為什麼 <code>健康總覽</code> 看不到數據。此頁只讀/寫你的瀏覽器 <code>localStorage</code>。</p>
+  <div class="shell">
+    <div class="header">
+      <div class="h-left">
+        <h1>總覽與建議 📊</h1>
+        <p class="slogan">跨模組圖表與健康建議卡，一次看懂。</p>
+      </div>
+      <div class="h-right">
+        <button id="toMainBtn" class="btn btn-secondary">返回主選單</button>
+        <button id="logoutBtn" class="btn btn-primary">登出</button>
+        <div class="userbox">
+          <a class="avatar" href="profile.html" title="個人資料"><img id="profileAvatar" alt="avatar"></a>
+          <span id="roleBadge" class="badge">《優秀人才》</span>
+        </div>
+      </div>
+    </div>
 
-  <div class="card">
-    <h2>目前登入者</h2>
-    <div id="user"></div>
-    <button id="btnSetUser">（可選）把登入者設為 admin</button>
+    <!-- Summary chips -->
+    <div class="section">
+      <div class="card">
+        <h3>本週摘要</h3>
+        <div id="chips" class="body chips"></div>
+      </div>
+    </div>
+
+    <!-- Charts: weight + diet -->
+    <div class="section grid-2">
+      <div class="card">
+        <h3>14 天體重趨勢 ⚖️</h3>
+        <div class="body"><canvas id="weightChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>7 天飲食熱量 vs. 推估 TDEE 🍱</h3>
+        <p class="muted">僅統計有熱量欄位的飲食紀錄；TDEE 依個人資料推估。</p>
+        <div class="body"><canvas id="dietChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Charts: exercise + water -->
+    <div class="section grid-2">
+      <div class="card">
+        <h3>7 天運動時間 ⏱️</h3>
+        <div class="body"><canvas id="exerciseChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>7 天飲水達成率 💧</h3>
+        <p class="muted">以每日目標（預設 2000ml）計算達成百分比。</p>
+        <div class="body"><canvas id="waterChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Advice -->
+    <div class="section">
+      <div class="advice" id="adviceCards">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <button id="refreshBtn" class="btn btn-secondary">重整資料</button>
+      <button id="profileBtn" class="btn btn-primary">個人資料</button>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>可能的資料鍵</h2>
-    <div id="keys"></div>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const $ = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-  <div class="card">
-    <h2>每個模組的欄位偵測</h2>
-    <table id="probe"><thead><tr><th>模組</th><th>Key</th><th>日期欄位</th><th>卡路里/毫升欄位</th><th>樣本數</th></tr></thead><tbody></tbody></table>
-  </div>
+    // Avatar fallback
+    const AVATAR_DATA = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="%2378b8ff"/><stop offset="1" stop-color="%23aeddff"/></linearGradient></defs><circle cx="128" cy="128" r="118" fill="url(%23g)" stroke="%23ffffff" stroke-width="10"/><rect x="90" y="90" width="76" height="76" rx="12" fill="%23ffffff" opacity="0.9"/></svg>';
 
-  <div class="card">
-    <h2>今日統計（以本地時區判斷）</h2>
-    <div id="today"></div>
-  </div>
-
-  <div class="card">
-    <h2>一鍵注入「今日」範例資料（安全測試）</h2>
-    <p>會在 <code>hc_diet_&lt;user&gt;</code>、<code>hc_exercise_&lt;user&gt;</code>、<code>hc_water_&lt;user&gt;</code> 追加 1 筆資料；不會覆蓋原資料。</p>
-    <button id="seed">注入範例資料</button>
-    <span id="seedMsg"></span>
-  </div>
-
-<script>
-  const byId = id=>document.getElementById(id);
-  function localYMD(d){const y=d.getFullYear(),m=('0'+(d.getMonth()+1)).slice(-2),da=('0'+d.getDate()).slice(-2);return `${y}-${m}-${da}`;}
-  function toDateAny(s){
-    if(!s) return null; if(s instanceof Date) return s;
-    if(typeof s!=='string') return null;
-    const t=s.trim();
-    if(/^\d{4}-\d{2}-\d{2}$/.test(t)) return new Date(t+'T00:00:00');
-    if(/^\d{4}\/\d{2}\/\d{2}$/.test(t)) return new Date(t.replaceAll('/','-')+'T00:00:00');
-    const d=new Date(t); return isNaN(d)?null:d;
-  }
-  function num(v){ if(typeof v==='number') return v; if(typeof v==='string'){ const n=parseFloat(v.replace(/[^\d.-]/g,'')); return isNaN(n)?0:n;} return 0; }
-
-  function pickKey(module, user){
-    const exact=`hc_${module}_${user}`;
-    if(localStorage.getItem(exact)!=null) return exact;
-    let best=null, score=-1;
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i)||''; const v=localStorage.getItem(k)||'';
-      const sc=(k.toLowerCase().includes(module)?2:0)+(k.toLowerCase().includes(user.toLowerCase())?2:0)+(v.trim().startsWith('[')?1:0);
-      if(sc>score){ score=sc; best=k; }
+    function getCurrentUser(){
+      return localStorage.getItem('currentUser') || '';
     }
-    return best;
-  }
-  function loadList(key){ try{ const a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; } }
-  function probeFields(list, isWater){
-    const dC=['date','datetime','time','timestamp','createdAt'];
-    const kC=isWater?['ml','volume','amount','water','intakeMl']:['kcal','calories','cal','intake','consume','burned'];
-    let dateKey=null, valKey=null;
-    for(const it of list){
-      if(!dateKey){ for(const k of dC){ if(k in it && toDateAny(it[k])){ dateKey=k; break; } } }
-      if(!valKey){ for(const k of kC){ const v=it[k]; if(v!=null && !isNaN(parseFloat(String(v)))){ valKey=k; break; } } }
-      if(dateKey && valKey) break;
+    function getProfile(){
+      const u = getCurrentUser();
+      try{ return JSON.parse(localStorage.getItem('hc_profile_' + u) || 'null') || {}; }catch{ return {}; }
     }
-    return {dateKey,valKey};
-  }
-
-  function render(){
-    const user = localStorage.getItem('hc_currentUser') || '(未登入)';
-    byId('user').textContent = user;
-
-    // 列出所有像樣的 key
-    const lines=[];
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i); const v = localStorage.getItem(k)||'';
-      if(!v.trim().startsWith('[')) continue;
-      lines.push(`<code>${k}</code> (len=${v.length})`);
+    function setAvatarAndRole(){
+      const u = getCurrentUser();
+      const img = $('#profileAvatar');
+      const p = getProfile();
+      const g = p.gender || localStorage.getItem('gender_' + u) || 'neutral';
+      img.src = (g==='female') ? 'avatar-female.png' : (g==='male' ? 'avatar-male.png' : 'avatar-neutral.png');
+      img.onerror = ()=>{ img.src = AVATAR_DATA; };
+      const badge = $('#roleBadge');
+      if ((u||'').toLowerCase() === 'admin'){ badge.textContent='《管理者》'; badge.classList.add('admin'); }
+      else { badge.textContent='《優秀人才》'; badge.classList.remove('admin'); }
     }
-    byId('keys').innerHTML = lines.length? lines.join('<br>') : '<span class="warn">沒有找到陣列型的資料鍵。</span>';
 
-    // 探測三模組
-    const mods=[['diet',false],['exercise',false],['water',true]];
-    const tbody = byId('probe').querySelector('tbody');
-    tbody.innerHTML='';
-    const today = localYMD(new Date());
-    const todaySum = {in:0, ex:0, wat:0};
-    for(const [mod,isWater] of mods){
-      const key = pickKey(mod, user);
-      const list = key ? loadList(key) : [];
-      const pf = probeFields(list, isWater);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${mod}</td><td><code>${key||'-'}</code></td><td>${pf.dateKey||'-'}</td><td>${pf.valKey||'-'}</td><td>${list.length}</td>`;
-      tbody.appendChild(tr);
-      if(list.length && pf.dateKey && pf.valKey){
-        for(const it of list){
-          const d = toDateAny(it[pf.dateKey]);
-          if(localYMD(d)===today){
-            if(mod==='diet') todaySum.in += num(it[pf.valKey]);
-            if(mod==='exercise') todaySum.ex += num(it[pf.valKey]);
-            if(mod==='water') todaySum.wat += num(it[pf.valKey]);
-          }
-        }
+    // Utilities
+    const pad = (n)=>String(n).padStart(2,'0');
+    const dateKey = (d)=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const daysAgo = (n)=>{ const d=new Date(); d.setDate(d.getDate()-n); d.setHours(0,0,0,0); return d; };
+
+    function safeParse(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]') || []; }catch{ return []; } }
+
+    function loadWeights(){
+      const u=getCurrentUser();
+      let arr = safeParse('hc_weight_records_'+u);
+      if (!Array.isArray(arr) || !arr.length){ arr = safeParse('weight_records_'+u); }
+      // normalize {ts, weight}
+      return arr.map(r=>{
+        const ts = r.ts || r.date || r.日期時間 || r.timestamp;
+        const w = r.weight ?? r.體重 ?? r.weightKg ?? r.kg;
+        return { ts: ts? new Date(ts): new Date(), weight: w? Number(w):NaN };
+      }).filter(x=>!isNaN(x.weight));
+    }
+
+    function loadDiet(){
+      const u=getCurrentUser();
+      let arr = safeParse('hc_diet_records_'+u);
+      if (!Array.isArray(arr) || !arr.length){ arr = safeParse('diet_records_'+u); }
+      return arr.map(r=>{
+        const ts = r.ts || r.date || r.日期時間 || r.timestamp;
+        const kcal = r.calories ?? r.kcal ?? r.熱量 ?? r.卡路里;
+        return { ts: ts? new Date(ts): new Date(), calories: kcal? Number(kcal):0 };
+      });
+    }
+
+    function loadExercise(){
+      const u=getCurrentUser();
+      let arr = safeParse('hc_exercise_records_'+u);
+      if (!Array.isArray(arr)) arr=[];
+      return arr.map(r=>{
+        const ts = r.ts || r.date || r.timestamp;
+        const cat = r.category || r.類別 || '時間型';
+        const duration = Number(r.duration || r.時間分 || 0);
+        const calories = Number(r.calories || r.卡路里 || 0);
+        const reps = Number(r.reps || r.次 || 0);
+        const sets = Number(r.sets || r.組 || 0);
+        const weight = Number((r.weight!==undefined? r.weight : r['重量kg']) || 0);
+        return { ts: ts? new Date(ts): new Date(), cat, duration, calories, load: (cat.includes('重')? (weight*reps*sets):0) };
+      });
+    }
+
+    function loadWater(){
+      const u=getCurrentUser();
+      let arr = safeParse('hc_water_records_'+u);
+      if (!Array.isArray(arr) || !arr.length){ arr = safeParse('water_records_'+u); }
+      return arr.map(r=>{
+        const ts = r.ts || r.date || r.日期時間 || r.timestamp;
+        const ml = r.ml ?? r.amount ?? r.volume ?? r.毫升 ?? r.水量 ?? 0;
+        const goal = r.goal ?? r.target ?? r.目標 ?? 2000;
+        return { ts: ts? new Date(ts): new Date(), ml: Number(ml), goal: Number(goal)||2000 };
+      });
+    }
+
+    // Aggregations
+    function seriesForRange(days, data, valuePicker){
+      const labels=[], values=[];
+      for(let i=days-1;i>=0;i--){
+        const d=daysAgo(i); const key=dateKey(d);
+        labels.push(key);
+        const vs = data.filter(x=>{ const dt=new Date(x.ts); return dateKey(dt)===key; }).map(valuePicker);
+        const sum = vs.reduce((a,b)=>a+(Number(b)||0),0);
+        values.push(sum || 0);
       }
+      return {labels, values};
     }
-    byId('today').innerHTML = `今日攝取：<b class="ok">${Math.round(todaySum.in)}</b> kcal，
-      運動消耗：<b class="ok">${Math.round(todaySum.ex)}</b> kcal，
-      淨值：<b class="ok">${Math.round(todaySum.in - todaySum.ex)}</b> kcal，
-      飲水：<b class="ok">${Math.round(todaySum.wat)}</b> ml`;
-  }
 
-  byId('btnSetUser').onclick = ()=>{ localStorage.setItem('hc_currentUser','admin'); render(); };
-  byId('seed').onclick = ()=>{
-    const user = localStorage.getItem('hc_currentUser') || 'admin';
-    const today = new Date(); const day = today.toISOString().slice(0,10);
-    function push(key, obj){
-      let arr=[]; try{ arr=JSON.parse(localStorage.getItem(key)||'[]'); if(!Array.isArray(arr)) arr=[]; }catch(_){}
-      arr.push(obj); localStorage.setItem(key, JSON.stringify(arr));
+    function lineForWeights(days, weights){
+      const labels=[], values=[];
+      for(let i=days-1;i>=0;i--){
+        const d=daysAgo(i); const key=dateKey(d);
+        labels.push(key);
+        // pick latest weight of that day
+        const ofDay = weights.filter(w=> dateKey(new Date(w.ts))===key ).sort((a,b)=> new Date(a.ts)-new Date(b.ts));
+        values.push(ofDay.length? ofDay[ofDay.length-1].weight : null);
+      }
+      return {labels, values};
     }
-    push(`hc_diet_${user}`, { date: day, kcal: 600, name: "測試-早餐" });
-    push(`hc_exercise_${user}`, { date: day, calories: 200, name: "測試-慢跑" });
-    push(`hc_water_${user}`, { date: day, ml: 500 });
-    byId('seedMsg').textContent = '已注入今天的測試資料，回健康總覽重整即可看到。';
-    render();
-  };
 
-  render();
-</script>
+    function lastNDiff(arr){
+      const nums = arr.filter(x=>x!==null && !isNaN(x));
+      if(nums.length<2) return 0;
+      return nums[nums.length-1]-nums[0];
+    }
+
+    function estimateTDEE(profile){
+      // Mifflin-St Jeor
+      let w = Number(profile.weight||65);
+      let h = Number(profile.height||170);
+      let age = Number(profile.age||30);
+      const male = (profile.gender||'neutral')==='male';
+      let bmr = male ? (10*w + 6.25*h - 5*age + 5) : (10*w + 6.25*h - 5*age - 161);
+      const act = Number(profile.activity||1.4); // baseline
+      return Math.round(bmr * (act>0?act:1.4));
+    }
+
+    function avg(arr){ return arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+
+    // Build charts + chips + advice
+    let weightChart,dietChart,exChart,waterChart;
+    function render(){
+      const u = getCurrentUser();
+      if(!u){ location.href='index.html'; return; }
+      setAvatarAndRole();
+
+      const profile = getProfile();
+      const weights = loadWeights();
+      const diet = loadDiet();
+      const ex = loadExercise();
+      const water = loadWater();
+      const tdee = estimateTDEE(profile);
+
+      // Chips
+      const weekEx = seriesForRange(7, ex, r=>r.duration);
+      const exMinTotal = weekEx.values.reduce((a,b)=>a+b,0);
+      const exSessions = ex.filter(r=> r.duration>0 && (Date.now()-new Date(r.ts).getTime())<8.64e7*7).length;
+      const weekDiet = seriesForRange(7, diet, r=>r.calories);
+      const weekExKcal = seriesForRange(7, ex, r=>r.calories);
+      const dailyBalance = weekDiet.values.map((c,i)=> c - (tdee) + (-weekExKcal.values[i])); // intake - TDEE - exercise
+      const avgBalance = Math.round(avg(dailyBalance));
+      const w14 = lineForWeights(14, weights);
+      const wChange7 = (function(){
+        const w7 = lineForWeights(7, weights);
+        return Math.round(lastNDiff(w7.values)*10)/10;
+      })();
+      const water7 = (function(){
+        const labels=[], pct=[];
+        for(let i=6;i>=0;i--){
+          const d=daysAgo(i), key=dateKey(d);
+          const ofDay = water.filter(w=> dateKey(new Date(w.ts))===key);
+          const ml = ofDay.reduce((a,b)=>a+(b.ml||0),0);
+          const goal = ofDay.length? (ofDay[0].goal||2000): (profile.waterGoal||2000);
+          pct.push(goal? Math.min(100, Math.round(ml/goal*100)) : 0);
+          labels.push(key);
+        }
+        return {labels, pct};
+      })();
+
+      const chips = $('#chips'); chips.innerHTML='';
+      const chip = (txt,cls='')=>{ const s=document.createElement('span'); s.className='chip '+cls; s.textContent=txt; chips.appendChild(s); };
+      chip(`本週運動 ${exMinTotal} 分`, exMinTotal>=150? 'ok':'warn');
+      chip(`運動次數 ${exSessions} 次`);
+      chip(`平均收支 ${avgBalance>=0?'+':''}${avgBalance} kcal/日`, avgBalance<=-200? 'ok' : (avgBalance<=100? '' : 'warn'));
+      chip(`體重 7 天變化 ${wChange7>0?'+':''}${wChange7} kg`, wChange7<0? 'ok': (wChange7>0.3? 'bad':'') );
+      chip(`飲水達成率 7 日平均 ${Math.round(avg(water7.pct))}%`, avg(water7.pct)>=80? 'ok': (avg(water7.pct)>=50?'':'warn') );
+
+      // Charts
+      const ctxW=$('#weightChart').getContext('2d');
+      const ctxD=$('#dietChart').getContext('2d');
+      const ctxE=$('#exerciseChart').getContext('2d');
+      const ctxWa=$('#waterChart').getContext('2d');
+
+      if(weightChart) weightChart.destroy();
+      if(dietChart) dietChart.destroy();
+      if(exChart) exChart.destroy();
+      if(waterChart) waterChart.destroy();
+
+      weightChart = new Chart(ctxW, {
+        type:'line',
+        data:{ labels:w14.labels, datasets:[{ label:'體重 (kg)', data:w14.values, spanGaps:true }]},
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:false } } }
+      });
+
+      dietChart = new Chart(ctxD, {
+        type:'bar',
+        data:{
+          labels: weekDiet.labels,
+          datasets:[
+            { type:'bar', label:'飲食熱量 (kcal)', data: weekDiet.values },
+            { type:'line', label:'推估 TDEE', data: weekDiet.labels.map(()=>tdee) }
+          ]
+        },
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+      });
+
+      exChart = new Chart(ctxE, {
+        type:'bar',
+        data:{ labels: weekEx.labels, datasets:[{ label:'運動時間 (分)', data: weekEx.values }]},
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+      });
+
+      waterChart = new Chart(ctxWa, {
+        type:'line',
+        data:{ labels: water7.labels, datasets:[{ label:'飲水達成率 (%)', data: water7.pct }]},
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, max:100 } } }
+      });
+
+      // Advice
+      const adv = $('#adviceCards'); adv.innerHTML='';
+      const addAdvice = (title, body)=>{
+        const card=document.createElement('div'); card.className='card';
+        card.innerHTML = `<h3>${title}</h3><div class="body"><p class="muted">${body}</p></div>`;
+        adv.appendChild(card);
+      };
+      // 1) 運動時間建議
+      if (exMinTotal < 150) addAdvice('本週運動再多一點 ⏱️', '建議每週至少 150 分鐘中等強度有氧（或 75 分鐘高強度），並安排 2 天以上肌力訓練。你本週累積 '+exMinTotal+' 分鐘，可以把兩天的散步加長到 30 分鐘試試。');
+      else addAdvice('運動量達標，保持！✅', '你本週已達成 150 分鐘指標，記得加入 2 次肌力訓練平衡體態與代謝。');
+
+      // 2) 熱量收支建議
+      if (avgBalance > 150) addAdvice('熱量略有盈餘 🍰', '最近 7 天每日平均 +'+avgBalance+' kcal，若想減脂可把每餐少 50–100 kcal，或加 10–15 分鐘走路。');
+      else if (avgBalance < -300) addAdvice('熱量赤字偏大 ⚠️', '每日平均 '+avgBalance+' kcal，若出現疲憊或易餓，建議把赤字控制在 -300～-500 kcal，確保蛋白質 1.6–2.2 g/kg。');
+      else addAdvice('收支控制得宜 👍', '目前熱量收支接近目標區間，維持規律飲食與運動即可。');
+
+      // 3) 體重趨勢建議
+      if (wChange7 > 0.5) addAdvice('體重上升較多 📈', '7 天變化 +'+wChange7+' kg。檢查夜間點心與含糖飲，或提高 NEAT（多走樓梯、站站起身）。');
+      else if (wChange7 < -0.5) addAdvice('體重下降迅速 📉', '7 天變化 '+wChange7+' kg。注意不是水份波動；若持續下降過快，適度增加碳水與總熱量。');
+      else addAdvice('體重平穩中 ⚖️', '變化 '+(wChange7>0?'+':'')+wChange7+' kg。維持目前節奏，觀察 2–4 週趨勢。');
+
+      // 4) 飲水建議
+      const waterAvg = Math.round((water7.pct.reduce((a,b)=>a+b,0)/7)||0);
+      if (waterAvg < 60) addAdvice('補水不足 💧', '近 7 天平均達成率 '+waterAvg+'%。試著設定固定整點喝水，或每餐前先喝 200ml。');
+      else addAdvice('補水不錯 👍', '近 7 天平均達成率 '+waterAvg+'%。運動日前後記得補足電解質。');
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      if (!getCurrentUser()){ location.href='index.html'; return; }
+      setAvatarAndRole();
+      render();
+
+      $('#logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); location.href='index.html'; });
+      $('#profileBtn').addEventListener('click', ()=> location.href='profile.html');
+      $('#toMainBtn').addEventListener('click', ()=> location.href='main.html');
+      $('#refreshBtn').addEventListener('click', render);
+    });
+  </script>
 </body>
 </html>
