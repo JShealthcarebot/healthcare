@@ -1,360 +1,221 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>純數字版｜易經計算＋紀錄</title>
-  <meta name="color-scheme" content="light only"/>
-  <style>
-    :root{
-      --bg1:#e9f7ff; --bg2:#f7fff9; --card:#ffffff;
-      --primary:#2b7cff; --primary-dark:#1f5ec1; --accent:#13c2c2;
-      --text:#1f2937; --muted:#6b7280; --err:#ef4444;
-      --shadow:0 10px 22px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
-      --radius:18px; --btnr:12px;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      height:100%; margin:0; color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
-      background:
-        radial-gradient(1200px 800px at 20% -10%,var(--bg1),transparent 60%),
-        radial-gradient(1000px 700px at 120% 10%,var(--bg2),transparent 60%),
-        linear-gradient(180deg,#f8fbff,#f6fff7 80%);
-    }
-    .wrap{min-height:100%; display:grid; place-items:center; padding:24px}
-    .card{
-      width:clamp(320px,92vw,980px); background:var(--card);
-      border-radius:24px; box-shadow:var(--shadow); border:1px solid rgba(43,124,255,.08);
-      padding:22px 18px;
-      position:relative;
-    }
-    .title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
-    .title h1{margin:0;font-size:20px;font-weight:800;
-      background:linear-gradient(90deg,#2b7cff,var(--accent),#16a34a);
-      -webkit-background-clip:text;background-clip:text;color:transparent}
-    .sub{color:var(--muted);font-size:14px;margin:-2px 0 10px}
-    .row{display:grid; gap:10px; grid-template-columns: 1fr auto auto auto; align-items:end}
-    .row .field{display:grid; gap:6px}
-    label{font-size:13px;color:var(--muted); padding-left:2px}
-    input[type="text"], input[type="date"]{
-      padding:12px 14px; border:1px solid #e5e7eb; background:#fbfdff;
-      border-radius:12px; font-size:16px; outline:none; transition:border .2s, box-shadow .2s;
-    }
-    input:focus{border-color:#c7ddff; box-shadow:0 0 0 6px rgba(43,124,255,.08)}
-    .btn{
-      padding:12px 14px; border:none; border-radius:var(--btnr);
-      background:linear-gradient(180deg,var(--primary),var(--primary-dark));
-      color:#fff; font-weight:800; cursor:pointer; box-shadow:0 8px 14px rgba(43,124,255,.22);
-    }
-    .btn.outline{
-      background:#eef5ff; color:#315a9f; border:1px solid #d6e6ff; box-shadow:none; font-weight:700;
-    }
-    .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px}
-    @media(max-width:860px){ .row{grid-template-columns:1fr 1fr 1fr 1fr} .grid-2{grid-template-columns:1fr} }
-    .panel{border:1px solid #e8f1ff; border-radius:14px; padding:12px; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,.04)}
-    .panel h3{margin:0 0 8px; font-size:16px}
-    .result{display:grid; gap:8px}
-    .kv{display:grid; grid-template-columns:140px 1fr; gap:8px; align-items:center}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-    .lines{display:flex; flex-direction:column; gap:4px; align-items:flex-start}
-    .line{height:10px; width:140px; background:#111; border-radius:2px; position:relative}
-    .line.yin::after{content:""; position:absolute; left:50%; top:0; transform:translateX(-50%); height:10px; width:36px; background:#fff}
-    .muted{color:var(--muted)}
-    table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px}
-    thead th{background:#f3f8ff; color:#315a9f; text-align:left; padding:10px; border-bottom:1px solid #e5efff}
-    tbody td{padding:10px; border-bottom:1px solid #f1f5f9}
-    tbody tr:hover{background:#f8fbff}
-    .note{margin-top:6px; font-size:12px; color:var(--muted); text-align:center}
-    .msg{margin-top:8px; font-size:14px; padding:10px; border-radius:10px; display:none}
-    .msg.ok{display:block; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0}
-    .msg.err{display:block; background:#fef2f2; color:#7f1d1d; border:1px solid #fecaca}
-    .chips{display:flex; gap:8px; flex-wrap:wrap}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Care｜登入</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#ecf8ff;
+    --bg2:#e9fffa;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --primary:#2563eb;
+    --shadow:0 18px 60px rgba(0,0,0,.10);
+    --radius:24px;
+    --formW: 320px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Noto Sans TC',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue','PingFang TC','Noto Sans TC',Arial,'Microsoft JhengHei',sans-serif;
+    color:var(--text);
+    background: radial-gradient(1000px 600px at 10% 10%, var(--bg1), transparent 60%),
+                radial-gradient(900px 700px at 90% 0%, var(--bg2), transparent 65%),
+                #f6fbff;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    width:min(92vw, 520px);
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 18px 22px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  /* Glass background moved BEHIND content (no blur) */
+  .glass{
+    content:"";
+    position:absolute; inset:0 0 auto 0; height:88px;
+    background: linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.05));
+    z-index:0;
+    pointer-events:none;
+  }
+  .content{ position:relative; z-index:1; }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    padding: 16px;
+  }
+  .logo svg{ width:44px; height:44px; flex:0 0 44px; }
+  .logo h1{
+    margin:0; font-size:22px; font-weight:800; letter-spacing:.6px;
+  }
+  .slogan{
+    margin: 0 16px 6px 16px;
+    color: var(--muted);
+    font-size:14px;
+  }
+  .form{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    padding: 10px 16px 12px 16px;
+  }
+  .field{
+    width: var(--formW);
+    position:relative;
+  }
+  input{
+    width: 100%;
+    padding: 12px 44px 12px 14px;
+    border-radius: 14px;
+    border:1px solid rgba(2,6,23,.12);
+    outline:none;
+    font-size: 15px;
+    background:#fff;
+    box-shadow: 0 2px 0 rgba(0,0,0,.03);
+  }
+  input::placeholder{ color:#94a3b8; }
+  .toggle{
+    position:absolute; top:50%; right:10px; transform:translateY(-50%);
+    border:none; background:#f1f5f9; border-radius:999px; padding:6px 10px; cursor:pointer; font-weight:700;
+  }
+  .btn{
+    width: var(--formW);
+    padding: 12px 16px;
+    border-radius:999px; border:none; cursor:pointer;
+    background: var(--primary); color:#fff; font-weight:800; font-size:15px;
+    box-shadow: 0 10px 24px rgba(37,99,235,.35);
+    transition: transform .06s ease, box-shadow .2s ease;
+  }
+  .btn:active{ transform: translateY(1px); box-shadow: 0 6px 18px rgba(37,99,235,.45); }
+  .tips{ margin: 10px 18px 6px 18px; text-align:center; color:#94a3b8; font-size:12px; }
+  .footer{
+    margin-top: 10px; display:flex; justify-content:center; gap:10px; color:#64748b; font-size:12px;
+  }
+  .toast{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+    background: rgba(15,23,42,.94); color:#fff; padding:10px 16px; border-radius:14px; font-size:13px;
+    opacity:0; pointer-events:none; transition: opacity .35s ease; box-shadow: var(--shadow);
+  }
+  .toast.show{ opacity:1; }
+  .mark{
+    position:absolute; right:-30px; bottom:-30px; opacity:.06; transform: rotate(-12deg);
+    font-weight:900; font-size:72px; letter-spacing:1px;
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <main class="card">
-      <div class="title">
-        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+  <div class="card">
+    <div class="glass"></div>
+    <div class="content">
+      <div class="logo" aria-label="Health Care">
+        <!-- 圖像風格 Logo：心形＋啞鈴（SVG）-->
+        <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
-            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#2b7cff"/><stop offset="1" stop-color="#13c2c2"/></linearGradient>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#ff9fb7"/>
+              <stop offset="1" stop-color="#ff6b8d"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#60a5fa"/>
+              <stop offset="1" stop-color="#34d399"/>
+            </linearGradient>
           </defs>
-          <rect x="4" y="14" width="56" height="6" rx="3" fill="url(#g1)"/>
-          <rect x="4" y="29" width="56" height="6" rx="3" fill="url(#g1)"/>
-          <rect x="4" y="44" width="56" height="6" rx="3" fill="url(#g1)"/>
+          <path d="M128 214c-52-35-86-62-86-102 0-25 19-44 44-44 18 0 31 10 42 25 11-15 24-25 42-25 25 0 44 19 44 44 0 40-34 67-86 102z" fill="url(#g1)" stroke="white" stroke-width="6"/>
+          <rect x="88" y="112" rx="8" ry="8" width="80" height="20" fill="white" opacity=".95"/>
+          <rect x="70" y="102" width="14" height="40" rx="6" fill="url(#g2)" />
+          <rect x="62" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
+          <rect x="172" y="102" width="14" height="40" rx="6" fill="url(#g2)" />
+          <rect x="186" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
         </svg>
-        <h1>純數字版｜易經計算＋紀錄</h1>
+        <h1>Health Care</h1>
       </div>
-      <div class="sub">輸入任意<strong>數字序列</strong>（只取 0-9），可儲存為今日紀錄並查詢日期區間。</div>
+      <p id="slogan" class="slogan">今天登入，明天更輕盈 🫶</p>
 
-      <!-- 輸入與操作 -->
-      <div class="row">
+      <form class="form" id="loginForm" autocomplete="off">
+        <input type="text" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
+        <input type="password" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
+
         <div class="field">
-          <label for="inp">輸入數字（僅 0-9）</label>
-          <input id="inp" type="text" inputmode="numeric" placeholder="例如：168168168 或 12345678"/>
+          <input id="username" name="username" inputmode="text" pattern=".{4,}" minlength="4"
+                placeholder="帳號（至少 4 字元）" autocomplete="new-username" autocapitalize="off" spellcheck="false">
         </div>
-        <button id="btnCalc" class="btn">計算（純數字）</button>
-        <button id="btnSave" class="btn outline" title="把目前結果儲存到今日">儲存到今天</button>
-        <button id="btnReset" class="btn outline">重設</button>
+        <div class="field">
+          <input id="password" name="password" type="password" pattern=".{4,}" minlength="4"
+                placeholder="密碼（至少 4 字元）" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+          <button class="toggle" type="button" id="togglePwd">顯示</button>
+        </div>
+        <button id="loginBtn" class="btn" type="submit">登入</button>
+      </form>
+
+      <p class="tips">貼心提醒：我們不會在此頁顯示「建立帳號 / 忘記密碼」選項，保持乾淨俐落。</p>
+
+      <div class="footer">
+        <span>© 2025 Health Care</span>
       </div>
-
-      <div id="msg" class="msg"></div>
-
-      <!-- 計算結果 -->
-      <div class="grid-2">
-        <section class="panel">
-          <h3>計算結果</h3>
-          <div class="result">
-            <div class="kv"><div class="muted">上卦</div><div id="upperTxt" class="mono">—</div></div>
-            <div class="kv"><div class="muted">下卦</div><div id="lowerTxt" class="mono">—</div></div>
-            <div class="kv"><div class="muted">動爻</div><div id="movingTxt" class="mono">—</div></div>
-
-            <div class="kv"><div class="muted">本卦</div>
-              <div id="mainHex" class="lines" aria-label="本卦六爻"></div>
-            </div>
-            <div class="kv"><div class="muted">之卦</div>
-              <div id="changedHex" class="lines" aria-label="之卦六爻"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 區間查詢 -->
-        <section class="panel">
-          <h3>查詢日期區間</h3>
-          <div class="chips" style="margin-bottom:8px">
-            <button class="btn outline" data-q="today">今日</button>
-            <button class="btn outline" data-q="7">近 7 天</button>
-            <button class="btn outline" data-q="30">近 30 天</button>
-          </div>
-          <div class="row" style="grid-template-columns: 1fr 1fr auto;">
-            <div class="field">
-              <label for="start">開始日期</label>
-              <input id="start" type="date"/>
-            </div>
-            <div class="field">
-              <label for="end">結束日期</label>
-              <input id="end" type="date"/>
-            </div>
-            <button id="btnQuery" class="btn">查詢</button>
-          </div>
-
-          <div class="note">下表顯示區間內的每日紀錄（若同日多筆，顯示最後一筆）。</div>
-          <div style="margin-top:10px; overflow:auto">
-            <table>
-              <thead><tr><th>日期</th><th>輸入</th><th>上卦/下卦</th><th>動爻</th><th>本卦 → 之卦</th></tr></thead>
-              <tbody id="tblBody"><tr><td colspan="5" style="text-align:center;color:#6b7280">尚無資料</td></tr></tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
-      <div class="note">儲存在本機瀏覽器（localStorage：<code class="mono">iching_records</code>）。</div>
-    </main>
+    </div>
+    <div class="toast" id="toast">登入失敗</div>
+    <div class="mark">HEALTH • CARE</div>
   </div>
 
-  <script>
-    // ====== 工具 ======
-    const $ = id => document.getElementById(id);
-    const todayYMD = () => {
-      const d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${da}`;
-    };
-    const onlyDigits = s => (s||'').replace(/\D+/g,'');
-    function showMsg(text, ok=false){
-      const m=$('msg'); m.className='msg '+(ok?'ok':'err'); m.textContent=text; m.style.display='block';
-      setTimeout(()=>{ m.style.display='none'; }, 2200);
-    }
+<script>
+  const slogans=[
+    '今天登入，明天更輕盈 🫶',
+    '少一點借口，多一點肌肉 💪',
+    '喝口水，再登入，動起來！💧',
+    '一卡通行，卡路里通通 OUT 🚪',
+    '穩穩登入，天天進步 📈'
+  ];
+  function setRandomSlogan(){ document.getElementById('slogan').textContent=slogans[Math.floor(Math.random()*slogans.length)]; }
 
-    // ====== 八卦與六十四卦（簡化呈現）======
-    // 0..7 -> 卦名與三爻位元（坤000、艮001、坎010、巽011、震100、離101、兌110、乾111）
-    const TRIGRAMS = [
-      {name:'坤', bits:[0,0,0]}, // 0
-      {name:'艮', bits:[1,0,0]}, // 1
-      {name:'坎', bits:[0,1,0]}, // 2
-      {name:'巽', bits:[1,1,0]}, // 3
-      {name:'震', bits:[0,0,1]}, // 4
-      {name:'離', bits:[1,0,1]}, // 5
-      {name:'兌', bits:[1,1,0].map((_,i)=> [1,1,0][i])}, // 6 (為穩定起見明確指定)
-      {name:'乾', bits:[1,1,1]}  // 7
-    ];
-    // 上面第6個（兌）bits 實際應為 110：
-    TRIGRAMS[6].bits = [1,1,0];
+  function toast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),1600);
+  }
 
-    function trigramByMod(n){ // n: 0..7
-      const idx = ((n%8)+8)%8;
-      return TRIGRAMS[idx];
-    }
+  const BUILT_IN_USERS={
+    "samelo":"1226",
+    "jessie":"0621",
+    "jenny":"0731",
+    "admin":"Admin"
+  };
+  function validate(u,p){ return !!(BUILT_IN_USERS[u] && BUILT_IN_USERS[u]===p); }
 
-    // lines: 6 條，自下而上，1=陽，0=陰
-    function hexagramFromTrigrams(lowerBits, upperBits){
-      // lowerBits -> lines 1..3, upperBits -> lines 4..6
-      return [
-        lowerBits[0], lowerBits[1], lowerBits[2],
-        upperBits[0], upperBits[1], upperBits[2],
-      ];
-    }
-    function flipAt(lines, pos){ // pos: 1..6
-      const i = pos-1; const out = lines.slice();
-      out[i] = out[i] ? 0 : 1; return out;
-    }
-    function renderLines(el, lines){
-      el.innerHTML = '';
-      // 顯示自上而下（視覺），但資料結構是自下而上，所以倒序畫
-      for(let i=5;i>=0;i--){
-        const div = document.createElement('div');
-        div.className = 'line '+(lines[i]===1?'yang':'yin');
-        if(lines[i]===0) div.classList.add('yin');
-        el.appendChild(div);
-      }
-    }
+  function preventAutofill(){
+    const u=document.getElementById('username');
+    const p=document.getElementById('password');
+    u.setAttribute('autocomplete','new-username');
+    p.setAttribute('autocomplete','new-password');
+    u.readOnly=true; p.readOnly=true;
+    setTimeout(()=>{u.readOnly=false; p.readOnly=false;}, 200);
+  }
 
-    // ====== 演算法（純數字）======
-    function computeFromInput(rawDigits){
-      const s = onlyDigits(rawDigits);
-      if(!s) return null;
-
-      let oddSum=0, evenSum=0, total=0; // 以 1 起算：1,3,5 為奇位；2,4,6 為偶位
-      for(let i=0;i<s.length;i++){
-        const n = parseInt(s[i],10);
-        total += n;
-        if((i+1)%2===1) oddSum += n; else evenSum += n;
-      }
-      const upper = trigramByMod(oddSum % 8);   // 上卦
-      const lower = trigramByMod(evenSum % 8);  // 下卦
-      let moving = total % 6;                   // 動爻（0 當 6）
-      if(moving===0) moving = 6;
-
-      const mainLines = hexagramFromTrigrams(lower.bits, upper.bits);
-      const changedLines = flipAt(mainLines, moving);
-
-      return {
-        input: s,
-        sums: { oddSum, evenSum, total },
-        upper, lower, moving,
-        mainLines, changedLines
-      };
-    }
-
-    function formatHexText(lines){
-      // 例如：111000（自上而下），或簡短顯示
-      return lines.slice().reverse().join(''); // 由上而下
-    }
-
-    // ====== UI 綁定 ======
-    const inp = $('inp'), upperTxt=$('upperTxt'), lowerTxt=$('lowerTxt'), movingTxt=$('movingTxt');
-    const mainHex=$('mainHex'), changedHex=$('changedHex');
-
-    function showResult(r){
-      if(!r){ upperTxt.textContent=lowerTxt.textContent=movingTxt.textContent='—'; mainHex.innerHTML=changedHex.innerHTML=''; return; }
-      upperTxt.textContent = `${r.upper.name}（${r.upper.bits.join('')}）`;
-      lowerTxt.textContent = `${r.lower.name}（${r.lower.bits.join('')}）`;
-      movingTxt.textContent = r.moving+' 爻';
-      renderLines(mainHex, r.mainLines);
-      renderLines(changedHex, r.changedLines);
-    }
-
-    // ====== 儲存與讀取 ======
-    const LS_KEY = 'iching_records'; // [{date,time,input,result:{...}}]
-    function readRecords(){
-      try{ const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; }
-    }
-    function writeRecords(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
-    function saveToday(input, result){
-      const list = readRecords();
-      list.push({ date: todayYMD(), time: new Date().toISOString(), input, result });
-      writeRecords(list);
-      showMsg('已儲存到今日！', true);
-    }
-    function loadTodayLatest(){
-      const list = readRecords().filter(x=>x.date===todayYMD());
-      if(list.length===0) return null;
-      return list[list.length-1];
-    }
-
-    // ====== 區間查詢 ======
-    const tblBody = $('tblBody'), startEl=$('start'), endEl=$('end');
-    function ymd(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; }
-    function rangeQuery(start, end){
-      const s = new Date(start+'T00:00:00'), e = new Date(end+'T23:59:59');
-      const list = readRecords().filter(x=>{
-        const d = new Date((x.date||'')+'T12:00:00'); // 以 local day 判斷
-        return !isNaN(d) && d>=s && d<=e;
-      });
-      // 取每天最後一筆
-      const map = {};
-      for(const it of list){ map[it.date] = it; }
-      const days = [];
-      for(let d=new Date(s); d<=e; d.setDate(d.getDate()+1)) days.push(ymd(d));
-
-      const rows = days.map(day=>{
-        const it = map[day];
-        if(!it) return `<tr><td>${day}</td><td class="muted" colspan="4">（無）</td></tr>`;
-        const r = it.result, hexMain = formatHexText(r.mainLines), hexChg = formatHexText(r.changedLines);
-        return `<tr>
-          <td>${day}</td>
-          <td class="mono">${it.input}</td>
-          <td>${r.upper.name}/${r.lower.name}</td>
-          <td>${r.moving}</td>
-          <td class="mono">${hexMain} → ${hexChg}</td>
-        </tr>`;
-      }).join('');
-      tblBody.innerHTML = rows || `<tr><td colspan="5" style="text-align:center;color:#6b7280">本區間沒有資料</td></tr>`;
-    }
-
-    // 快捷鍵
-    function setQuickRange(mode){
-      const now = new Date();
-      if(mode==='today'){
-        startEl.value = endEl.value = ymd(now);
+  window.addEventListener('DOMContentLoaded', ()=>{
+    setRandomSlogan();
+    preventAutofill();
+    document.getElementById('togglePwd').addEventListener('click',()=>{
+      const i=document.getElementById('password');
+      if(i.type==='password'){ i.type='text'; document.getElementById('togglePwd').textContent='隱藏'; }
+      else { i.type='password'; document.getElementById('togglePwd').textContent='顯示'; }
+    });
+    document.getElementById('loginForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const u=document.getElementById('username').value.trim();
+      const p=document.getElementById('password').value;
+      if(u.length<4 || p.length<4){ toast('帳號/密碼至少 4 字元'); return; }
+      if(validate(u,p)){
+        localStorage.setItem('currentUser', u);
+        localStorage.setItem('login_at', new Date().toISOString());
+        window.location.href='main.html';
       }else{
-        const n = parseInt(mode,10)||7;
-        const s = new Date(now); s.setDate(now.getDate()-(n-1));
-        startEl.value = ymd(s); endEl.value = ymd(now);
-      }
-    }
-
-    // ====== 綁定事件 ======
-    $('btnCalc').addEventListener('click', ()=>{
-      const r = computeFromInput(inp.value);
-      if(!r){ showMsg('請輸入數字。'); return; }
-      showResult(r);
-    });
-
-    $('btnSave').addEventListener('click', ()=>{
-      const r = computeFromInput(inp.value);
-      if(!r){ showMsg('請先輸入數字並計算。'); return; }
-      saveToday(r.input, r);
-      // 儲存後自動刷新當前區間表（若剛好是今天）
-      if(startEl.value && endEl.value && startEl.value<=todayYMD() && endEl.value>=todayYMD()){
-        rangeQuery(startEl.value, endEl.value);
+        toast('登入失敗：請確認帳號或密碼');
       }
     });
-
-    $('btnReset').addEventListener('click', ()=>{
-      inp.value=''; showResult(null);
-    });
-
-    document.querySelectorAll('.chips .btn').forEach(b=>{
-      b.addEventListener('click', ()=>{ setQuickRange(b.dataset.q); if(startEl.value && endEl.value) rangeQuery(startEl.value, endEl.value); });
-    });
-
-    $('btnQuery').addEventListener('click', ()=>{
-      if(!startEl.value || !endEl.value){ showMsg('請選擇起訖日期'); return; }
-      if(startEl.value > endEl.value){ showMsg('開始不可晚於結束'); return; }
-      rangeQuery(startEl.value, endEl.value);
-    });
-
-    // ====== 初始化：帶入今日資料、預設區間 ======
-    (function init(){
-      // 今日最後一筆 → 自動帶入
-      const t = loadTodayLatest();
-      if(t){ inp.value = t.input; showResult(t.result); }
-
-      // 預設近 7 天
-      setQuickRange('7');
-      rangeQuery(startEl.value, endEl.value);
-    })();
-  </script>
+  });
+</script>
 </body>
 </html>
