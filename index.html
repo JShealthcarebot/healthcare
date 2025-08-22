@@ -1,221 +1,94 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Health Care｜登入</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
+<!DOCTYPE html><html lang="zh-Hant"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Care｜登入</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg1:#ecf8ff;
-    --bg2:#e9fffa;
+    --canvas:#e8f8ff;
+    --panel:#eafaff;
     --card:#ffffff;
-    --text:#0f172a;
-    --muted:#64748b;
     --primary:#2563eb;
-    --shadow:0 18px 60px rgba(0,0,0,.10);
-    --radius:24px;
-    --formW: 320px;
+    --danger:#ef4444;
+    --text:#0f172a;
+    --muted:#475569;
+    --shadow-lg: 0 18px 60px rgba(0,0,0,.10);
+    --shadow-md: 0 10px 26px rgba(0,0,0,.08);
+    --radius: 24px;
+    --gutter: 16px;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:'Noto Sans TC',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue','PingFang TC','Noto Sans TC',Arial,'Microsoft JhengHei',sans-serif;
-    color:var(--text);
-    background: radial-gradient(1000px 600px at 10% 10%, var(--bg1), transparent 60%),
-                radial-gradient(900px 700px at 90% 0%, var(--bg2), transparent 65%),
-                #f6fbff;
-    display:flex; align-items:center; justify-content:center; padding:24px;
-  }
-  .card{
-    width:min(92vw, 520px);
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 20px 18px 22px 18px;
-    position:relative;
-    overflow:hidden;
-  }
-  /* Glass background moved BEHIND content (no blur) */
-  .glass{
-    content:"";
-    position:absolute; inset:0 0 auto 0; height:88px;
-    background: linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.05));
-    z-index:0;
-    pointer-events:none;
-  }
-  .content{ position:relative; z-index:1; }
-  .logo{
-    display:flex; align-items:center; gap:10px;
-    padding: 16px;
-  }
-  .logo svg{ width:44px; height:44px; flex:0 0 44px; }
-  .logo h1{
-    margin:0; font-size:22px; font-weight:800; letter-spacing:.6px;
-  }
-  .slogan{
-    margin: 0 16px 6px 16px;
-    color: var(--muted);
-    font-size:14px;
-  }
-  .form{
-    display:flex; flex-direction:column; align-items:center; gap:10px;
-    padding: 10px 16px 12px 16px;
-  }
-  .field{
-    width: var(--formW);
-    position:relative;
-  }
-  input{
-    width: 100%;
-    padding: 12px 44px 12px 14px;
-    border-radius: 14px;
-    border:1px solid rgba(2,6,23,.12);
-    outline:none;
-    font-size: 15px;
-    background:#fff;
-    box-shadow: 0 2px 0 rgba(0,0,0,.03);
-  }
-  input::placeholder{ color:#94a3b8; }
-  .toggle{
-    position:absolute; top:50%; right:10px; transform:translateY(-50%);
-    border:none; background:#f1f5f9; border-radius:999px; padding:6px 10px; cursor:pointer; font-weight:700;
-  }
-  .btn{
-    width: var(--formW);
-    padding: 12px 16px;
-    border-radius:999px; border:none; cursor:pointer;
-    background: var(--primary); color:#fff; font-weight:800; font-size:15px;
-    box-shadow: 0 10px 24px rgba(37,99,235,.35);
-    transition: transform .06s ease, box-shadow .2s ease;
-  }
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  body{ margin:0; font-family:'Noto Sans TC',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue','PingFang TC','Noto Sans TC',Arial,'Microsoft JhengHei',sans-serif; color:var(--text); background: radial-gradient(900px 600px at 8% 4%, #ecf8ff, transparent 60%), radial-gradient(900px 700px at 92% 0%, #e9fffa, transparent 65%), var(--canvas); display:flex; align-items:flex-start; justify-content:center; padding:24px; }
+  .shell{ width:min(1200px, 96vw); background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.45)), var(--panel); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 18px 20px 24px 20px; }
+  .header{ display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:center; margin:4px 4px 8px 4px; }
+  .h-left h1{ margin:8px 0 2px 0; font-size:28px; font-weight:900; letter-spacing:.5px; }
+  .h-left .slogan{ margin:0; color:var(--muted); font-size:14px; }
+  .h-right{ display:flex; align-items:center; gap:12px; }
+  .userbox{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:56px; height:56px; border-radius:50%; overflow:hidden; border:4px solid #fff; background:#fff; box-shadow:0 8px 20px rgba(0,0,0,.18); }
+  .avatar img{ width:100%; height:100%; display:block; border-radius:50%; object-fit:cover; }
+  .badge{ font-size:13px; font-weight:800; padding:6px 10px; border-radius:14px; background:#e6ffed; color:#16a34a; border:2px solid #16a34a; }
+  .badge.admin{ background:#ffe6e6; color:#dc2626; border-color:#dc2626; }
+  .btn{ padding:12px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:800; font-size:15px; box-shadow: 0 10px 24px rgba(37,99,235,.35); transition: transform .06s ease, box-shadow .2s ease; white-space:nowrap; }
   .btn:active{ transform: translateY(1px); box-shadow: 0 6px 18px rgba(37,99,235,.45); }
-  .tips{ margin: 10px 18px 6px 18px; text-align:center; color:#94a3b8; font-size:12px; }
-  .footer{
-    margin-top: 10px; display:flex; justify-content:center; gap:10px; color:#64748b; font-size:12px;
-  }
-  .toast{
-    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
-    background: rgba(15,23,42,.94); color:#fff; padding:10px 16px; border-radius:14px; font-size:13px;
-    opacity:0; pointer-events:none; transition: opacity .35s ease; box-shadow: var(--shadow);
-  }
-  .toast.show{ opacity:1; }
-  .mark{
-    position:absolute; right:-30px; bottom:-30px; opacity:.06; transform: rotate(-12deg);
-    font-weight:900; font-size:72px; letter-spacing:1px;
-  }
+  .btn-primary{ background: var(--primary); color:#fff; }
+  .btn-secondary{ background:#f1f5f9; color:#0f172a; box-shadow:0 6px 16px rgba(15,23,42,.12); }
+  .btn-danger{ background: var(--danger); color:#fff; box-shadow:0 10px 24px rgba(239,68,68,.35); }
+  .btn.small{ padding:8px 12px; font-size:13px; }
+  .section{ margin-top:10px; }
+  .card{ background:var(--card); border-radius:20px; box-shadow:var(--shadow-md); padding:12px; }
+  .card h3{ margin:8px 8px 6px 8px; font-size:16px; font-weight:900; }
+  .card .muted{ color:#64748b; font-size:12px; margin:0 8px; }
+  .card .body{ padding:6px 8px 10px 8px; }
+  .grid-2{ display:grid; grid-template-columns: 1fr; gap:var(--gutter); }
+  @media (min-width:860px){ .grid-2{ grid-template-columns: 1fr 1fr; } }
 </style>
-</head>
-<body>
-  <div class="card">
-    <div class="glass"></div>
-    <div class="content">
-      <div class="logo" aria-label="Health Care">
-        <!-- 圖像風格 Logo：心形＋啞鈴（SVG）-->
-        <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#ff9fb7"/>
-              <stop offset="1" stop-color="#ff6b8d"/>
-            </linearGradient>
-            <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#60a5fa"/>
-              <stop offset="1" stop-color="#34d399"/>
-            </linearGradient>
-          </defs>
-          <path d="M128 214c-52-35-86-62-86-102 0-25 19-44 44-44 18 0 31 10 42 25 11-15 24-25 42-25 25 0 44 19 44 44 0 40-34 67-86 102z" fill="url(#g1)" stroke="white" stroke-width="6"/>
-          <rect x="88" y="112" rx="8" ry="8" width="80" height="20" fill="white" opacity=".95"/>
-          <rect x="70" y="102" width="14" height="40" rx="6" fill="url(#g2)" />
-          <rect x="62" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
-          <rect x="172" y="102" width="14" height="40" rx="6" fill="url(#g2)" />
-          <rect x="186" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
-        </svg>
-        <h1>Health Care</h1>
-      </div>
-      <p id="slogan" class="slogan">今天登入，明天更輕盈 🫶</p>
 
-      <form class="form" id="loginForm" autocomplete="off">
-        <input type="text" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
-        <input type="password" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
-
-        <div class="field">
-          <input id="username" name="username" inputmode="text" pattern=".{4,}" minlength="4"
-                placeholder="帳號（至少 4 字元）" autocomplete="new-username" autocapitalize="off" spellcheck="false">
-        </div>
-        <div class="field">
-          <input id="password" name="password" type="password" pattern=".{4,}" minlength="4"
-                placeholder="密碼（至少 4 字元）" autocomplete="new-password" autocapitalize="off" spellcheck="false">
-          <button class="toggle" type="button" id="togglePwd">顯示</button>
-        </div>
-        <button id="loginBtn" class="btn" type="submit">登入</button>
-      </form>
-
-      <p class="tips">貼心提醒：我們不會在此頁顯示「建立帳號 / 忘記密碼」選項，保持乾淨俐落。</p>
-
-      <div class="footer">
-        <span>© 2025 Health Care</span>
-      </div>
-    </div>
-    <div class="toast" id="toast">登入失敗</div>
-    <div class="mark">HEALTH • CARE</div>
+<style>
+  .card{ width:min(92vw,520px); background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-lg); padding:20px 18px 22px 18px; position:relative; overflow:hidden; }
+  .glass{ content:''; position:absolute; inset:0 0 auto 0; height:88px; background: linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.05)); z-index:0; pointer-events:none; }
+  .content{ position:relative; z-index:1; }
+  .logo{ display:flex; align-items:center; gap:10px; padding:16px; }
+  .logo svg{ width:44px; height:44px; flex:0 0 44px; }
+  .logo h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:.6px; }
+  .slogan{ margin:0 16px 6px 16px; color:var(--muted); font-size:14px; }
+  .form{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:10px 16px 12px 16px; }
+  .field{ width:320px; max-width:92vw; position:relative; }
+  input{ width:100%; padding:12px 44px 12px 14px; border-radius:14px; border:1px solid rgba(2,6,23,.12); outline:none; font-size:15px; background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.03);}
+  .toggle{ position:absolute; top:50%; right:10px; transform:translateY(-50%); border:none; background:#f1f5f9; border-radius:999px; padding:6px 10px; cursor:pointer; font-weight:700; }
+  .btn{ width:320px; max-width:92vw; }
+  .toast{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background: rgba(15,23,42,.94); color:#fff; padding:10px 16px; border-radius:14px; font-size:13px; opacity:0; pointer-events:none; transition: opacity .35s ease; box-shadow:var(--shadow-lg);}
+  .toast.show{ opacity:1; }
+</style></head><body>
+<div class="card"><div class="glass"></div><div class="content">
+  <div class="logo" aria-label="Health Care">
+    <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ff9fb7"/><stop offset="1" stop-color="#ff6b8d"/></linearGradient>
+             <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+      <path d="M128 214c-52-35-86-62-86-102 0-25 19-44 44-44 18 0 31 10 42 25 11-15 24-25 42-25 25 0 44 19 44 44 0 40-34 67-86 102z" fill="url(#g1)" stroke="white" stroke-width="6"/>
+      <rect x="88" y="112" rx="8" ry="8" width="80" height="20" fill="white" opacity=".95"/>
+      <rect x="70" y="102" width="14" height="40" rx="6" fill="url(#g2)"/><rect x="62" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
+      <rect x="172" y="102" width="14" height="40" rx="6" fill="url(#g2)"/><rect x="186" y="96" width="8" height="52" rx="4" fill="#e2e8f0"/>
+    </svg><h1>Health Care</h1>
   </div>
-
+  <p id="slogan" class="slogan">今天登入，明天更輕盈 🫶</p>
+  <form class="form" id="loginForm" autocomplete="off">
+    <input type="text" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
+    <input type="password" style="position:absolute; left:-9999px; width:1px; height:1px;" tabindex="-1" aria-hidden="true">
+    <div class="field"><input id="username" pattern=".{4,}" minlength="4" placeholder="帳號（至少 4 字元）" autocomplete="new-username" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><input id="password" type="password" pattern=".{4,}" minlength="4" placeholder="密碼（至少 4 字元）" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+      <button class="toggle" type="button" id="togglePwd">顯示</button></div>
+    <button id="loginBtn" class="btn btn-primary" type="submit">登入</button>
+  </form>
+</div><div class="toast" id="toast">登入失敗</div></div>
 <script>
-  const slogans=[
-    '今天登入，明天更輕盈 🫶',
-    '少一點借口，多一點肌肉 💪',
-    '喝口水，再登入，動起來！💧',
-    '一卡通行，卡路里通通 OUT 🚪',
-    '穩穩登入，天天進步 📈'
-  ];
+  const slogans=['今天登入，明天更輕盈 🫶','少一點借口，多一點肌肉 💪','喝口水，再登入，動起來！💧','一卡通行，卡路里 OUT 🚪','穩穩登入，天天進步 📈'];
   function setRandomSlogan(){ document.getElementById('slogan').textContent=slogans[Math.floor(Math.random()*slogans.length)]; }
-
-  function toast(msg){
-    const t=document.getElementById('toast');
-    t.textContent=msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),1600);
-  }
-
-  const BUILT_IN_USERS={
-    "samelo":"1226",
-    "jessie":"0621",
-    "jenny":"0731",
-    "admin":"Admin"
-  };
-  function validate(u,p){ return !!(BUILT_IN_USERS[u] && BUILT_IN_USERS[u]===p); }
-
-  function preventAutofill(){
-    const u=document.getElementById('username');
-    const p=document.getElementById('password');
-    u.setAttribute('autocomplete','new-username');
-    p.setAttribute('autocomplete','new-password');
-    u.readOnly=true; p.readOnly=true;
-    setTimeout(()=>{u.readOnly=false; p.readOnly=false;}, 200);
-  }
-
-  window.addEventListener('DOMContentLoaded', ()=>{
-    setRandomSlogan();
-    preventAutofill();
-    document.getElementById('togglePwd').addEventListener('click',()=>{
-      const i=document.getElementById('password');
-      if(i.type==='password'){ i.type='text'; document.getElementById('togglePwd').textContent='隱藏'; }
-      else { i.type='password'; document.getElementById('togglePwd').textContent='顯示'; }
-    });
-    document.getElementById('loginForm').addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const u=document.getElementById('username').value.trim();
-      const p=document.getElementById('password').value;
-      if(u.length<4 || p.length<4){ toast('帳號/密碼至少 4 字元'); return; }
-      if(validate(u,p)){
-        localStorage.setItem('currentUser', u);
-        localStorage.setItem('login_at', new Date().toISOString());
-        window.location.href='main.html';
-      }else{
-        toast('登入失敗：請確認帳號或密碼');
-      }
-    });
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+  const USERS={"samelo":"1226","jessie":"0621","jenny":"0731","admin":"Admin"};
+  function preventAutofill(){ const u=document.getElementById('username'); const p=document.getElementById('password'); u.readOnly=p.readOnly=true; setTimeout(()=>{u.readOnly=p.readOnly=false;},200); }
+  window.addEventListener('DOMContentLoaded',()=>{
+    setRandomSlogan(); preventAutofill();
+    document.getElementById('togglePwd').addEventListener('click',()=>{ const i=document.getElementById('password'); i.type=(i.type==='password')?'text':'password'; });
+    document.getElementById('loginForm').addEventListener('submit',(e)=>{ e.preventDefault(); const u=username.value.trim(), p=password.value; if(u.length<4||p.length<4) return toast('帳號/密碼至少 4 字元'); if(USERS[u]===p){ localStorage.setItem('currentUser',u); localStorage.setItem('login_at', new Date().toISOString()); location.href='main.html'; } else toast('登入失敗：請確認帳號或密碼'); });
   });
-</script>
-</body>
-</html>
+</script></body></html>

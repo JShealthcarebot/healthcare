@@ -1,51 +1,344 @@
-<!DOCTYPE html><html lang="zh-Hant"><head><title>體重紀錄 ⚖️ | Health Care</title><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://cdn.jsdelivr.net"/><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>
-:root{--bg:#eaf8ff;--card:#d7f2ff;--text:#113048;--muted:#5b7284;--primary:#2d9cdb;--danger:#e74c3c;--white:#fff;--shadow:0 10px 30px rgba(25,79,116,.12);--radius:22px}
-html,body{height:100%}body{margin:0;background:var(--bg);font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans TC',Arial,sans-serif;color:var(--text)}
-.card{background:var(--card);max-width:520px;width:92vw;margin:64px auto;padding:28px 24px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.btn{appearance:none;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-weight:700;letter-spacing:.3px;background:#eef7ff;color:var(--primary);box-shadow:0 4px 10px rgba(45,156,219,.12);transition:transform .12s ease,background .12s ease}
-.btn:hover{transform:translateY(-1px);background:#e4f2ff}.btn:active{transform:translateY(0)}.btn.primary{background:var(--primary);color:#fff}.btn.danger{background:var(--danger);color:#fff;box-shadow:0 6px 14px rgba(231,76,60,.18)}.btn.block{width:100%}
-h1{font-size:28px;margin:6px 0 6px;display:flex;align-items:center;gap:8px}.slogan{color:var(--muted);font-size:14px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:1fr;gap:12px}.row{display:flex;gap:10px}
-.field{position:relative}.label{font-size:13px;color:var(--muted);margin:2px 2px 6px}
-.input{width:100%;padding:12px 14px;font-size:16px;border-radius:14px;border:1px solid #cfe5f4;outline:0;background:#f7fcff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-.input:focus{border-color:#9dd3f3;background:#fff;box-shadow:0 0 0 3px rgba(45,156,219,.15)}
-.summary{margin:14px 0 8px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #dfeef8;text-align:center;font-weight:600}
-.record{background:#fff;border:1px solid #e9f2f9;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(12,50,78,.06);color:#234;display:flex;justify-content:space-between;align-items:center}
-.list{display:grid;gap:10px}.empty{text-align:center;color:#7b92a3;background:#fff;border:1px dashed #cfe0ed;padding:12px;border-radius:14px}
-#chartContainer{display:none;margin-top:18px}.chart{background:#fff;border:1px solid #e9f2f9;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(12,50,78,.06)}
-.chart canvas{display:block;width:100% !important;height:240px !important;max-height:240px !important}@media(min-width:640px){.chart canvas{height:260px !important;max-height:260px !important}}
-#profileAvatar{position:fixed;top:14px;right:14px;width:50px;height:50px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);border:3px solid rgba(255,255,255,.8);z-index:9;object-fit:cover;background:#fff}
-.center{text-align:center}
-</style></head><body>
-<img id="profileAvatar" src="avatar-neutral.png" onclick="location.href='profile.html'"/>
-<div class="card"><div class="top"><button class="btn" onclick="goMenu()">主選單</button><button class="btn danger" onclick="logout()">登出</button></div>
-<h1>體重紀錄 ⚖️</h1><p class="slogan">小步前進，穩定下降。</p>
-<div class="grid">
-  <div class="field"><div class="label">日期</div><input id="wt_date" type="date" class="input"></div>
-  <div class="row">
-    <div class="field" style="flex:1;"><div class="label">體重 (kg)</div><input id="wt_kg" type="number" step="0.1" class="input" placeholder="例如 68.5"></div>
-    <div class="field" style="flex:1;"><div class="label">體脂 (%)（可選）</div><input id="wt_bf" type="number" step="0.1" class="input" placeholder="例如 22.0"></div>
-  </div>
-  <button class="btn primary block" onclick="addWeight()">＋ 新增紀錄</button>
-</div>
-<div class="summary" id="wtSummary">最新：— kg（— %）</div>
-<div id="wtList" class="list"><div class="empty">尚無紀錄</div></div>
-<div class="center" style="margin-top:12px;"><button id="wtToggle" class="btn" onclick="wtToggle()">📈 展開圖表</button></div>
-<div id="chartContainer"><div class="chart"><h3 style="margin:0 0 12px;">📉 體重趨勢</h3><canvas id="wtChart"></canvas></div></div>
-</div>
-<script>
-function currentUserId(){return localStorage.getItem('currentUser')||'guest';}
-function loadAvatar(){const uid=currentUserId();try{const p=JSON.parse(localStorage.getItem(`profile_${uid}`))||{};const g=(p.gender||'').toLowerCase();const img=document.getElementById('profileAvatar');if(g==='male'||g==='男'||g==='男性')img.src='avatar-male.png';else if(g==='female'||g==='女'||g==='女性')img.src='avatar-female.png';else img.src='avatar-neutral.png';}catch(e){}}
-function goMenu(){location.href='main.html';}
-function logout(){location.href='index.html';}
-function todayISO(){return new Date().toISOString().slice(0,10);}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>體重紀錄｜Health Care</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#e8f8ff;
+    --panel:#eafaff;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --danger:#ef4444;
+    --text:#0f172a;
+    --muted:#475569;
+    --shadow-lg: 0 18px 60px rgba(0,0,0,.10);
+    --shadow-md: 0 10px 26px rgba(0,0,0,.08);
+    --radius: 24px;
+    --gutter: 16px;
+  }
+  *{ box-sizing:border-box; }
+  html, body { height:100%; }
+  body{
+    margin:0;
+    font-family:'Noto Sans TC', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', 'PingFang TC', 'Noto Sans TC', Arial, 'Microsoft JhengHei', sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(900px 600px at 8% 4%, #ecf8ff, transparent 60%),
+      radial-gradient(900px 700px at 92% 0%, #e9fffa, transparent 65%),
+      var(--canvas);
+    display:flex; align-items:flex-start; justify-content:center; padding:24px;
+  }
+  .shell{
+    width:min(1000px, 96vw);
+    background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.45)), var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 18px 20px 24px 20px;
+  }
 
-const uid=currentUserId();const key=`weight_${uid}`;function wtGet(){return JSON.parse(localStorage.getItem(key))||[];}function wtSet(v){localStorage.setItem(key,JSON.stringify(v));}
-function addWeight(){const date=wt_date.value||todayISO();const kg=parseFloat(wt_kg.value);const bf=parseFloat(wt_bf.value);if(isNaN(kg)){alert('請輸入體重');return;}const list=wtGet();list.push({date,kg,bf:isNaN(bf)?null:bf});wtSet(list);wt_kg.value='';wt_bf.value='';render();build();}
-function render(){const box=wtList;const list=wtGet();box.innerHTML='';if(!list.length){box.innerHTML='<div class=empty>尚無紀錄</div>';}else{list.sort((a,b)=>new Date(b.date)-new Date(a.date));list.forEach(r=>{const div=document.createElement('div');div.className='record';div.innerHTML=`<div>📅 ${r.date}</div><div>⚖️ ${r.kg} kg${(r.bf!=null)?' ・ '+r.bf+'%':''}</div>`;box.appendChild(div);});const latest=list[0];wtSummary.textContent=`最新：${latest.kg} kg${(latest.bf!=null)?'（'+latest.bf+' %）':''}`;}}
-let wtReady=false,wtChartObj=null;
-function wtToggle(){const box=chartContainer;const show=box.style.display==='none'||box.style.display==='';box.style.display=show?'block':'none';document.getElementById('wtToggle').textContent=show?'📉 收合圖表':'📈 展開圖表';if(show)build();}
-function build(){const list=wtGet().slice().sort((a,b)=>new Date(a.date)-new Date(b.date));const labels=list.map(r=>r.date);const weights=list.map(r=>r.kg);const ctx=wtChart.getContext('2d');if(!wtReady){wtChartObj=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'kg',data:weights,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});wtReady=true;}else{wtChartObj.data.labels=labels;wtChartObj.data.datasets[0].data=weights;wtChartObj.update();}}
-window.onload=function(){loadAvatar();if(!wt_date.value)wt_date.value=todayISO();render();};
-</script></body></html>
+  .header{ display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:center; margin:4px 4px 8px 4px; }
+  .h-left h1{ margin:8px 0 2px 0; font-size:28px; font-weight:900; letter-spacing:.5px; }
+  .h-left .slogan{ margin:0; color:var(--muted); font-size:14px; }
+  .h-right{ display:flex; align-items:center; gap:12px; }
+  .userbox{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:56px; height:56px; border-radius:50%; overflow:hidden; border:4px solid #fff; background:#fff; box-shadow:0 8px 20px rgba(0,0,0,.18); }
+  .avatar img{ width:100%; height:100%; display:block; border-radius:50%; object-fit:cover; }
+  .badge{ font-size:13px; font-weight:800; padding:6px 10px; border-radius:14px; background:#e6ffed; color:#16a34a; border:2px solid #16a34a; }
+  .badge.admin{ background:#ffe6e6; color:#dc2626; border-color:#dc2626; }
+
+  /* Buttons */
+  .btn{ padding:12px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:800; font-size:15px;
+        box-shadow: 0 10px 24px rgba(37,99,235,.35); transition: transform .06s ease, box-shadow .2s ease; white-space:nowrap; }
+  .btn:active{ transform: translateY(1px); box-shadow: 0 6px 18px rgba(37,99,235,.45); }
+  .btn-primary{ background: var(--primary); color:#fff; }
+  .btn-secondary{ background:#f1f5f9; color:#0f172a; box-shadow:0 6px 16px rgba(15,23,42,.12); }
+  .btn.small{ padding:8px 12px; font-size:13px; }
+
+  .section{ margin-top:10px; }
+  .card{ background:var(--card); border-radius:20px; box-shadow:var(--shadow-md); padding:12px; }
+  .card h3{ margin:8px 8px 6px 8px; font-size:16px; font-weight:900; }
+  .card .muted{ color:#64748b; font-size:12px; margin:0 8px; }
+  .card .body{ padding:6px 8px 10px 8px; }
+
+  .grid-2{ display:grid; grid-template-columns: 1fr; gap:var(--gutter); }
+  @media (min-width:860px){ .grid-2{ grid-template-columns: 1fr 1fr; } }
+
+  .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  label{ font-size:13px; color:#0b3a53; }
+  input, select{
+    width: 220px; max-width: 92vw; padding:10px 12px; border-radius:14px;
+    border:1px solid rgba(2,6,23,.12); background:#fff; font-size:14px; outline:none; box-shadow:0 2px 0 rgba(0,0,0,.03);
+  }
+
+  table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius:14px; background:#fff; }
+  thead th{ background:#e6f6ff; font-size:13px; text-align:left; padding:10px; position:sticky; top:0; z-index:1; }
+  tbody td{ padding:9px 10px; border-top:1px dashed rgba(2,6,23,.08); font-size:13px; }
+  tbody tr:nth-child(even){ background:#fafcff; }
+  .table-wrap{ max-height:280px; overflow:auto; border-radius:14px; }
+  .muted-note{ color:#64748b; font-size:12px; }
+
+  canvas{ width:100%; height:260px; }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header">
+      <div class="h-left">
+        <h1>體重紀錄 ⚖️</h1>
+        <p class="slogan">自動計算 BMI 與體脂率（可用 BMI 推估或美國海軍圍度法）。</p>
+      </div>
+      <div class="h-right">
+        <button id="toMainBtn" class="btn btn-secondary">返回主選單</button>
+        <button id="logoutBtn" class="btn btn-primary">登出</button>
+        <div class="userbox">
+          <a class="avatar" href="profile.html" title="個人資料"><img id="profileAvatar" alt="avatar"></a>
+          <span id="roleBadge" class="badge">《優秀人才》</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="section card">
+      <h3>新增紀錄</h3>
+      <div class="body">
+        <div class="row">
+          <input type="number" id="weight" step="0.1" placeholder="體重（kg）">
+          <input type="number" id="height" step="0.5" placeholder="身高（cm，若未填會用個人資料）">
+          <input type="number" id="age" step="1" placeholder="年齡（歲，若未填會用個人資料）">
+          <select id="gender">
+            <option value="">性別（若未選會用個人資料）</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <label><input type="checkbox" id="useNavy"> 使用「美國海軍」圍度法</label>
+          <input type="number" id="waist" step="0.1" placeholder="腰圍（cm）" style="display:none">
+          <input type="number" id="neck" step="0.1" placeholder="頸圍（cm）" style="display:none">
+          <input type="number" id="hip" step="0.1" placeholder="臀圍（cm，女性）" style="display:none">
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="calcBtn" class="btn btn-secondary">試算</button>
+          <button id="addBtn" class="btn btn-primary">新增紀錄</button>
+        </div>
+        <p class="muted-note">說明：若有腰/頸（女性另加臀）圍資訊，建議使用「海軍法」；否則以 Deurenberg BMI 公式推估：<code>體脂% ≈ 1.2×BMI + 0.23×年齡 − 10.8×性別 − 5.4</code>（男性性別=1、女性=0）。僅供參考，非醫療診斷。</p>
+      </div>
+    </div>
+
+    <!-- Table & Chart -->
+    <div class="section grid-2">
+      <div class="card">
+        <h3>紀錄列表</h3>
+        <div class="body table-wrap">
+          <table>
+            <thead><tr><th>日期</th><th>體重(kg)</th><th>BMI</th><th>體脂(%)</th><th>方法</th></tr></thead>
+            <tbody id="tbody"><tr><td colspan="5" class="muted-note">暫無資料</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>30 天體重趨勢</h3>
+        <div class="body"><canvas id="chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section" style="text-align:center">
+      <button id="exportBtn" class="btn btn-secondary">匯出 Excel</button>
+      <input id="importFile" type="file" accept=".xlsx,.xls" hidden />
+      <button id="importBtn" class="btn btn-secondary">匯入 Excel</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const $ = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
+    const pad = (n)=>String(n).padStart(2,'0');
+    const fmt = (d)=>{ const dt=new Date(d); return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate()); };
+
+    const AVATAR_DATA='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="%2378b8ff"/><stop offset="1" stop-color="%23aeddff"/></linearGradient></defs><circle cx="128" cy="128" r="118" fill="url(%23g)" stroke="%23ffffff" stroke-width="10"/><rect x="90" y="90" width="76" height="76" rx="12" fill="%23ffffff" opacity="0.9"/></svg>';
+
+    function getCurrentUser(){ return localStorage.getItem('currentUser') || ''; }
+    function profileKey(){ return 'hc_profile_'+getCurrentUser(); }
+    function storageKey(){ return 'hc_weight_records_'+getCurrentUser(); }
+
+    function getProfile(){
+      try{ return JSON.parse(localStorage.getItem(profileKey())||'{}'); }catch{ return {}; }
+    }
+    function setAvatarAndRole(){
+      const u=getCurrentUser();
+      const p=getProfile();
+      const g=p.gender || localStorage.getItem('gender_'+u) || 'neutral';
+      const img=$('#profileAvatar');
+      img.src = (g==='female') ? 'avatar-female.png' : (g==='male' ? 'avatar-male.png' : 'avatar-neutral.png');
+      img.onerror=()=>{ img.src=AVATAR_DATA; };
+      const badge=$('#roleBadge');
+      if((u||'').toLowerCase()==='admin'){ badge.textContent='《管理者》'; badge.classList.add('admin'); } else { badge.textContent='《優秀人才》'; badge.classList.remove('admin'); }
+      // preload profile data as placeholders
+      if(p.height) $('#height').placeholder='身高（cm：'+p.height+'）';
+      if(p.age) $('#age').placeholder='年齡（歲：'+p.age+'）';
+      if(!$('#gender').value && p.gender) $('#gender').value = p.gender;
+    }
+
+    function loadRecords(){ try{ return JSON.parse(localStorage.getItem(storageKey())||'[]')||[]; }catch{ return []; } }
+    function saveRecords(list){ localStorage.setItem(storageKey(), JSON.stringify(list)); }
+
+    // --- Calculations ---
+    function calcBMI(weightKg, heightCm){
+      if(!weightKg || !heightCm) return null;
+      const m = heightCm/100; return +(weightKg / (m*m)).toFixed(1);
+    }
+    function bfDeurenberg(bmi, age, gender){ // gender: 'male'|'female'|'neutral'
+      if(bmi==null || !age || !gender) return null;
+      const sex = (gender==='male') ? 1 : 0;
+      const bf = 1.2*bmi + 0.23*age - 10.8*sex - 5.4;
+      return Math.min(60, Math.max(3, +(bf.toFixed(1))));
+    }
+    // U.S. Navy: male uses waist-neck-height; female uses waist-hip-neck-height
+    function bfNavy(gender, waist, neck, hip, height){
+      if(!gender || !waist || !neck || !height) return null;
+      const log10 = (x)=>Math.log10? Math.log10(x) : Math.log(x)/Math.LN10;
+      let bf;
+      if(gender==='male'){
+        bf = 495/(1.0324 - 0.19077*log10(waist-neck) + 0.15456*log10(height)) - 450;
+      }else{
+        if(!hip) return null;
+        bf = 495/(1.29579 - 0.35004*log10(waist+hip-neck) + 0.22100*log10(height)) - 450;
+      }
+      return Math.min(60, Math.max(3, +bf.toFixed(1)));
+    }
+
+    function pickGender(){
+      return $('#gender').value || (getProfile().gender || null);
+    }
+    function pickHeight(){
+      return Number($('#height').value) || Number(getProfile().height || 0) || null;
+    }
+    function pickAge(){
+      return Number($('#age').value) || Number(getProfile().age || 0) || null;
+    }
+
+    function tryEstimate(){
+      const weight = Number($('#weight').value);
+      const height = pickHeight();
+      const age = pickAge();
+      const gender = pickGender();
+      if(!weight){ alert('請輸入體重'); return {bmi:null, bf:null, method:null}; }
+
+      const useNavy = $('#useNavy').checked;
+      let bmi = calcBMI(weight, height||0);
+      let bf=null, method=null;
+
+      if(useNavy){
+        const waist=Number($('#waist').value||0);
+        const neck=Number($('#neck').value||0);
+        const hip=Number($('#hip').value||0);
+        if(!height || !waist || !neck || (gender==='female' && !hip)){
+          alert('海軍法需要：身高＋腰圍＋頸圍（女性另需臀圍）。未填者將改用 BMI 公式。');
+        }else{
+          bf = bfNavy(gender, waist, neck, hip, height); method='navy';
+        }
+      }
+      if(bf==null){
+        if(!height || !age || !gender){ alert('BMI 公式需要：身高＋年齡＋性別。請在個人資料或此處補齊。'); }
+        else{ bf = bfDeurenberg(bmi, age, gender); method='bmi'; }
+      }
+      return {bmi, bf, method};
+    }
+
+    // --- UI actions ---
+    let records = [];
+    let chart;
+    function renderTable(){
+      const tb=$('#tbody');
+      if(!records.length){ tb.innerHTML='<tr><td colspan="5" class="muted-note">暫無資料</td></tr>'; return; }
+      tb.innerHTML = records.slice().sort((a,b)=>new Date(b.ts)-new Date(a.ts)).map(r=>{
+        return `<tr>
+          <td>${fmt(r.ts)}</td>
+          <td>${(r.weight||'').toFixed? r.weight.toFixed(1): r.weight}</td>
+          <td>${r.bmi??''}</td>
+          <td>${r.bf??''}</td>
+          <td>${r.method==='navy'?'海軍法':'BMI'}</td>
+        </tr>`;
+      }).join('');
+    }
+    function renderChart(){
+      const ctx=$('#chart').getContext('2d');
+      const sorted = records.slice().sort((a,b)=> new Date(a.ts)-new Date(b.ts));
+      const last30 = sorted.filter(r=> (Date.now()-new Date(r.ts).getTime()) < 1000*60*60*24*30 );
+      const labels = last30.map(r=>fmt(r.ts));
+      const data = last30.map(r=>r.weight);
+      if(chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type:'line',
+        data:{ labels, datasets:[{ label:'體重 (kg)', data, spanGaps:true }] },
+        options:{ responsive:true, maintainAspectRatio:false }
+      });
+    }
+    function addRecord(){
+      const weight = Number($('#weight').value);
+      if(!weight){ alert('請輸入體重'); return; }
+      const {bmi, bf, method} = tryEstimate();
+      const rec = { ts: new Date(), weight, bmi, bf, method };
+      records.push(rec); saveRecords(records);
+      renderTable(); renderChart();
+    }
+
+    function exportExcel(){
+      if(!records.length){ alert('目前沒有資料可匯出'); return; }
+      const data = records.map(r=>({ 日期:fmt(r.ts), 體重kg:r.weight, BMI:r.bmi||'', 體脂:r.bf||'', 方法:r.method==='navy'?'海軍法':'BMI' }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Weight');
+      XLSX.writeFile(wb, 'weight_records.xlsx');
+    }
+    function importExcel(file){
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws);
+        let imported=0;
+        for(const row of json){
+          const ts = new Date(row['日期'] || row['timestamp'] || new Date());
+          const weight = Number(row['體重kg'] || row['weight'] || 0);
+          const bmi = row['BMI']!=null ? Number(row['BMI']) : null;
+          const bf = row['體脂']!=null ? Number(row['體脂']) : null;
+          const method = (row['方法']||'').includes('海軍') ? 'navy':'bmi';
+          if(weight){ records.push({ts, weight, bmi, bf, method}); imported++; }
+        }
+        saveRecords(records); renderTable(); renderChart(); alert('已匯入 '+imported+' 筆');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function toggleNavyFields(){
+      const on = $('#useNavy').checked;
+      $('#waist').style.display = on? '': 'none';
+      $('#neck').style.display = on? '': 'none';
+      $('#hip').style.display = (on && pickGender()==='female')? '': 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      if(!getCurrentUser()){ location.href='index.html'; return; }
+      setAvatarAndRole();
+      records = loadRecords();
+      renderTable(); renderChart();
+
+      $('#toMainBtn').addEventListener('click', ()=> location.href='main.html');
+      $('#logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); location.href='index.html'; });
+      $('#profileBtn')?.addEventListener('click', ()=> location.href='profile.html');
+      $('#calcBtn').addEventListener('click', tryEstimate);
+      $('#addBtn').addEventListener('click', addRecord);
+      $('#importBtn').addEventListener('click', ()=> $('#importFile').click());
+      $('#importFile').addEventListener('change', (e)=>{ if(e.target.files?.[0]) importExcel(e.target.files[0]); });
+      $('#useNavy').addEventListener('change', toggleNavyFields);
+      $('#gender').addEventListener('change', toggleNavyFields);
+      toggleNavyFields();
+    });
+  </script>
+</body>
+</html>
